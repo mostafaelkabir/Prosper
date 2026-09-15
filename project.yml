@@ -32,6 +32,8 @@ targets:
       path: Prosper/Prosper.entitlements
       properties:
         com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.mostafa.prosper
     dependencies:
       - target: ProsperMonitor
       - target: ProsperShield
@@ -42,6 +44,8 @@ targets:
     platform: iOS
     sources:
       - path: ProsperMonitor
+      - path: Prosper/Models
+      - path: Prosper/Services/PersistenceConfig.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.monitor
@@ -52,6 +56,8 @@ targets:
       path: ProsperMonitor/ProsperMonitor.entitlements
       properties:
         com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.mostafa.prosper
     info:
       path: ProsperMonitor/Info.plist
       properties:

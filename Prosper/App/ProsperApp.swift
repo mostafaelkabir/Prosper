@@ -18,12 +18,7 @@ struct ProsperApp: App {
                     AuthorizationView(authManager: authManager)
                 }
             }
-            .modelContainer(for: [
-                BlockSession.self,
-                UsageStat.self,
-                WarningEvent.self,
-                UserSettings.self
-            ])
+            .modelContainer(PersistenceConfig.sharedModelContainer)
         }
     }
 }
