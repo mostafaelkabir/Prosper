@@ -1,0 +1,34 @@
+# Xcode
+build/
+DerivedData/
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Xcodegen
+# Keep project.yml, ignore generated xcodeproj internals that change per machine
+Prosper.xcodeproj/xcuserdata/
+Prosper.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Spec artifact (local preview only)
+spec-artifact.html
