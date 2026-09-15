@@ -11,6 +11,9 @@ struct ProsperApp: App {
             Group {
                 if authManager.isAuthorized {
                     MainTabView()
+                        .onAppear {
+                            UsageTrackingService.shared.startDailyMonitoring()
+                        }
                 } else {
                     AuthorizationView(authManager: authManager)
                 }
