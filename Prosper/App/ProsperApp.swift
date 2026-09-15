@@ -11,16 +11,14 @@ struct ProsperApp: App {
             Group {
                 if authManager.isAuthorized {
                     MainTabView()
+                        .onAppear {
+                            UsageTrackingService.shared.startDailyMonitoring()
+                        }
                 } else {
                     AuthorizationView(authManager: authManager)
                 }
             }
-            .modelContainer(for: [
-                BlockSession.self,
-                UsageStat.self,
-                WarningEvent.self,
-                UserSettings.self
-            ])
+            .modelContainer(PersistenceConfig.sharedModelContainer)
         }
     }
 }

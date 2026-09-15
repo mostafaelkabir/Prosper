@@ -9,11 +9,11 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
     let store = ManagedSettingsStore()
 
     override func intervalDidStart(for activity: DeviceActivityName) {
-        logger.info("Interval started: \(activity.rawValue)")
+        logger.info("Monitoring interval started: \(activity.rawValue)")
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        logger.info("Interval ended: \(activity.rawValue)")
+        logger.info("Monitoring interval ended: \(activity.rawValue)")
 
         if activity.rawValue == "prosper.unblock" {
             store.shield.applications = nil
