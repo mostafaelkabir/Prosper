@@ -158,3 +158,47 @@ User preferences and app configuration.
 2. **Warnings actually interrupt** — notifications are persistent enough to break the scroll trance
 3. **Stats are honest** — usage data is accurate and presented in a way that makes waste obvious
 4. **You actually use it** — the app becomes part of your daily routine, not something you install and forget
+
+---
+
+## Status — 2026-09-16
+
+> Live tracking: Basira → Work → Prosper (21 tickets, `ticket_ref` = item number). This section is a snapshot.
+
+Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
+
+### Epic 1: Foundation — ✅ complete
+1.1 ✅ · 1.2 ✅ (MVVM, SwiftData, xcodegen) · 1.3 ✅ FamilyControls authorization · 1.4 🟡 NotificationService exists, not yet requested in UI · 1.5 ✅ · 1.6 ✅
+
+### Epic 2: Usage Stats — 🟡 in progress
+- 2.1 ✅ Daily DeviceActivity schedule (no threshold events yet)
+- 2.2 ✅ Daily summary: total time, pickups, top apps, top sites (ProsperReport extension, Stats + Dashboard)
+- 2.3 🟡 7-day bar chart done; monthly not started
+- 2.4 ✅ Category breakdown (Apple's categories, in the report)
+- 2.5 ⬜ "Time Wasted" metric — needs redesign: the report extension cannot write data back, so this must use DeviceActivityEvent thresholds on user-picked waste apps/sites
+- 2.6 ⬜ Today vs yesterday / week vs week (must live inside the report extension)
+
+### Epic 3: Hard-Lock Blocking — 🟡 core done
+- 3.1 ✅ Create Block flow. Apps via FamilyActivityPicker; websites typed by domain (Reddit/YouTube quick-add, remembered list, 50 max)
+- 3.2 ✅ ManagedSettingsStore shields + `webContent.blockedByFilter = .specific` for typed domains
+- 3.3 ✅ Custom shield screen (ProsperShield)
+- 3.4 ✅ Countdown with no cancel path; OS-level unblock via ProsperMonitor
+- 3.5 ⬜ Quick Block presets · 3.6 ⬜ Recurring schedules · 3.7 🟡 single active block shown on Block + Dashboard · 3.8 ⬜ completion notification
+
+### Epic 4: Distraction Warnings — ⬜ not started
+4.6 🟡 monitor extension exists (used for unblock only)
+
+### Epic 5: Self-Accountability — ⬜ · Epic 6: Settings — ⬜ (Settings tab is a placeholder)
+
+### Verified in simulator (2026-09-16)
+Block creation with typed domains, URL normalization, invalid-domain error, swipe-to-delete, saved list prefill, 30-min block lifecycle (active screen → expiry → reset), Dashboard/Stats report layouts with sample data.
+
+### 🚫 Blocked on real device
+FamilyControls needs a paid Apple Developer Program membership; enrollment in progress. Until then blocking enforcement, the shield screen, and real usage data are unverified. Team ID V9WJ9X99FX is already in project.yml.
+
+### Next up (recommended order)
+1. **Device install + real verification** once enrollment is active: authorization prompt, block Reddit in Safari, shield on a blocked app, live Stats data.
+2. **E6.3 + E6.2 Settings**: pick "waste" apps/sites (FamilyActivityPicker + typed domains) and thresholds. Prerequisite for warnings.
+3. **E4.1 + E4.2 + E4.6 Warnings**: DeviceActivityEvent thresholds on the waste selection → local notifications + WarningEvent log. Also delivers a first cut of 2.5 "Time Wasted".
+4. **E3.5 Quick Block presets** and **E3.8 completion notification**.
+5. **E2.6 comparisons** and **E4.3 escalation** later.

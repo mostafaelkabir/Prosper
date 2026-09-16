@@ -18,7 +18,8 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         if activity == PersistenceConfig.unblockActivityName {
             store.shield.applications = nil
             store.shield.webDomains = nil
-            logger.info("Block cleared — shield removed")
+            store.webContent.blockedByFilter = nil
+            logger.info("Block cleared — shield and web filter removed")
         }
     }
 

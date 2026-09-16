@@ -6,6 +6,9 @@ final class BlockSession {
     var id: UUID
     var appCount: Int
     var domainCount: Int
+    /// Websites the user typed in by domain (e.g. "reddit.com"). Blocked via the
+    /// system web content filter, independent of the FamilyActivityPicker tokens.
+    var domains: [String] = []
     var selectionData: Data?
     var duration: TimeInterval
     var startedAt: Date
@@ -26,6 +29,7 @@ final class BlockSession {
     init(
         appCount: Int = 0,
         domainCount: Int = 0,
+        domains: [String] = [],
         selectionData: Data? = nil,
         duration: TimeInterval,
         startedAt: Date = .now
@@ -33,6 +37,7 @@ final class BlockSession {
         self.id = UUID()
         self.appCount = appCount
         self.domainCount = domainCount
+        self.domains = domains
         self.selectionData = selectionData
         self.duration = duration
         self.startedAt = startedAt

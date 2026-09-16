@@ -11,6 +11,9 @@ final class UserSettings {
     var wasteDomains: [String]
     var warningsEnabled: Bool
     var level3PhraseRequired: Bool
+    /// Websites the user last typed into the block creator, so the list is
+    /// remembered between blocks (e.g. ["reddit.com", "youtube.com"]).
+    var savedBlockDomains: [String] = []
 
     init() {
         self.id = UUID()
@@ -21,6 +24,7 @@ final class UserSettings {
         self.wasteDomains = []
         self.warningsEnabled = true
         self.level3PhraseRequired = true
+        self.savedBlockDomains = []
     }
 
     static func current(context: ModelContext) -> UserSettings {
