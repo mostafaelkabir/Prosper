@@ -13,6 +13,7 @@ struct ProsperApp: App {
                     MainTabView()
                         .onAppear {
                             UsageTrackingService.shared.startDailyMonitoring()
+                            refreshWarningSchedule()
                         }
                 } else {
                     AuthorizationView(authManager: authManager)
@@ -20,6 +21,19 @@ struct ProsperApp: App {
             }
             .modelContainer(PersistenceConfig.sharedModelContainer)
         }
+    }
+
+    /// Re-installs the waste-time DeviceActivity monitor on launch so a device
+    /// reboot or app reinstall does not silently drop it.
+    private func refreshWarningSchedule() {
+        let context = ModelContext(PersistenceConfig.sharedModelContainer)
+        let settings = UserSettings.current(context: context)
+        WarningService.shared.refreshSchedule(
+            enabled: settings.warningsEnabled,
+            selection: WasteSelectionCodec.decode(settings.wasteAppSelectionData),
+            typedDomains: settings.wasteDomains,
+            thresholdMinutes: settings.wasteWarningThresholdMinutes
+        )
     }
 }
 
