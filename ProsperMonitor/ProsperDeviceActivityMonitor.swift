@@ -15,7 +15,7 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
     override func intervalDidEnd(for activity: DeviceActivityName) {
         logger.info("Monitoring interval ended: \(activity.rawValue)")
 
-        if activity.rawValue == "prosper.unblock" {
+        if activity == PersistenceConfig.unblockActivityName {
             store.shield.applications = nil
             store.shield.webDomains = nil
             logger.info("Block cleared — shield removed")

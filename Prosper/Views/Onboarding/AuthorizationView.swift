@@ -12,7 +12,7 @@ struct AuthorizationView: View {
             VStack(spacing: 16) {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 64))
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(.tint)
 
                 Text("Prosper")
                     .font(.largeTitle.bold())

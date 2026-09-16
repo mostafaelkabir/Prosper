@@ -2,11 +2,11 @@ import Foundation
 import DeviceActivity
 import FamilyControls
 
-final class UsageTrackingService {
+final class UsageTrackingService: @unchecked Sendable {
     static let shared = UsageTrackingService()
 
     private let center = DeviceActivityCenter()
-    static let activityName = DeviceActivityName("prosper.daily")
+    nonisolated(unsafe) static let activityName = DeviceActivityName("prosper.daily")
 
     private init() {}
 

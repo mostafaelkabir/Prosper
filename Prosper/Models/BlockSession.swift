@@ -4,8 +4,9 @@ import SwiftData
 @Model
 final class BlockSession {
     var id: UUID
-    var blockedAppTokens: [String]
-    var blockedWebDomains: [String]
+    var appCount: Int
+    var domainCount: Int
+    var selectionData: Data?
     var duration: TimeInterval
     var startedAt: Date
     var createdAt: Date
@@ -23,14 +24,16 @@ final class BlockSession {
     }
 
     init(
-        blockedAppTokens: [String] = [],
-        blockedWebDomains: [String] = [],
+        appCount: Int = 0,
+        domainCount: Int = 0,
+        selectionData: Data? = nil,
         duration: TimeInterval,
         startedAt: Date = .now
     ) {
         self.id = UUID()
-        self.blockedAppTokens = blockedAppTokens
-        self.blockedWebDomains = blockedWebDomains
+        self.appCount = appCount
+        self.domainCount = domainCount
+        self.selectionData = selectionData
         self.duration = duration
         self.startedAt = startedAt
         self.createdAt = .now

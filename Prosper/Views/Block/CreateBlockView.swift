@@ -184,10 +184,12 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
+        guard !BlockingService.shared.hasActiveBlock else { return }
         BlockingService.shared.startBlock(
             apps: selection.applicationTokens,
             webDomains: selection.webDomainTokens,
-            duration: duration
+            duration: duration,
+            selection: selection
         )
         dismiss()
     }
