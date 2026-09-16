@@ -5,17 +5,27 @@ import FamilyControls
 struct CreateBlockView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @State private var selection = FamilyActivitySelection()
-    @State private var domains: [String] = []
+    @State private var selection: FamilyActivitySelection
+    @State private var domains: [String]
     @State private var domainInput = ""
     @State private var domainError: String?
     @FocusState private var domainFieldFocused: Bool
     @State private var isPickerPresented = false
-    @State private var duration: TimeInterval = 3600
+    @State private var duration: TimeInterval
     @State private var showCustomPicker = false
     @State private var customHours = 1
     @State private var customMinutes = 0
-    @State private var showConfirmation = false
+    @State private var showConfirmation: Bool
+
+    /// Prefill hook for Quick Block presets: seed the sheet with the user's
+    /// waste selection + typed domains and a chosen duration, then jump
+    /// straight to the confirmation alert. `nil` = manual entry.
+    init(prefill: BlockPrefill? = nil) {
+        _selection = State(initialValue: prefill?.selection ?? FamilyActivitySelection())
+        _domains = State(initialValue: prefill?.domains ?? [])
+        _duration = State(initialValue: prefill?.duration ?? 3600)
+        _showConfirmation = State(initialValue: prefill != nil)
+    }
 
     private let presets: [(label: String, seconds: TimeInterval)] = [
         ("30m", 1800),

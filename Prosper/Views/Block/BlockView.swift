@@ -3,7 +3,10 @@ import SwiftData
 import Combine
 
 struct BlockView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var showCreateBlock = false
+    /// Non-nil = New Block sheet opened with a Quick Preset already applied.
+    @State private var pendingPrefill: BlockPrefill?
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
     @State private var now = Date.now
 
@@ -27,6 +30,8 @@ struct BlockView: View {
                 Spacer()
 
                 if activeSession == nil {
+                    quickPresetsRow
+
                     Button {
                         showCreateBlock = true
                     } label: {
@@ -43,6 +48,9 @@ struct BlockView: View {
             .navigationTitle("Block")
             .sheet(isPresented: $showCreateBlock) {
                 CreateBlockView()
+            }
+            .sheet(item: $pendingPrefill) { prefill in
+                CreateBlockView(prefill: prefill)
             }
             .onReceive(timer) { now = $0 }
         }
@@ -96,6 +104,49 @@ struct BlockView: View {
                 .font(.subheadline)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+        }
+    }
+
+
+    private var quickPresetsRow: some View {
+        let settings = UserSettings.current(context: modelContext)
+        let hasWaste = (settings.wasteAppCount > 0) || !settings.wasteDomains.isEmpty
+        return VStack(alignment: .leading, spacing: 8) {
+            if hasWaste {
+                Text("Focus for")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 24)
+                HStack(spacing: 12) {
+                    ForEach(QuickPreset.all) { preset in
+                        Button {
+                            pendingPrefill = preset.prefill(from: settings)
+                        } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: preset.systemImage)
+                                    .font(.title2)
+                                Text(preset.label)
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 24)
+                Text("Locks your Settings waste list for the chosen duration. Cannot be undone.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 24)
+            } else {
+                Text("Pick waste apps in Settings to unlock one-tap Focus presets.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 24)
+            }
         }
     }
 
