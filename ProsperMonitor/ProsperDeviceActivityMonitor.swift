@@ -22,6 +22,21 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
             store.shield.webDomains = nil
             store.webContent.blockedByFilter = nil
             logger.info("Block cleared — shield and web filter removed")
+
+            let content = UNMutableNotificationContent()
+            content.title = "Block finished"
+            content.body = "Your Prosper block just expired. Nice work — the door is unlocked again."
+            content.sound = .default
+            let request = UNNotificationRequest(
+                identifier: "prosper.block.end.\(Int(Date.now.timeIntervalSince1970))",
+                content: content,
+                trigger: nil
+            )
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error {
+                    logger.error("Failed to post block-end notification: \(error.localizedDescription, privacy: .public)")
+                }
+            }
         }
     }
 

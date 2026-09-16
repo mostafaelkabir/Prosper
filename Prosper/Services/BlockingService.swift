@@ -32,6 +32,10 @@ final class BlockingService: @unchecked Sendable {
     ) {
         guard !hasActiveBlock else { return }
 
+        // Ask once for notification permission so the block-end message can
+        // reach the user. If the user declined earlier we don't re-prompt.
+        Task { _ = await NotificationService.shared.requestPermission() }
+
         let typedDomains = Array(domains.prefix(Self.maxDomains))
 
         store.shield.applications = apps.isEmpty ? nil : apps
