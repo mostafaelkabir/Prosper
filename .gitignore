@@ -32,3 +32,6 @@ Prosper.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Spec artifact (local preview only)
 spec-artifact.html
+
+# Claude Code personal overrides (project settings.json is shared)
+.claude/settings.local.json
