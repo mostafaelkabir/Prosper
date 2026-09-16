@@ -71,6 +71,14 @@ struct BlockView: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+
+            if !session.domains.isEmpty {
+                Text(session.domains.joined(separator: "  ·  "))
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
         }
     }
 

@@ -1,9 +1,15 @@
 import SwiftUI
+import SwiftData
 import FamilyControls
 
 struct CreateBlockView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var selection = FamilyActivitySelection()
+    @State private var domains: [String] = []
+    @State private var domainInput = ""
+    @State private var domainError: String?
+    @FocusState private var domainFieldFocused: Bool
     @State private var isPickerPresented = false
     @State private var duration: TimeInterval = 3600
     @State private var showCustomPicker = false
@@ -19,8 +25,21 @@ struct CreateBlockView: View {
         ("8h", 28800),
     ]
 
+    private static let suggestedDomains: [(name: String, domain: String)] = [
+        ("Reddit", "reddit.com"),
+        ("YouTube", "youtube.com"),
+        ("X", "x.com"),
+        ("Instagram", "instagram.com"),
+        ("TikTok", "tiktok.com"),
+        ("Facebook", "facebook.com"),
+    ]
+
+    private var siteCount: Int {
+        selection.webDomainTokens.count + domains.count
+    }
+
     private var hasSelection: Bool {
-        !selection.applicationTokens.isEmpty || !selection.webDomainTokens.isEmpty
+        !selection.applicationTokens.isEmpty || siteCount > 0
     }
 
     private var durationText: String {
@@ -39,6 +58,7 @@ struct CreateBlockView: View {
         NavigationStack {
             Form {
                 appsSection
+                websitesSection
                 durationSection
                 if hasSelection {
                     confirmSection
@@ -58,8 +78,9 @@ struct CreateBlockView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Block \(selection.applicationTokens.count) app(s) and \(selection.webDomainTokens.count) site(s) for \(durationText).\n\n⚠️ This CANNOT be undone. You will not be able to access these apps until the block expires.")
+                Text("Block \(selection.applicationTokens.count) app(s) and \(siteCount) site(s) for \(durationText).\n\n⚠️ This CANNOT be undone. You will not be able to access these apps and sites until the block expires.")
             }
+            .onAppear(perform: loadSavedDomains)
         }
     }
 
@@ -69,20 +90,76 @@ struct CreateBlockView: View {
                 isPickerPresented = true
             } label: {
                 HStack {
-                    Label("Select Apps & Sites", systemImage: "apps.iphone")
+                    Label("Select Apps", systemImage: "apps.iphone")
                     Spacer()
-                    if hasSelection {
+                    if !selection.applicationTokens.isEmpty || !selection.webDomainTokens.isEmpty {
                         Text("\(selection.applicationTokens.count + selection.webDomainTokens.count) selected")
                             .foregroundStyle(.secondary)
                     }
                 }
             }
         } header: {
-            Text("What to block")
+            Text("Apps")
         } footer: {
-            if hasSelection {
-                Text("\(selection.applicationTokens.count) app(s), \(selection.webDomainTokens.count) website(s) selected")
+            Text("To block the YouTube or Reddit app itself, pick it here. Websites are added below.")
+        }
+    }
+
+    private var websitesSection: some View {
+        Section {
+            HStack {
+                TextField("reddit.com", text: $domainInput)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.URL)
+                    .textContentType(.URL)
+                    .focused($domainFieldFocused)
+                    .onSubmit(addTypedDomain)
+                Button("Add", action: addTypedDomain)
+                    .disabled(domainInput.trimmingCharacters(in: .whitespaces).isEmpty)
             }
+
+            if let domainError {
+                Text(domainError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+
+            ForEach(domains, id: \.self) { domain in
+                Label(domain, systemImage: "globe")
+            }
+            .onDelete { offsets in
+                domains.remove(atOffsets: offsets)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Self.suggestedDomains, id: \.domain) { item in
+                        let added = domains.contains(item.domain)
+                        Button {
+                            if added {
+                                domains.removeAll { $0 == item.domain }
+                            } else {
+                                add(domain: item.domain)
+                            }
+                        } label: {
+                            Label(item.name, systemImage: added ? "checkmark" : "plus")
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(added ? Color.accentColor : Color(.systemGray5))
+                                .foregroundStyle(added ? .white : .primary)
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            Text("Websites")
+        } footer: {
+            Text("Blocked in Safari and other browsers on this iPhone only. If a site is already open in Safari, close Safari for the block to take effect. Up to \(BlockingService.maxDomains) sites.")
         }
     }
 
@@ -183,11 +260,42 @@ struct CreateBlockView: View {
         if duration == 0 { duration = 300 }
     }
 
+    private func loadSavedDomains() {
+        guard domains.isEmpty else { return }
+        domains = UserSettings.current(context: modelContext).savedBlockDomains
+    }
+
+    private func addTypedDomain() {
+        guard let domain = BlockDomain.normalize(domainInput) else {
+            domainError = "Enter a website like reddit.com"
+            return
+        }
+        add(domain: domain)
+        domainInput = ""
+        domainFieldFocused = true
+    }
+
+    private func add(domain: String) {
+        domainError = nil
+        guard !domains.contains(domain) else { return }
+        guard domains.count < BlockingService.maxDomains else {
+            domainError = "You can block up to \(BlockingService.maxDomains) websites at once"
+            return
+        }
+        domains.append(domain)
+    }
+
     private func startBlock() {
         guard !BlockingService.shared.hasActiveBlock else { return }
+
+        let settings = UserSettings.current(context: modelContext)
+        settings.savedBlockDomains = domains
+        try? modelContext.save()
+
         BlockingService.shared.startBlock(
             apps: selection.applicationTokens,
             webDomains: selection.webDomainTokens,
+            domains: domains,
             duration: duration,
             selection: selection
         )

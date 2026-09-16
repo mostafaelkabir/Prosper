@@ -9,30 +9,40 @@
 /* Begin PBXBuildFile section */
 		00117D31DAD5B1C060F12C55 /* ProsperShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		03AF6B431ACE56BF0BD3A7D2 /* ProsperShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */; };
+		17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */; };
 		1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
+		24B893714D4533FB5AA6D111 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
+		2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DF7522319D26BE76512424 /* ProsperReportExtension.swift */; };
+		2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
 		33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD81363CEE9AFA44997EAE05 /* NotificationService.swift */; };
 		40C5CA1A317282DA49DB719A /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */; };
 		428114169845C3BD1F42D13F /* ProsperShieldConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */; };
 		43C54EF4DE40026B1F26D20B /* PersistenceConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */; };
 		47A95850D574972EFDB091EA /* BlockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037BAC3E9EC0431009ABE06C /* BlockSession.swift */; };
 		483703E5A19843B96AFDE43C /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */; };
+		4BFE11BA6D11945D58CF3887 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
+		55EF66B110B9B1FD26B456C3 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		5B3E77F66242484182855F8C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70907B88A840AC6A25FAA3B6 /* SettingsView.swift */; };
 		5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */; };
 		65A8D0BAFC6B66B418F5D706 /* BlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A632709C4CC649D29F82481B /* BlockView.swift */; };
 		671A44D232DB05062646B6B0 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
 		6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9571C24CF734505B0A04A5F /* ProsperApp.swift */; };
 		6B7C06440DB423343FE5D07B /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
+		77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		84911D8643111011B7AD7091 /* CreateBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C798094F2F921F57D4E9DA /* CreateBlockView.swift */; };
 		87D9ACCAE9A3CBF70D76E6E2 /* ProsperShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
 		97727BBE97137F3C9E209F77 /* ProsperMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		99701B527EA2A66A130E14EC /* ProsperReport.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 787F80B30CAB4A7432226247 /* ProsperReport.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF1BA9DD8B110676DBE404 /* DashboardView.swift */; };
 		A5EAFF3CA15B28677E0A7F8F /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
 		A6996DD6B8D595F40A67B814 /* BlockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037BAC3E9EC0431009ABE06C /* BlockSession.swift */; };
 		AE39E426B90306EB201322B4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380FF60661EA74BC8735A26D /* BlockingService.swift */; };
+		B40C7A6639711E28D34AB404 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8F0966BDF79094A611FF59E /* Assets.xcassets */; };
 		D680F5699C97E44818731489 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A5392C1BFA98EA99B7C63B /* StatsView.swift */; };
 		D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72AD9387F5DEB57CF802404 /* MainTabView.swift */; };
+		DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */; };
 		E1335E39417B1E4F9DADB50D /* UsageTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */; };
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
 /* End PBXBuildFile section */
@@ -44,6 +54,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 0C58C44EBA07697DC7855819;
 			remoteInfo = ProsperShieldAction;
+		};
+		A7EF9782D9208E7FE320658D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED575DA574B9DD2E37E11EB1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7C45EEB71FE21263942EF22C;
+			remoteInfo = ProsperReport;
 		};
 		CFF97E8DE5DC461127D52EC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -62,6 +79,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		23DEBE6C2AB2D3E147BE8072 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				99701B527EA2A66A130E14EC /* ProsperReport.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A6AD601408665CF4E670C0E6 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -79,11 +107,14 @@
 
 /* Begin PBXFileReference section */
 		037BAC3E9EC0431009ABE06C /* BlockSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockSession.swift; sourceTree = "<group>"; };
+		1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryScene.swift; sourceTree = "<group>"; };
 		1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceConfig.swift; sourceTree = "<group>"; };
 		2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrackingService.swift; sourceTree = "<group>"; };
 		363E1B2D164246C5150D6D51 /* Prosper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Prosper.entitlements; sourceTree = "<group>"; };
 		380FF60661EA74BC8735A26D /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
+		3974BFC7D4583121C9877996 /* UsageSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryView.swift; sourceTree = "<group>"; };
+		4036DF70562D624D5EE1072F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		643BD5F882BBCEBFC2911F9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		68D2F2EB4ABB65B26F5BC408 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6AE69637163805466D518E49 /* UsageStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStat.swift; sourceTree = "<group>"; };
@@ -91,10 +122,13 @@
 		70907B88A840AC6A25FAA3B6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		74EF1BA9DD8B110676DBE404 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		7647CA969CEE0A3F6F293AA3 /* Prosper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Prosper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		787F80B30CAB4A7432226247 /* ProsperReport.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = ProsperReport.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
 		943E53DA14521BE1FDA1AACE /* WarningEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEvent.swift; sourceTree = "<group>"; };
 		95C798094F2F921F57D4E9DA /* CreateBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateBlockView.swift; sourceTree = "<group>"; };
 		9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
+		9DE8A4C6525B1024CC685F3B /* ReportContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportContext.swift; sourceTree = "<group>"; };
 		A3678B823AB6BEC5CE18E98B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A632709C4CC649D29F82481B /* BlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockView.swift; sourceTree = "<group>"; };
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
@@ -103,8 +137,11 @@
 		C0A5392C1BFA98EA99B7C63B /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		C0BEECE923A1EB6C084F9C26 /* ProsperMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperMonitor.entitlements; sourceTree = "<group>"; };
 		C72AD9387F5DEB57CF802404 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageReportFilter.swift; sourceTree = "<group>"; };
 		DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldActionExtension.swift; sourceTree = "<group>"; };
 		DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummary.swift; sourceTree = "<group>"; };
+		F9307A48CDD179678D104993 /* ProsperReport.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperReport.entitlements; sourceTree = "<group>"; };
 		FD81363CEE9AFA44997EAE05 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -125,6 +162,7 @@
 			children = (
 				17A8D1F8DEB5EAF9C6C7A46C /* Prosper */,
 				00DDE7E27190EF4AD329DD1F /* ProsperMonitor */,
+				4E3B08F25788129C60C6955C /* ProsperReport */,
 				A5C391FE50F4110CDE5939F9 /* ProsperShield */,
 				365EB966ADD071B747DD6E6B /* ProsperShieldAction */,
 				6A5B1B8958B386AD79BF9A2D /* Products */,
@@ -143,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				6B20E40BAD2C6155133AC29E /* App */,
+				D51E73D23315E413F5EEB520 /* Extensions */,
 				19C20D2AEFD5C74E817CE631 /* Models */,
 				AAB6DC317D5ABB3CE7BA8595 /* Services */,
 				C72DCEC429DB36C4CDFCB49D /* Views */,
@@ -180,11 +219,25 @@
 			path = Stats;
 			sourceTree = "<group>";
 		};
+		4E3B08F25788129C60C6955C /* ProsperReport */ = {
+			isa = PBXGroup;
+			children = (
+				4036DF70562D624D5EE1072F /* Info.plist */,
+				F9307A48CDD179678D104993 /* ProsperReport.entitlements */,
+				89DF7522319D26BE76512424 /* ProsperReportExtension.swift */,
+				F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */,
+				1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */,
+				3974BFC7D4583121C9877996 /* UsageSummaryView.swift */,
+			);
+			path = ProsperReport;
+			sourceTree = "<group>";
+		};
 		6A5B1B8958B386AD79BF9A2D /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				7647CA969CEE0A3F6F293AA3 /* Prosper.app */,
 				1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */,
+				787F80B30CAB4A7432226247 /* ProsperReport.appex */,
 				DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */,
 				FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */,
 			);
@@ -231,6 +284,7 @@
 				380FF60661EA74BC8735A26D /* BlockingService.swift */,
 				FD81363CEE9AFA44997EAE05 /* NotificationService.swift */,
 				24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */,
+				C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */,
 				2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */,
 			);
 			path = Services;
@@ -255,6 +309,14 @@
 				C72AD9387F5DEB57CF802404 /* MainTabView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		D51E73D23315E413F5EEB520 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				9DE8A4C6525B1024CC685F3B /* ReportContext.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,6 +346,7 @@
 				10F28E1845D7CD255D1EF282 /* Sources */,
 				EC58D957874AEB47C04AD1BC /* Resources */,
 				A6AD601408665CF4E670C0E6 /* Embed Foundation Extensions */,
+				23DEBE6C2AB2D3E147BE8072 /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
@@ -291,6 +354,7 @@
 				D4C1C302F0C3CB3CADD11808 /* PBXTargetDependency */,
 				3B98AD3B893BF9D84E2A126F /* PBXTargetDependency */,
 				C8C290DAC60BF91E923DCF48 /* PBXTargetDependency */,
+				84A62A2481E4DFACFD0510EF /* PBXTargetDependency */,
 			);
 			name = Prosper;
 			packageProductDependencies = (
@@ -298,6 +362,23 @@
 			productName = Prosper;
 			productReference = 7647CA969CEE0A3F6F293AA3 /* Prosper.app */;
 			productType = "com.apple.product-type.application";
+		};
+		7C45EEB71FE21263942EF22C /* ProsperReport */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7CFF53D665A8B54BF99BE56 /* Build configuration list for PBXNativeTarget "ProsperReport" */;
+			buildPhases = (
+				9681D39ED04D3FE6D0A23C60 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ProsperReport;
+			packageProductDependencies = (
+			);
+			productName = ProsperReport;
+			productReference = 787F80B30CAB4A7432226247 /* ProsperReport.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
 		};
 		BCDD04D5E5E8EB077EF1377C /* ProsperMonitor */ = {
 			isa = PBXNativeTarget;
@@ -343,16 +424,19 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					0C58C44EBA07697DC7855819 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = V9WJ9X99FX;
 					};
 					79E807E5BA2A73A80F588CF9 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = V9WJ9X99FX;
+					};
+					7C45EEB71FE21263942EF22C = {
+						DevelopmentTeam = V9WJ9X99FX;
 					};
 					BCDD04D5E5E8EB077EF1377C = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = V9WJ9X99FX;
 					};
 					C12D40161C0CB3AB3699DE60 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = V9WJ9X99FX;
 					};
 				};
 			};
@@ -374,6 +458,7 @@
 				BCDD04D5E5E8EB077EF1377C /* ProsperMonitor */,
 				C12D40161C0CB3AB3699DE60 /* ProsperShield */,
 				0C58C44EBA07697DC7855819 /* ProsperShieldAction */,
+				7C45EEB71FE21263942EF22C /* ProsperReport */,
 			);
 		};
 /* End PBXProject section */
@@ -404,9 +489,13 @@
 				33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */,
 				5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */,
 				6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */,
+				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
 				5B3E77F66242484182855F8C /* SettingsView.swift in Sources */,
 				D680F5699C97E44818731489 /* StatsView.swift in Sources */,
+				17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */,
 				671A44D232DB05062646B6B0 /* UsageStat.swift in Sources */,
+				55EF66B110B9B1FD26B456C3 /* UsageSummary.swift in Sources */,
+				B40C7A6639711E28D34AB404 /* UsageSummaryView.swift in Sources */,
 				E1335E39417B1E4F9DADB50D /* UsageTrackingService.swift in Sources */,
 				40C5CA1A317282DA49DB719A /* UserSettings.swift in Sources */,
 				6B7C06440DB423343FE5D07B /* WarningEvent.swift in Sources */,
@@ -442,6 +531,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9681D39ED04D3FE6D0A23C60 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */,
+				4BFE11BA6D11945D58CF3887 /* ReportContext.swift in Sources */,
+				77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */,
+				DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */,
+				24B893714D4533FB5AA6D111 /* UsageSummaryView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -449,6 +550,11 @@
 			isa = PBXTargetDependency;
 			target = C12D40161C0CB3AB3699DE60 /* ProsperShield */;
 			targetProxy = CFF97E8DE5DC461127D52EC5 /* PBXContainerItemProxy */;
+		};
+		84A62A2481E4DFACFD0510EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7C45EEB71FE21263942EF22C /* ProsperReport */;
+			targetProxy = A7EF9782D9208E7FE320658D /* PBXContainerItemProxy */;
 		};
 		C8C290DAC60BF91E923DCF48 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -516,7 +622,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = V9WJ9X99FX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -542,6 +648,42 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		4B5383E8140839D99A9D348D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProsperReport/ProsperReport.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProsperReport/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mostafa.prosper.report;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		72F5995F12CDAAA408FA8FB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProsperReport/ProsperReport.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProsperReport/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mostafa.prosper.report;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -634,7 +776,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = V9WJ9X99FX;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -784,6 +926,15 @@
 			buildConfigurations = (
 				3D6E95245C8D2B43A46BE3D4 /* Debug */,
 				B6F963DF3CB4EC0A2153A82B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E7CFF53D665A8B54BF99BE56 /* Build configuration list for PBXNativeTarget "ProsperReport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				72F5995F12CDAAA408FA8FB3 /* Debug */,
+				4B5383E8140839D99A9D348D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
