@@ -163,6 +163,8 @@ User preferences and app configuration.
 
 ## Status — 2026-09-16
 
+> Live tracking: Basira → Work → Prosper (21 tickets, `ticket_ref` = item number). This section is a snapshot.
+
 Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
 
 ### Epic 1: Foundation — ✅ complete

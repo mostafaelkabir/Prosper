@@ -48,6 +48,10 @@ Four extension targets embedded in the main app:
 
 Typed domains are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. Do not use `.auto`, which also enables Apple's adult-content filter.
 
+## Tracking
+
+Tickets live in Basira, Mostafa's local life-OS app (http://localhost:8001, Work tab → company "Prosper", linked to the "Prosper" project goal). `ticket_ref` is the SPEC.md epic item (E3.1, E2.2, DEV-1…). Statuses: backlog | todo | in_progress | review | done | blocked. Update tickets through its REST API (`/work-tickets`, `/work-tickets/{id}/comments`) when work lands; add the PR URL as a `proof` comment. SPEC.md's Status section is a snapshot, Basira is the source of truth.
+
 ## Data Models
 
 - `BlockSession` — one blocking period (apps, sites, duration, start time)
