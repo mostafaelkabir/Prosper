@@ -1,10 +1,12 @@
 import Foundation
 import SwiftData
+@preconcurrency import DeviceActivity
 
 enum PersistenceConfig {
     static let appGroupID = "group.com.mostafa.prosper"
+    nonisolated(unsafe) static let unblockActivityName = DeviceActivityName("prosper.unblock")
 
-    static var sharedModelContainer: ModelContainer {
+    static let sharedModelContainer: ModelContainer = {
         let schema = Schema([
             BlockSession.self,
             UsageStat.self,
@@ -24,7 +26,7 @@ enum PersistenceConfig {
         } catch {
             fatalError("Failed to create shared ModelContainer: \(error)")
         }
-    }
+    }()
 
     static var sharedStoreURL: URL {
         let containerURL = FileManager.default.containerURL(

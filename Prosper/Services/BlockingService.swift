@@ -4,32 +4,33 @@ import FamilyControls
 import DeviceActivity
 import SwiftData
 
-final class BlockingService {
+final class BlockingService: @unchecked Sendable {
     static let shared = BlockingService()
 
     private let store = ManagedSettingsStore()
     private let activityCenter = DeviceActivityCenter()
-
-    static let unblockActivityName = DeviceActivityName("prosper.unblock")
 
     private init() {}
 
     func startBlock(
         apps: Set<ApplicationToken>,
         webDomains: Set<WebDomainToken>,
-        duration: TimeInterval
+        duration: TimeInterval,
+        selection: FamilyActivitySelection
     ) {
+        guard !hasActiveBlock else { return }
+
         store.shield.applications = apps
         store.shield.webDomains = webDomains
 
         scheduleUnblock(duration: duration)
-        persistBlockSession(appCount: apps.count, domainCount: webDomains.count, duration: duration)
+        persistBlockSession(selection: selection, appCount: apps.count, domainCount: webDomains.count, duration: duration)
     }
 
     func clearBlock() {
         store.shield.applications = nil
         store.shield.webDomains = nil
-        activityCenter.stopMonitoring([Self.unblockActivityName])
+        activityCenter.stopMonitoring([PersistenceConfig.unblockActivityName])
     }
 
     var hasActiveBlock: Bool {
@@ -54,18 +55,20 @@ final class BlockingService {
         )
 
         do {
-            try activityCenter.startMonitoring(Self.unblockActivityName, during: schedule)
+            try activityCenter.startMonitoring(PersistenceConfig.unblockActivityName, during: schedule)
         } catch {
             print("Failed to schedule unblock: \(error)")
         }
     }
 
-    private func persistBlockSession(appCount: Int, domainCount: Int, duration: TimeInterval) {
+    private func persistBlockSession(selection: FamilyActivitySelection, appCount: Int, domainCount: Int, duration: TimeInterval) {
         let container = PersistenceConfig.sharedModelContainer
         let context = ModelContext(container)
+        let selectionData = try? JSONEncoder().encode(selection)
         let session = BlockSession(
-            blockedAppTokens: Array(repeating: "app", count: appCount),
-            blockedWebDomains: Array(repeating: "domain", count: domainCount),
+            appCount: appCount,
+            domainCount: domainCount,
+            selectionData: selectionData,
             duration: duration
         )
         context.insert(session)
