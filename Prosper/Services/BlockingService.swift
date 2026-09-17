@@ -115,6 +115,7 @@ final class BlockingService: @unchecked Sendable {
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
         activityCenter.stopMonitoring([PersistenceConfig.unblockActivityName])
+        SharedBlockState.clear()
     }
 
     var hasActiveBlock: Bool {
@@ -162,6 +163,10 @@ final class BlockingService: @unchecked Sendable {
         )
         context.insert(session)
         try? context.save()
+
+        // Mirror the essentials to the App Group so the Shield extension can
+        // describe this block (remaining time, when it was set).
+        SharedBlockState.save(startedAt: session.startedAt, duration: duration)
     }
 }
 
