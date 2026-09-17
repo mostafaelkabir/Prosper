@@ -75,12 +75,18 @@ targets:
     platform: iOS
     sources:
       - path: ProsperShield
+      - path: Prosper/Services/SharedBlockState.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.shield
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
+    entitlements:
+      path: ProsperShield/ProsperShield.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.mostafa.prosper
     info:
       path: ProsperShield/Info.plist
       properties:
