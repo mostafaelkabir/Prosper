@@ -114,6 +114,15 @@ struct CreateBlockView: View {
                     }
                 }
             }
+            if !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty || !selection.webDomainTokens.isEmpty {
+                SelectionChips(
+                    selection: selection,
+                    placeholderCount: selection.applicationTokens.count
+                        + selection.categoryTokens.count
+                        + selection.webDomainTokens.count
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
         } header: {
             Text("Apps")
         } footer: {

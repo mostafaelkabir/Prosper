@@ -82,6 +82,14 @@ struct BlockView: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
+            if session.appCount > 0 {
+                SelectionChips(
+                    selection: WasteSelectionCodec.decode(session.selectionData),
+                    placeholderCount: session.appCount
+                )
+                .padding(.horizontal, 32)
+            }
+
             if !session.domains.isEmpty {
                 Text(session.domains.joined(separator: "  ·  "))
                     .font(.caption)

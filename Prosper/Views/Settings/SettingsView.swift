@@ -65,6 +65,18 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            if !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty {
+                Button {
+                    isPickerPresented = true
+                } label: {
+                    SelectionChips(
+                        selection: selection,
+                        placeholderCount: selection.applicationTokens.count + selection.categoryTokens.count
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
         } header: {
             Text("Waste apps")
         } footer: {

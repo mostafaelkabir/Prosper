@@ -47,6 +47,7 @@
 		DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */; };
 		E1335E39417B1E4F9DADB50D /* UsageTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */; };
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
+		ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE86A244991500CE0C12F76 /* SelectionChips.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -146,6 +147,7 @@
 		E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickBlockPresets.swift; sourceTree = "<group>"; };
 		F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummary.swift; sourceTree = "<group>"; };
 		F9307A48CDD179678D104993 /* ProsperReport.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperReport.entitlements; sourceTree = "<group>"; };
+		FCE86A244991500CE0C12F76 /* SelectionChips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionChips.swift; sourceTree = "<group>"; };
 		FD81363CEE9AFA44997EAE05 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -274,6 +276,14 @@
 			path = Block;
 			sourceTree = "<group>";
 		};
+		7D2DC5A17B1E4A67D11E2DAE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				FCE86A244991500CE0C12F76 /* SelectionChips.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		A5C391FE50F4110CDE5939F9 /* ProsperShield */ = {
 			isa = PBXGroup;
 			children = (
@@ -308,6 +318,7 @@
 			isa = PBXGroup;
 			children = (
 				7CEE8446B7FEA05200B28C50 /* Block */,
+				7D2DC5A17B1E4A67D11E2DAE /* Components */,
 				7AD0C7D85ACB25C54B5532DA /* Dashboard */,
 				B22BE46A6FD081AAAC42F7DD /* Onboarding */,
 				0BB08EFE8CD5F64D1F2C237F /* Settings */,
@@ -497,6 +508,7 @@
 				6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */,
 				8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */,
 				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
+				ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */,
 				5B3E77F66242484182855F8C /* SettingsView.swift in Sources */,
 				D680F5699C97E44818731489 /* StatsView.swift in Sources */,
 				17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */,
