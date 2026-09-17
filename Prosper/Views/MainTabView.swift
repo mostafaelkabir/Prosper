@@ -9,24 +9,25 @@ struct MainTabView: View {
         TabView {
             DashboardView(onResumeSetup: { showSetup = true })
                 .tabItem {
-                    Label("Dashboard", systemImage: "chart.bar.fill")
-                }
-
-            BlockView()
-                .tabItem {
-                    Label("Block", systemImage: "lock.fill")
+                    Label("Today", systemImage: "clock")
                 }
 
             StatsView()
                 .tabItem {
-                    Label("Stats", systemImage: "chart.line.uptrend.xyaxis")
+                    Label("Insights", systemImage: "chart.bar.xaxis")
+                }
+
+            BlockView()
+                .tabItem {
+                    Label("Lock", systemImage: "lock.fill")
                 }
 
             SettingsView(onOpenSetup: { showSetup = true })
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
+                    Label("Settings", systemImage: "gearshape")
                 }
         }
+        .tint(ProsperColor.slate)
         .fullScreenCover(isPresented: $showSetup) {
             SetupFlowView()
         }

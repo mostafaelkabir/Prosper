@@ -65,7 +65,7 @@ struct StatsView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle("Stats")
+            .navigationTitle("Insights")
         }
     }
 
