@@ -37,7 +37,7 @@ struct SelectionChips: View {
         let items = items
         if items.isEmpty {
             if placeholderCount > 0 {
-                ChipShape {
+                Chip {
                     Text("\(placeholderCount) selected")
                         .foregroundStyle(.secondary)
                 }
@@ -50,7 +50,7 @@ struct SelectionChips: View {
                     chip(for: item)
                 }
                 if overflow > 0 {
-                    ChipShape {
+                    Chip {
                         Text("+\(overflow) more")
                             .foregroundStyle(.secondary)
                     }
@@ -63,30 +63,14 @@ struct SelectionChips: View {
     private func chip(for item: Item) -> some View {
         switch item {
         case .app(let token):
-            ChipShape { Label(token).labelStyle(.titleAndIcon) }
+            Chip { Label(token).labelStyle(.titleAndIcon) }
         case .category(let token):
-            ChipShape { Label(token).labelStyle(.titleAndIcon) }
+            Chip { Label(token).labelStyle(.titleAndIcon) }
         case .web(let token):
-            ChipShape { Label(token).labelStyle(.titleAndIcon) }
+            Chip { Label(token).labelStyle(.titleAndIcon) }
         case .domain(let domain):
-            ChipShape { Label(domain, systemImage: "globe") }
+            Chip { Label(domain, systemImage: "globe") }
         }
-    }
-}
-
-/// Capsule chip wrapper matching the app's existing pill styling.
-private struct ChipShape<Content: View>: View {
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        content
-            .font(.caption.weight(.medium))
-            .lineLimit(1)
-            .imageScale(.small)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(Color(.systemGray5))
-            .clipShape(Capsule())
     }
 }
 

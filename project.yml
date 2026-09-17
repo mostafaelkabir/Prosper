@@ -114,6 +114,7 @@ targets:
     sources:
       - path: ProsperReport
       - path: Prosper/Extensions/ReportContext.swift
+      - path: Prosper/DesignSystem
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.report

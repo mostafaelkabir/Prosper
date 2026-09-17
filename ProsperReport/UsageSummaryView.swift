@@ -140,22 +140,18 @@ struct TotalTimeView: View {
     let total: TotalTime
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Today")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text(total.duration.usageFormatted)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
+                LabelCaps("Screen time")
+                HeroNumber(value: total.duration.usageFormatted, size: 44)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("Pickups")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .trailing, spacing: 6) {
+                LabelCaps("Pickups")
                 Text("\(total.pickups)")
-                    .font(.title2.weight(.semibold))
+                    .font(ProsperFont.hero(24))
                     .monospacedDigit()
+                    .foregroundStyle(ProsperColor.ink)
             }
         }
         .padding()

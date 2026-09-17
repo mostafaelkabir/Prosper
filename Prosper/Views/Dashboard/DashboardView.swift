@@ -3,7 +3,7 @@ import SwiftData
 import DeviceActivity
 
 struct DashboardView: View {
-    /// Reopens the setup flow from the "finish setting up" banner.
+    /// Reopens the setup flow from the "finish setting up" card.
     var onResumeSetup: () -> Void = {}
 
     @Environment(\.scenePhase) private var scenePhase
@@ -12,50 +12,33 @@ struct DashboardView: View {
     @Query(sort: \WarningEvent.timestamp, order: .reverse) private var warnings: [WarningEvent]
     @Query private var allSettings: [UserSettings]
 
-    /// Bumped on appear and when the app returns to the foreground so the usage
-    /// report re-queries with an up-to-date time window (its `end: .now` would
-    /// otherwise be frozen at first render, leaving pickups/time stale).
+    /// Bumped on appear / foreground so the usage report re-queries with a fresh
+    /// time window (its `end: .now` is otherwise frozen at first render).
     @State private var refreshToken = Date.now
     @State private var pendingPrefill: BlockPrefill?
     @State private var showCreateBlock = false
 
     private var settings: UserSettings? { allSettings.first }
-
-    private var activeSession: BlockSession? {
-        sessions.first { $0.isActive }
-    }
+    private var activeSession: BlockSession? { sessions.first { $0.isActive } }
 
     private var hasWasteList: Bool {
         (settings?.wasteAppCount ?? 0) > 0 || !(settings?.wasteDomains.isEmpty ?? true)
     }
 
-    /// Warnings recorded since midnight; each represents one crossing of the
-    /// user's daily waste threshold.
     private var todaysWarnings: [WarningEvent] {
         let start = Calendar.current.startOfDay(for: .now)
         return warnings.filter { $0.timestamp >= start }
     }
 
+    private var thresholdMinutes: Int { settings?.wasteWarningThresholdMinutes ?? 30 }
+
+    /// Coarse waste estimate until E2.5b: warnings × threshold. nil = none flagged.
     private var wasteMinutesToday: Int? {
-        guard todaysWarnings.count > 0 else { return nil }
-        // We can't read the exact per-minute total from the DeviceActivity
-        // extension. Each warning corresponds to one threshold crossing, so
-        // the rough floor is warnings × latest threshold.
-        let threshold = todaysWarnings.first?.triggerReason.parsedThresholdMinutes ?? 0
+        guard !todaysWarnings.isEmpty else { return nil }
+        let threshold = todaysWarnings.first?.triggerReason.parsedThresholdMinutes ?? thresholdMinutes
         return todaysWarnings.count * threshold
     }
 
-    private var greeting: String {
-        switch Calendar.current.component(.hour, from: .now) {
-        case 5..<12: return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<22: return "Good evening"
-        default: return "Good night"
-        }
-    }
-
-    /// Reading `refreshToken` here ties the filter to it, so foregrounding the
-    /// app produces a fresh `today()` window and the report updates.
     private var todayFilter: DeviceActivityFilter {
         _ = refreshToken
         return UsageReportFilter.today()
@@ -64,29 +47,29 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    header
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(Date.now.formatted(.dateTime.weekday(.wide).month().day()))
+                        .labelCaps()
+                        .padding(.horizontal, 4)
 
                     if let settings, !settings.hasCompletedSetup {
-                        setupBanner
-                    }
-                    if settings?.isFirstDay ?? false {
-                        firstDayNote
+                        setupCard
                     }
 
                     heroCard
                     wasteCard
+                    insightCard
 
                     if let session = activeSession {
                         activeBlockCard(session)
                     } else {
-                        focusCard
+                        lockCard
                     }
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Prosper")
+            .background(ProsperColor.ground)
+            .navigationTitle("Today")
             .onAppear { refreshToken = .now }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { refreshToken = .now }
@@ -96,198 +79,187 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Header
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(greeting)
-                .font(.title3.weight(.semibold))
-            Text(Date.now.formatted(.dateTime.weekday(.wide).month().day()))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
     // MARK: - Hero
 
     private var heroCard: some View {
-        UsageReportView(filter: todayFilter, context: .totalTime)
-            // Recreate on refresh so the report re-queries with the new window,
-            // not just re-renders the cached one.
-            .id(refreshToken)
-            .frame(maxWidth: .infinity)
-            .frame(height: 110)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+        ProsperCard(padding: 0) {
+            UsageReportView(filter: todayFilter, context: .totalTime)
+                .id(refreshToken)
+                .frame(maxWidth: .infinity)
+                .frame(height: 116)
+        }
     }
 
-    // MARK: - Waste
+    // MARK: - Waste vs limit
 
     private var wasteCard: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Waste today")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        ProsperCard {
+            VStack(alignment: .leading, spacing: 10) {
+                LabelCaps("Waste today")
                 if let minutes = wasteMinutesToday {
-                    Text("\(minutes)+ min")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundStyle(.orange)
-                } else if todaysWarnings.isEmpty {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("\(minutes)")
+                            .font(ProsperFont.hero(30))
+                            .monospacedDigit()
+                            .foregroundStyle(ProsperColor.ember)
+                        Text("min")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(ProsperColor.ink2)
+                    }
+                    StackedBar(waste: Double(minutes), other: Double(max(0, thresholdMinutes - minutes)))
+                    Text(minutes >= thresholdMinutes
+                         ? "\(minutes - thresholdMinutes)m over your \(thresholdMinutes)m limit · at least"
+                         : "\(thresholdMinutes - minutes)m left of your \(thresholdMinutes)m limit")
+                        .font(.footnote)
+                        .foregroundStyle(minutes >= thresholdMinutes ? ProsperColor.ember : ProsperColor.ink3)
+                } else {
                     Text("None flagged")
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(.green)
-                } else {
-                    Text("—")
-                        .font(.title3)
+                        .foregroundStyle(ProsperColor.sage)
+                    Text("A clean run so far. Limit \(thresholdMinutes)m.")
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ink3)
                 }
-                Text("\(todaysWarnings.count) warning\(todaysWarnings.count == 1 ? "" : "s") today")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
-            Spacer()
-            Image(systemName: todaysWarnings.isEmpty ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                .font(.system(size: 28))
-                .foregroundStyle(todaysWarnings.isEmpty ? .green : .orange)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Insight (honest until E7.0)
+
+    private var insightCard: some View {
+        ProsperCard {
+            VStack(alignment: .leading, spacing: 10) {
+                LabelCaps("Noticed today")
+                insightSentence
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var insightSentence: some View {
+        if settings?.isFirstDay ?? false {
+            InsightSentence(
+                text: "Prosper is still learning your day.",
+                footnote: "Come back tonight for your first read."
+            )
+        } else if let count = wasteMinutesToday.map({ _ in todaysWarnings.count }), count > 0 {
+            InsightSentence(
+                text: "You slipped past your waste limit \(count) time\(count == 1 ? "" : "s") today.",
+                footnote: "Limit \(thresholdMinutes)m · tap Lock to close the door."
+            )
+        } else {
+            InsightSentence(
+                text: "A clean run so far — nothing has pulled you off today.",
+                footnote: hasWasteList ? nil : "Set a waste list so Prosper can watch for you."
+            )
+        }
     }
 
     // MARK: - Active block
 
     private func activeBlockCard(_ session: BlockSession) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "lock.fill")
-                    .foregroundStyle(.red)
-                Text("Block active")
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(Self.remaining(session.endTime.timeIntervalSince(context.date)))
-                        .font(.subheadline.weight(.semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(.red)
-                }
-            }
-            Text("Until \(session.endTime.formatted(date: .omitted, time: .shortened))")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            if session.appCount > 0 {
-                SelectionChips(
-                    selection: WasteSelectionCodec.decode(session.selectionData),
-                    placeholderCount: session.appCount,
-                    cap: 3
-                )
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
-    // MARK: - Focus (no active block)
-
-    private var focusCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Start a focus block", systemImage: "lock.fill")
-                .font(.headline)
-
-            if hasWasteList, let settings {
-                HStack(spacing: 10) {
-                    ForEach(QuickPreset.all) { preset in
-                        Button {
-                            pendingPrefill = preset.prefill(from: settings)
-                        } label: {
-                            VStack(spacing: 2) {
-                                Text(preset.label)
-                                    .font(.headline)
-                                Text("focus")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color(.systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .buttonStyle(.plain)
+        ProsperCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "lock.fill")
+                        .foregroundStyle(ProsperColor.slate)
+                    LabelCaps("Locked")
+                    Spacer()
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        Text(Self.remaining(session.endTime.timeIntervalSince(context.date)))
+                            .font(ProsperFont.dataRow.weight(.semibold))
+                            .foregroundStyle(ProsperColor.ink)
                     }
                 }
-                Text("Locks your waste list for the chosen time. Can't be undone.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Button {
-                    showCreateBlock = true
-                } label: {
-                    Text("New block")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                Text("Until \(session.endTime.formatted(date: .omitted, time: .shortened))")
+                    .font(.footnote)
+                    .foregroundStyle(ProsperColor.ink3)
+                if session.appCount > 0 {
+                    SelectionChips(
+                        selection: WasteSelectionCodec.decode(session.selectionData),
+                        placeholderCount: session.appCount,
+                        cap: 3
+                    )
                 }
-                .buttonStyle(.borderedProminent)
-                Text("Block distracting apps and sites for a set time. Can't be undone.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    // MARK: - Banners
+    // MARK: - Lock (no active block)
 
-    private var setupBanner: some View {
+    private var lockCard: some View {
+        ProsperCard {
+            VStack(alignment: .leading, spacing: 12) {
+                LabelCaps("Lock the waste list")
+                if hasWasteList, let settings {
+                    HStack(spacing: 10) {
+                        ForEach(QuickPreset.all) { preset in
+                            Button {
+                                pendingPrefill = preset.prefill(from: settings)
+                            } label: {
+                                VStack(spacing: 3) {
+                                    Text(preset.label)
+                                        .font(.headline)
+                                        .foregroundStyle(ProsperColor.ink)
+                                    Text("focus").labelCaps()
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(ProsperColor.card2)
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    Text("Cannot be undone.")
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ink3)
+                } else {
+                    Button {
+                        showCreateBlock = true
+                    } label: {
+                        Text("New block")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Text("Block distracting apps and sites for a set time. Cannot be undone.")
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ink3)
+                }
+            }
+        }
+    }
+
+    // MARK: - Setup card
+
+    private var setupCard: some View {
         Button(action: onResumeSetup) {
             HStack(spacing: 12) {
-                Image(systemName: "sparkles")
-                    .font(.title3)
-                    .foregroundStyle(.tint)
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text("Finish setting up")
                         .font(.subheadline.weight(.semibold))
-                    Text("Pick your waste apps and sites so Prosper can warn you.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ProsperColor.ink)
+                    Text("Pick your waste apps and sites so Prosper can watch for you.")
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ink3)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ProsperColor.slate)
             }
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(ProsperColor.card)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(.plain)
     }
 
-    private var firstDayNote: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "clock.arrow.circlepath")
-                .foregroundStyle(.secondary)
-            Text("Prosper is learning your day. Screen Time totals fill in over the next few hours — come back tonight. The numbers below are an example.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
     // MARK: - Helpers
 
-    /// "1h 12m left", "47m left", "0m left".
     private static func remaining(_ interval: TimeInterval) -> String {
         let total = max(0, Int(interval))
         let hours = total / 3600

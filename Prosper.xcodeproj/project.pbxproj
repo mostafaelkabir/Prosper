@@ -9,11 +9,13 @@
 /* Begin PBXBuildFile section */
 		00117D31DAD5B1C060F12C55 /* ProsperShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		03AF6B431ACE56BF0BD3A7D2 /* ProsperShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */; };
+		12A4F7B9CCF7D96FF1E8DAE4 /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
 		17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */; };
 		1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
 		24B893714D4533FB5AA6D111 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DF7522319D26BE76512424 /* ProsperReportExtension.swift */; };
 		2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
+		32F7CF502ECEFE5B265CE1E6 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD81363CEE9AFA44997EAE05 /* NotificationService.swift */; };
 		40C5CA1A317282DA49DB719A /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */; };
 		428114169845C3BD1F42D13F /* ProsperShieldConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */; };
@@ -23,6 +25,7 @@
 		4BFE11BA6D11945D58CF3887 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
 		55EF66B110B9B1FD26B456C3 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		5B3E77F66242484182855F8C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70907B88A840AC6A25FAA3B6 /* SettingsView.swift */; };
+		5E7986F77B9B7FDACBDA6B6C /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E408975B92219D4F495551F /* ProsperType.swift */; };
 		5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */; };
 		65A8D0BAFC6B66B418F5D706 /* BlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A632709C4CC649D29F82481B /* BlockView.swift */; };
 		671A44D232DB05062646B6B0 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
@@ -43,6 +46,8 @@
 		A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF1BA9DD8B110676DBE404 /* DashboardView.swift */; };
 		A5EAFF3CA15B28677E0A7F8F /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
 		A6996DD6B8D595F40A67B814 /* BlockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037BAC3E9EC0431009ABE06C /* BlockSession.swift */; };
+		AC680BAF6B9777A21662243A /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
+		ADA8D5C1795A3AD563170B84 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		AE39E426B90306EB201322B4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380FF60661EA74BC8735A26D /* BlockingService.swift */; };
 		B40C7A6639711E28D34AB404 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8F0966BDF79094A611FF59E /* Assets.xcassets */; };
@@ -51,6 +56,7 @@
 		D680F5699C97E44818731489 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A5392C1BFA98EA99B7C63B /* StatsView.swift */; };
 		D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72AD9387F5DEB57CF802404 /* MainTabView.swift */; };
 		DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */; };
+		E0AF7B38371A2EE5AEE1FDF7 /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E408975B92219D4F495551F /* ProsperType.swift */; };
 		E1335E39417B1E4F9DADB50D /* UsageTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */; };
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
 		ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE86A244991500CE0C12F76 /* SelectionChips.swift */; };
@@ -122,6 +128,7 @@
 		1D40CCAE0FDE3B059BBCB4F6 /* SetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowView.swift; sourceTree = "<group>"; };
 		24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceConfig.swift; sourceTree = "<group>"; };
 		2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrackingService.swift; sourceTree = "<group>"; };
+		33C7C894E4F3AE214D525759 /* ProsperColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperColor.swift; sourceTree = "<group>"; };
 		363E1B2D164246C5150D6D51 /* Prosper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Prosper.entitlements; sourceTree = "<group>"; };
 		380FF60661EA74BC8735A26D /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
 		3974BFC7D4583121C9877996 /* UsageSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryView.swift; sourceTree = "<group>"; };
@@ -136,7 +143,9 @@
 		7647CA969CEE0A3F6F293AA3 /* Prosper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Prosper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		787F80B30CAB4A7432226247 /* ProsperReport.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = ProsperReport.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
+		8E408975B92219D4F495551F /* ProsperType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperType.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
+		9314AE9A9C3D53B04778361F /* ProsperComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperComponents.swift; sourceTree = "<group>"; };
 		943E53DA14521BE1FDA1AACE /* WarningEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEvent.swift; sourceTree = "<group>"; };
 		95C798094F2F921F57D4E9DA /* CreateBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateBlockView.swift; sourceTree = "<group>"; };
 		9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
@@ -197,6 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				6B20E40BAD2C6155133AC29E /* App */,
+				299071F07BE43006A1F79C59 /* DesignSystem */,
 				D51E73D23315E413F5EEB520 /* Extensions */,
 				19C20D2AEFD5C74E817CE631 /* Models */,
 				AAB6DC317D5ABB3CE7BA8595 /* Services */,
@@ -216,6 +226,16 @@
 				943E53DA14521BE1FDA1AACE /* WarningEvent.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		299071F07BE43006A1F79C59 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				33C7C894E4F3AE214D525759 /* ProsperColor.swift */,
+				9314AE9A9C3D53B04778361F /* ProsperComponents.swift */,
+				8E408975B92219D4F495551F /* ProsperType.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 		365EB966ADD071B747DD6E6B /* ProsperShieldAction */ = {
@@ -522,6 +542,9 @@
 				33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */,
 				5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */,
 				6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */,
+				12A4F7B9CCF7D96FF1E8DAE4 /* ProsperColor.swift in Sources */,
+				32F7CF502ECEFE5B265CE1E6 /* ProsperComponents.swift in Sources */,
+				E0AF7B38371A2EE5AEE1FDF7 /* ProsperType.swift in Sources */,
 				8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */,
 				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
 				ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */,
@@ -575,7 +598,10 @@
 			files = (
 				9A3564894D135C232E22F704 /* HourlyHeatmapView.swift in Sources */,
 				6EBA330352C4EBB49E02EE17 /* HourlyUsage.swift in Sources */,
+				AC680BAF6B9777A21662243A /* ProsperColor.swift in Sources */,
+				ADA8D5C1795A3AD563170B84 /* ProsperComponents.swift in Sources */,
 				2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */,
+				5E7986F77B9B7FDACBDA6B6C /* ProsperType.swift in Sources */,
 				4BFE11BA6D11945D58CF3887 /* ReportContext.swift in Sources */,
 				77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */,
 				DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */,
