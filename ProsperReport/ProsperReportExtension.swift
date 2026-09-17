@@ -11,6 +11,9 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         UsageSummaryScene { summary in
             UsageSummaryView(summary: summary)
         }
+        UsageByOpensScene { summary in
+            UsageSummaryView(summary: summary)
+        }
         TotalTimeScene { total in
             TotalTimeView(total: total)
         }

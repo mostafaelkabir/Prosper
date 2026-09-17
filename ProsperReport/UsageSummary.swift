@@ -7,6 +7,13 @@ struct UsageItem: Identifiable, Hashable, Sendable {
     let name: String
     var duration: TimeInterval
     var pickups: Int
+    var notifications: Int = 0
+}
+
+/// How the app list is ranked. Websites and categories always rank by time.
+enum AppSort: Sendable {
+    case time
+    case opens
 }
 
 struct DailyUsage: Identifiable, Hashable, Sendable {
@@ -28,7 +35,10 @@ struct UsageSummary: Sendable {
     static let maxRows = 15
 
     /// Walks the async result tree from the system and flattens it into totals.
-    static func build(from data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
+    static func build(
+        from data: DeviceActivityResults<DeviceActivityData>,
+        sortApps: AppSort = .time
+    ) async -> UsageSummary {
         var summary = UsageSummary()
         var apps: [String: UsageItem] = [:]
         var sites: [String: UsageItem] = [:]
@@ -56,6 +66,7 @@ struct UsageSummary: Sendable {
                         var item = apps[id] ?? UsageItem(id: id, name: name, duration: 0, pickups: 0)
                         item.duration += app.totalActivityDuration
                         item.pickups += app.numberOfPickups
+                        item.notifications += app.numberOfNotifications
                         apps[id] = item
                         summary.totalPickups += app.numberOfPickups
                     }
@@ -71,7 +82,13 @@ struct UsageSummary: Sendable {
         }
 
         summary.days = days.map { DailyUsage(day: $0.key, duration: $0.value) }.sorted { $0.day < $1.day }
-        summary.apps = Array(apps.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }.prefix(maxRows))
+        let rankedApps = apps.values.filter { $0.duration > 0 || $0.pickups > 0 }.sorted { lhs, rhs in
+            switch sortApps {
+            case .time: return lhs.duration > rhs.duration
+            case .opens: return lhs.pickups > rhs.pickups
+            }
+        }
+        summary.apps = Array(rankedApps.prefix(maxRows))
         summary.sites = Array(sites.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }.prefix(maxRows))
         summary.categories = Array(categories.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }.prefix(maxRows))
         return summary
@@ -116,12 +133,12 @@ extension UsageSummary {
             totalPickups: 63,
             days: days,
             apps: [
-                UsageItem(id: "instagram", name: "Instagram", duration: 41 * 60, pickups: 18),
-                UsageItem(id: "youtube", name: "YouTube", duration: 33 * 60, pickups: 7),
-                UsageItem(id: "safari", name: "Safari", duration: 24 * 60, pickups: 11),
-                UsageItem(id: "reddit", name: "Reddit", duration: 19 * 60, pickups: 9),
-                UsageItem(id: "messages", name: "Messages", duration: 11 * 60, pickups: 14),
-                UsageItem(id: "mail", name: "Mail", duration: 6 * 60, pickups: 4),
+                UsageItem(id: "instagram", name: "Instagram", duration: 41 * 60, pickups: 18, notifications: 32),
+                UsageItem(id: "youtube", name: "YouTube", duration: 33 * 60, pickups: 7, notifications: 9),
+                UsageItem(id: "safari", name: "Safari", duration: 24 * 60, pickups: 11, notifications: 0),
+                UsageItem(id: "reddit", name: "Reddit", duration: 19 * 60, pickups: 9, notifications: 14),
+                UsageItem(id: "messages", name: "Messages", duration: 11 * 60, pickups: 14, notifications: 47),
+                UsageItem(id: "mail", name: "Mail", duration: 6 * 60, pickups: 4, notifications: 21),
             ],
             sites: [
                 UsageItem(id: "youtube.com", name: "youtube.com", duration: 14 * 60, pickups: 0),

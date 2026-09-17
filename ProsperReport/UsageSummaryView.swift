@@ -15,13 +15,13 @@ struct UsageSummaryView: View {
                         dailyChart
                     }
                     if !summary.apps.isEmpty {
-                        usageList(title: "Apps", icon: "app.fill", items: summary.apps, showPickups: true)
+                        usageList(title: "Apps", icon: "app.fill", items: summary.apps, showDetails: true)
                     }
                     if !summary.sites.isEmpty {
-                        usageList(title: "Websites", icon: "globe", items: summary.sites, showPickups: false)
+                        usageList(title: "Websites", icon: "globe", items: summary.sites, showDetails: false)
                     }
                     if !summary.categories.isEmpty {
-                        usageList(title: "Categories", icon: "square.grid.2x2", items: summary.categories, showPickups: false)
+                        usageList(title: "Categories", icon: "square.grid.2x2", items: summary.categories, showDetails: false)
                     }
                 }
                 .padding(.horizontal)
@@ -75,21 +75,22 @@ struct UsageSummaryView: View {
         }
     }
 
-    private func usageList(title: String, icon: String, items: [UsageItem], showPickups: Bool) -> some View {
+    private func usageList(title: String, icon: String, items: [UsageItem], showDetails: Bool) -> some View {
         let maxDuration = items.map(\.duration).max() ?? 1
         return VStack(alignment: .leading, spacing: 12) {
             Label(title, systemImage: icon)
                 .font(.headline)
             ForEach(items) { item in
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                    HStack(spacing: 10) {
                         Text(item.name)
                             .lineLimit(1)
-                        Spacer()
-                        if showPickups && item.pickups > 0 {
-                            Text("\(item.pickups)×")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        Spacer(minLength: 8)
+                        if showDetails && item.pickups > 0 {
+                            metric("\(item.pickups)", systemImage: "hand.tap.fill")
+                        }
+                        if showDetails && item.notifications > 0 {
+                            metric("\(item.notifications)", systemImage: "bell.fill")
                         }
                         Text(item.duration.usageFormatted)
                             .monospacedDigit()
@@ -106,6 +107,16 @@ struct UsageSummaryView: View {
                 }
             }
         }
+    }
+
+    /// A compact "icon + count" badge for opens / notifications on an app row.
+    private func metric(_ value: String, systemImage: String) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: systemImage)
+            Text(value).monospacedDigit()
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
     }
 
     private var emptyState: some View {

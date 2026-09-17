@@ -10,7 +10,16 @@ nonisolated struct UsageSummaryScene: DeviceActivityReportScene {
     let content: (UsageSummary) -> UsageSummaryView
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
-        await UsageSummary.build(from: data)
+        await UsageSummary.build(from: data, sortApps: .time)
+    }
+}
+
+nonisolated struct UsageByOpensScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .usageByOpens
+    let content: (UsageSummary) -> UsageSummaryView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
+        await UsageSummary.build(from: data, sortApps: .opens)
     }
 }
 
