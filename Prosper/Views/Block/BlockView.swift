@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import Combine
 
 struct BlockView: View {
     @Environment(\.modelContext) private var modelContext
@@ -8,9 +7,6 @@ struct BlockView: View {
     /// Non-nil = New Block sheet opened with a Quick Preset already applied.
     @State private var pendingPrefill: BlockPrefill?
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
-    @State private var now = Date.now
-
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private var activeSession: BlockSession? {
         sessions.first { $0.isActive }
@@ -18,144 +14,147 @@ struct BlockView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
+            ZStack {
+                ProsperColor.ground.ignoresSafeArea()
 
                 if let session = activeSession {
-                    activeBlockContent(session)
+                    activeVault(session)
                 } else {
-                    emptyBlockContent
-                }
-
-                Spacer()
-
-                if activeSession == nil {
-                    quickPresetsRow
-
-                    Button {
-                        showCreateBlock = true
-                    } label: {
-                        Label("New Block", systemImage: "lock.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
+                    idleContent
                 }
             }
             .navigationTitle("Lock")
-            .sheet(isPresented: $showCreateBlock) {
-                CreateBlockView()
-            }
-            .sheet(item: $pendingPrefill) { prefill in
-                CreateBlockView(prefill: prefill)
-            }
-            .onReceive(timer) { now = $0 }
+            .navigationBarTitleDisplayMode(activeSession == nil ? .large : .inline)
+            .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
+            .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
         }
     }
 
-    private func activeBlockContent(_ session: BlockSession) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.red)
+    // MARK: - Active vault
 
-            Text("Block Active")
-                .font(.title3.weight(.semibold))
+    private func activeVault(_ session: BlockSession) -> some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let remaining = max(0, session.endTime.timeIntervalSince(context.date))
+            let progress = session.duration > 0 ? remaining / session.duration : 0
+            VStack(spacing: 22) {
+                Spacer()
 
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text(formatTime(max(0, session.endTime.timeIntervalSince(context.date))))
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-            }
-
-            Text("Until \(session.endTime.formatted(date: .omitted, time: .shortened))")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 16) {
-                Label("\(session.appCount) app\(session.appCount == 1 ? "" : "s")", systemImage: "app.fill")
-                Label("\(session.domainCount) site\(session.domainCount == 1 ? "" : "s")", systemImage: "globe")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-
-            if session.appCount > 0 {
-                SelectionChips(
-                    selection: WasteSelectionCodec.decode(session.selectionData),
-                    placeholderCount: session.appCount
+                CountdownRing(
+                    progress: progress,
+                    centerText: formatTime(remaining),
+                    size: 208
                 )
-                .padding(.horizontal, 32)
-            }
 
-            if !session.domains.isEmpty {
-                Text(session.domains.joined(separator: "  ·  "))
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(session.endTime.formatted(date: .omitted, time: .shortened))")
+                    .font(.footnote)
+                    .foregroundStyle(ProsperColor.ink3)
+
+                if session.appCount > 0 {
+                    SelectionChips(
+                        selection: WasteSelectionCodec.decode(session.selectionData),
+                        placeholderCount: session.appCount
+                    )
+                    .padding(.horizontal, 32)
+                }
+                if !session.domains.isEmpty {
+                    Text(session.domains.joined(separator: "  ·  "))
+                        .font(.caption)
+                        .foregroundStyle(ProsperColor.ink3)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
+
+                Spacer()
+
+                Text("There is no cancel. That is the point.")
+                    .font(ProsperFont.insight)
+                    .foregroundStyle(ProsperColor.ink2)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 24)
+            }
+            .frame(maxWidth: .infinity)
+            .background(
+                RadialGradient(
+                    colors: [ProsperColor.slate.opacity(0.22), .clear],
+                    center: .top, startRadius: 0, endRadius: 360
+                )
+                .ignoresSafeArea()
+            )
+        }
+    }
+
+    // MARK: - Idle
+
+    private var idleContent: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            VStack(spacing: 14) {
+                Image(systemName: "lock.open")
+                    .font(.system(size: 44))
+                    .foregroundStyle(ProsperColor.ink3)
+                Text("Nothing is locked")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(ProsperColor.ink)
+                Text("Lock distracting apps and sites for a set time — with no way to undo.")
+                    .font(.subheadline)
+                    .foregroundStyle(ProsperColor.ink3)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
+            Spacer()
+
+            quickPresetsRow
+
+            Button {
+                showCreateBlock = true
+            } label: {
+                Label("New block", systemImage: "lock.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
         }
     }
-
-    private var emptyBlockContent: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "lock.open")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-
-            Text("No active blocks")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-
-            Text("Block distracting apps and websites\nfor a set time with no way to undo.")
-                .font(.subheadline)
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-        }
-    }
-
 
     private var quickPresetsRow: some View {
         let settings = UserSettings.current(context: modelContext)
         let hasWaste = (settings.wasteAppCount > 0) || !settings.wasteDomains.isEmpty
         return VStack(alignment: .leading, spacing: 8) {
             if hasWaste {
-                Text("Focus for")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 24)
+                Text("Focus for").labelCaps().padding(.horizontal, 20)
                 HStack(spacing: 12) {
                     ForEach(QuickPreset.all) { preset in
                         Button {
                             pendingPrefill = preset.prefill(from: settings)
                         } label: {
-                            VStack(spacing: 4) {
-                                Image(systemName: preset.systemImage)
-                                    .font(.title2)
+                            VStack(spacing: 3) {
                                 Text(preset.label)
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.headline)
+                                    .foregroundStyle(ProsperColor.ink)
+                                Text("focus").labelCaps()
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .padding(.vertical, 14)
+                            .background(ProsperColor.card)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 24)
-                Text("Locks your Settings waste list for the chosen duration. Cannot be undone.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
+                Text("Locks your Settings waste list for the chosen time. Cannot be undone.")
+                    .font(.footnote)
+                    .foregroundStyle(ProsperColor.ink3)
+                    .padding(.horizontal, 20)
             } else {
                 Text("Pick waste apps in Settings to unlock one-tap Focus presets.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 24)
+                    .font(.footnote)
+                    .foregroundStyle(ProsperColor.ink3)
+                    .padding(.horizontal, 20)
             }
         }
     }

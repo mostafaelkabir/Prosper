@@ -15,17 +15,19 @@ struct CreateBlockView: View {
     @State private var showCustomPicker = false
     @State private var customHours = 1
     @State private var customMinutes = 0
-    @State private var showConfirmation: Bool
     @State private var startError: String?
 
     /// Prefill hook for Quick Block presets: seed the sheet with the user's
-    /// waste selection + typed domains and a chosen duration, then jump
-    /// straight to the confirmation alert. `nil` = manual entry.
+    /// waste selection + typed domains and a chosen duration. The user still
+    /// completes the hold-to-lock. `nil` = manual entry.
     init(prefill: BlockPrefill? = nil) {
         _selection = State(initialValue: prefill?.selection ?? FamilyActivitySelection())
         _domains = State(initialValue: prefill?.domains ?? [])
         _duration = State(initialValue: prefill?.duration ?? 3600)
-        _showConfirmation = State(initialValue: prefill != nil)
+    }
+
+    private var endTimeText: String {
+        Date.now.addingTimeInterval(duration).formatted(date: .omitted, time: .shortened)
     }
 
     private let presets: [(label: String, seconds: TimeInterval)] = [
@@ -71,12 +73,14 @@ struct CreateBlockView: View {
                 appsSection
                 websitesSection
                 durationSection
-                if hasSelection {
-                    confirmSection
-                }
             }
             .navigationTitle("New Block")
             .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .bottom) {
+                if hasSelection {
+                    confirmBar
+                }
+            }
             .alert("Couldn't start block", isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })) {
                 Button("OK", role: .cancel) { startError = nil }
             } message: {
@@ -88,14 +92,6 @@ struct CreateBlockView: View {
                 }
             }
             .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
-            .alert("Start Block?", isPresented: $showConfirmation) {
-                Button("Start Block", role: .destructive) {
-                    startBlock()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Block \(selection.applicationTokens.count) app(s) and \(siteCount) site(s) for \(durationText).\n\n⚠️ This CANNOT be undone. You will not be able to access these apps and sites until the block expires.")
-            }
             .onAppear(perform: loadSavedDomains)
         }
     }
@@ -260,24 +256,19 @@ struct CreateBlockView: View {
         }
     }
 
-    private var confirmSection: some View {
-        Section {
-            Button {
-                showConfirmation = true
-            } label: {
-                HStack {
-                    Spacer()
-                    Label("Start Block", systemImage: "lock.fill")
-                        .font(.headline)
-                    Spacer()
-                }
-                .padding(.vertical, 4)
+    private var confirmBar: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Once it starts, nothing in this app can stop it before \(endTimeText).")
+                .font(ProsperFont.insight)
+                .foregroundStyle(ProsperColor.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HoldToLock(title: "Hold to lock") {
+                startBlock()
             }
-            .tint(.red)
-        } footer: {
-            Text("Once started, this block cannot be cancelled or shortened.")
-                .foregroundStyle(.red)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
     }
 
     private func updateCustomDuration() {
