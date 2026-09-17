@@ -39,13 +39,24 @@ struct DashboardView: View {
                     wasteCard
 
                     if let session = activeSession {
-                        HStack {
-                            Image(systemName: "lock.fill")
-                                .foregroundStyle(.red)
-                            Text("Block active until \(session.endTime.formatted(date: .omitted, time: .shortened))")
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Image(systemName: "lock.fill")
+                                    .foregroundStyle(.red)
+                                Text("Block active until \(session.endTime.formatted(date: .omitted, time: .shortened))")
+                                Spacer()
+                            }
+                            .font(.subheadline)
+
+                            if session.appCount > 0 {
+                                SelectionChips(
+                                    selection: WasteSelectionCodec.decode(session.selectionData),
+                                    placeholderCount: session.appCount,
+                                    cap: 3
+                                )
+                            }
                         }
-                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
