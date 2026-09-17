@@ -14,6 +14,7 @@ struct ProsperApp: App {
                         .onAppear {
                             UsageTrackingService.shared.startDailyMonitoring()
                             refreshWarningSchedule()
+                            BlockingService.shared.reconcileStaleShield()
                         }
                 } else {
                     AuthorizationView(authManager: authManager)
