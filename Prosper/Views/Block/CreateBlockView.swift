@@ -15,7 +15,6 @@ struct CreateBlockView: View {
     @State private var showCustomPicker = false
     @State private var customHours = 1
     @State private var customMinutes = 0
-    @State private var startError: String?
 
     /// Prefill hook for Quick Block presets: seed the sheet with the user's
     /// waste selection + typed domains and a chosen duration. The user still
@@ -80,11 +79,6 @@ struct CreateBlockView: View {
                 if hasSelection {
                     confirmBar
                 }
-            }
-            .alert("Couldn't start block", isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })) {
-                Button("OK", role: .cancel) { startError = nil }
-            } message: {
-                Text(startError ?? "")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -302,21 +296,19 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
-        do {
-            let settings = UserSettings.current(context: modelContext)
-            settings.savedBlockDomains = domains
-            try? modelContext.save()
+        guard !BlockingService.shared.hasActiveBlock else { return }
 
-            try BlockingService.shared.startBlock(
-                apps: selection.applicationTokens,
-                webDomains: selection.webDomainTokens,
-                domains: domains,
-                duration: duration,
-                selection: selection
-            )
-            dismiss()
-        } catch {
-            startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-        }
+        let settings = UserSettings.current(context: modelContext)
+        settings.savedBlockDomains = domains
+        try? modelContext.save()
+
+        BlockingService.shared.startBlock(
+            apps: selection.applicationTokens,
+            webDomains: selection.webDomainTokens,
+            domains: domains,
+            duration: duration,
+            selection: selection
+        )
+        dismiss()
     }
 }
