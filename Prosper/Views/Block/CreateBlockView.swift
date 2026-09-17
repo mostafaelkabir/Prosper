@@ -16,6 +16,7 @@ struct CreateBlockView: View {
     @State private var customHours = 1
     @State private var customMinutes = 0
     @State private var showConfirmation: Bool
+    @State private var startError: String?
 
     /// Prefill hook for Quick Block presets: seed the sheet with the user's
     /// waste selection + typed domains and a chosen duration, then jump
@@ -76,6 +77,11 @@ struct CreateBlockView: View {
             }
             .navigationTitle("New Block")
             .navigationBarTitleDisplayMode(.inline)
+            .alert("Couldn't start block", isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })) {
+                Button("OK", role: .cancel) { startError = nil }
+            } message: {
+                Text(startError ?? "")
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -296,19 +302,21 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
-        guard !BlockingService.shared.hasActiveBlock else { return }
+        do {
+            let settings = UserSettings.current(context: modelContext)
+            settings.savedBlockDomains = domains
+            try? modelContext.save()
 
-        let settings = UserSettings.current(context: modelContext)
-        settings.savedBlockDomains = domains
-        try? modelContext.save()
-
-        BlockingService.shared.startBlock(
-            apps: selection.applicationTokens,
-            webDomains: selection.webDomainTokens,
-            domains: domains,
-            duration: duration,
-            selection: selection
-        )
-        dismiss()
+            try BlockingService.shared.startBlock(
+                apps: selection.applicationTokens,
+                webDomains: selection.webDomainTokens,
+                domains: domains,
+                duration: duration,
+                selection: selection
+            )
+            dismiss()
+        } catch {
+            startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 }

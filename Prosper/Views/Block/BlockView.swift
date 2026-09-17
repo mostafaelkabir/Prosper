@@ -65,9 +65,11 @@ struct BlockView: View {
             Text("Block Active")
                 .font(.title3.weight(.semibold))
 
-            Text(formatTime(session.remainingTime))
-                .font(.system(size: 44, weight: .bold, design: .rounded))
-                .monospacedDigit()
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                Text(formatTime(max(0, session.endTime.timeIntervalSince(context.date))))
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+            }
 
             Text("Until \(session.endTime.formatted(date: .omitted, time: .shortened))")
                 .font(.subheadline)
