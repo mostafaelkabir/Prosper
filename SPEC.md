@@ -105,6 +105,28 @@ User preferences and app configuration.
 - **6.4** Notification preferences
 - **6.5** Data export (optional)
 
+### Epic 7: Insights — See the Habits You Don't Notice
+Pillar 1 done properly. Plain-language cards computed inside the ProsperReport extension (the only process that sees per-app data) from signals Screen Time exposes but never surfaces: hourly segments, first pickup, longest session, per-app pickups and notification counts. Each card is one honest sentence with one number, ranked by severity, never shaming.
+
+- **7.0** Insight engine: `InsightCard` model, ranking, `.insights` report context
+- **7.1** "When" heatmap: hourly usage today, 7×24 grid for the week
+- **7.2** Checking reflex: opens vs minutes per app ("18 opens, one every 52 minutes")
+- **7.3** Rituals: morning first-pickup app, late-night scrolling after 22:00
+- **7.4** Notification pull: notifications received vs opens per app
+- **7.5** Rabbit holes: longest continuous session per day, with a "block at 9pm" CTA
+- **7.6** Drift: week-over-week change per app and total (absorbs 2.6)
+- **7.7** Block attempts ("cravings") counted by ShieldAction, shown live and in a post-block summary
+
+### UX Tickets (Basira `UX-n`)
+- **UX-1** Dashboard as "Today's story": hero with comparison, one headline insight, action row
+- **UX-2** Stats IA: Overview / When / What / Patterns, month range, waste rows tinted
+- **UX-3** Onboarding: waste-list setup step, honest first-day empty states
+- **UX-4** Real app names and icons via `Label(token)` in Settings, Create Block, Active block
+- **UX-5** Shield copy with remaining time, reason, attempt count
+- **UX-6** Weekly review screen + Monday notification (reframes 5.3)
+- **UX-7** Visual system pass: card component, semantic colors, dark mode, Dynamic Type
+- **E2.5b** Exact waste-time metric from a waste-only report context (replaces the threshold estimate)
+
 ---
 
 ## Technical Approach
@@ -161,9 +183,9 @@ User preferences and app configuration.
 
 ---
 
-## Status — 2026-09-16
+## Status — 2026-09-17
 
-> Live tracking: Basira → Work → Prosper (21 tickets, `ticket_ref` = item number). This section is a snapshot.
+> Live tracking: Basira → Work → Prosper (37 tickets, `ticket_ref` = item number). This section is a snapshot.
 
 Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
 
@@ -188,7 +210,7 @@ Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
 ### Epic 4: Distraction Warnings — ⬜ not started
 4.6 🟡 monitor extension exists (used for unblock only)
 
-### Epic 5: Self-Accountability — ⬜ · Epic 6: Settings — ⬜ (Settings tab is a placeholder)
+### Epic 5: Self-Accountability — ⬜ · Epic 6: Settings — 🟡 (6.2 + 6.3 in review) · Epic 7: Insights — ⬜ (ticketed 2026-09-17)
 
 ### Verified in simulator (2026-09-16)
 Block creation with typed domains, URL normalization, invalid-domain error, swipe-to-delete, saved list prefill, 30-min block lifecycle (active screen → expiry → reset), Dashboard/Stats report layouts with sample data.
@@ -196,9 +218,10 @@ Block creation with typed domains, URL normalization, invalid-domain error, swip
 ### 🚫 Blocked on real device
 FamilyControls needs a paid Apple Developer Program membership; enrollment in progress. Until then blocking enforcement, the shield screen, and real usage data are unverified. Team ID V9WJ9X99FX is already in project.yml.
 
-### Next up (recommended order)
-1. **Device install + real verification** once enrollment is active: authorization prompt, block Reddit in Safari, shield on a blocked app, live Stats data.
-2. **E6.3 + E6.2 Settings**: pick "waste" apps/sites (FamilyActivityPicker + typed domains) and thresholds. Prerequisite for warnings.
-3. **E4.1 + E4.2 + E4.6 Warnings**: DeviceActivityEvent thresholds on the waste selection → local notifications + WarningEvent log. Also delivers a first cut of 2.5 "Time Wasted".
-4. **E3.5 Quick Block presets** and **E3.8 completion notification**.
-5. **E2.6 comparisons** and **E4.3 escalation** later.
+### Next up (recommended order, product review 2026-09-17)
+1. **DEV-1** device verification. Everything below depends on real data; add the Epic 7 API checks listed on the ticket.
+2. **Merge the review column** (E6.3+6.2, E4.1-4.2, E2.5, E3.5, E3.8).
+3. **Insights foundation**: E7.0 engine → E2.5b exact waste metric → E7.7 block attempts (cheapest, most honest signal).
+4. **See the day**: E7.1 heatmap → E7.2 checking reflex → UX-1 Dashboard → UX-2 Stats IA.
+5. **Name the habits**: E7.3 rituals, E7.4 notification pull, E7.5 rabbit holes, E7.6 drift; UX-4 icons, UX-5 shield copy, UX-3 onboarding.
+6. **Close the loop**: UX-6 weekly review, then E5 score/streaks and E4.3-4.5 escalation.
