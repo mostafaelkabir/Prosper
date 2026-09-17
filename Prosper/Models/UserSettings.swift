@@ -24,6 +24,12 @@ final class UserSettings {
     /// Websites the user last typed into the block creator, so the list is
     /// remembered between blocks (e.g. ["reddit.com", "youtube.com"]).
     var savedBlockDomains: [String] = []
+    /// True once the user has finished (or explicitly skipped through) the
+    /// post-authorization setup flow. Drives the "resume setup" banner.
+    var hasCompletedSetup: Bool = false
+    /// When the settings record was first created — i.e. first launch. Used to
+    /// show honest "data is still accumulating" empty states on day one.
+    var firstLaunchAt: Date = Date.now
 
     init() {
         self.id = UUID()
@@ -38,6 +44,14 @@ final class UserSettings {
         self.warningsEnabled = true
         self.level3PhraseRequired = true
         self.savedBlockDomains = []
+        self.hasCompletedSetup = false
+        self.firstLaunchAt = .now
+    }
+
+    /// True during the first calendar day after install, when Screen Time data
+    /// has not yet had time to accumulate.
+    var isFirstDay: Bool {
+        Calendar.current.isDateInToday(firstLaunchAt)
     }
 
     static func current(context: ModelContext) -> UserSettings {

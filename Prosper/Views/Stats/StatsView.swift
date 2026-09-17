@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import DeviceActivity
 
 struct StatsView: View {
@@ -9,6 +10,9 @@ struct StatsView: View {
     }
 
     @State private var range: Range = .today
+    @Query private var allSettings: [UserSettings]
+
+    private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
 
     var body: some View {
         NavigationStack {
@@ -18,6 +22,15 @@ struct StatsView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
+
+                if isFirstDay {
+                    Text("Screen Time data builds up over the first day. Until then these numbers are an example.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
+                }
 
                 UsageReportView(filter: filter)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

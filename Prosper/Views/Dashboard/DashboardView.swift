@@ -3,8 +3,14 @@ import SwiftData
 import DeviceActivity
 
 struct DashboardView: View {
+    /// Reopens the setup flow from the "finish setting up" banner.
+    var onResumeSetup: () -> Void = {}
+
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
     @Query(sort: \WarningEvent.timestamp, order: .reverse) private var warnings: [WarningEvent]
+    @Query private var allSettings: [UserSettings]
+
+    private var settings: UserSettings? { allSettings.first }
 
     private var activeSession: BlockSession? {
         sessions.first { $0.isActive }
@@ -30,6 +36,14 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    if let settings, !settings.hasCompletedSetup {
+                        setupBanner
+                    }
+
+                    if settings?.isFirstDay ?? false {
+                        firstDayNote
+                    }
+
                     UsageReportView(filter: UsageReportFilter.today(), context: .totalTime)
                         .frame(maxWidth: .infinity)
                         .frame(height: 110)
@@ -67,6 +81,45 @@ struct DashboardView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Prosper")
         }
+    }
+
+    private var setupBanner: some View {
+        Button(action: onResumeSetup) {
+            HStack(spacing: 12) {
+                Image(systemName: "sparkles")
+                    .font(.title3)
+                    .foregroundStyle(.tint)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Finish setting up")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Pick your waste apps and sites so Prosper can warn you.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var firstDayNote: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "clock.arrow.circlepath")
+                .foregroundStyle(.secondary)
+            Text("Prosper is learning your day. Screen Time totals fill in over the next few hours — come back tonight. The numbers below are an example.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private var wasteCard: some View {
