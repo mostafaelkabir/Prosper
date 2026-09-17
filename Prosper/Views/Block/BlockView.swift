@@ -45,7 +45,7 @@ struct BlockView: View {
                     .padding(.bottom, 16)
                 }
             }
-            .navigationTitle("Block")
+            .navigationTitle("Lock")
             .sheet(isPresented: $showCreateBlock) {
                 CreateBlockView()
             }
