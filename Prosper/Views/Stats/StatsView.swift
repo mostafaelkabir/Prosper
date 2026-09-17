@@ -17,6 +17,7 @@ struct StatsView: View {
 
     @State private var range: Range = .today
     @State private var lens: Lens = .usage
+    @State private var appSort: AppSort = .time
     @Query private var allSettings: [UserSettings]
 
     private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
@@ -48,7 +49,16 @@ struct StatsView: View {
 
                 switch lens {
                 case .usage:
-                    UsageReportView(filter: usageFilter)
+                    HStack {
+                        Spacer()
+                        Picker("Sort apps by", selection: $appSort) {
+                            Label("Most time", systemImage: "clock").tag(AppSort.time)
+                            Label("Most opens", systemImage: "hand.tap").tag(AppSort.opens)
+                        }
+                        .pickerStyle(.menu)
+                    }
+                    .padding(.horizontal)
+                    UsageReportView(filter: usageFilter, context: appSort == .time ? .usageSummary : .usageByOpens)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .when:
                     UsageReportView(filter: whenFilter, context: .whenHeatmap)
@@ -90,7 +100,7 @@ struct UsageReportView: View {
             } else if context == .whenHeatmap {
                 HourlyHeatmapView(usage: .sample(days: sampleDayCount))
             } else {
-                UsageSummaryView(summary: .sample(days: sampleDayCount))
+                UsageSummaryView(summary: sampleSummary)
             }
         }
         .overlay(alignment: .top) {
@@ -108,6 +118,15 @@ struct UsageReportView: View {
     }
 
     #if targetEnvironment(simulator)
+    /// Sample usage for the simulator, re-ranked to match the selected sort.
+    private var sampleSummary: UsageSummary {
+        var summary = UsageSummary.sample(days: sampleDayCount)
+        if context == .usageByOpens {
+            summary.apps.sort { $0.pickups > $1.pickups }
+        }
+        return summary
+    }
+
     /// Number of calendar days the filter spans, so sample data matches the range.
     private var sampleDayCount: Int {
         let interval: DateInterval
