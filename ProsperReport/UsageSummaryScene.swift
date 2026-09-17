@@ -23,3 +23,12 @@ nonisolated struct TotalTimeScene: DeviceActivityReportScene {
         return TotalTime(duration: summary.totalDuration, pickups: summary.totalPickups)
     }
 }
+
+nonisolated struct WhenHeatmapScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .whenHeatmap
+    let content: (HourlyUsage) -> HourlyHeatmapView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> HourlyUsage {
+        await HourlyUsage.build(from: data)
+    }
+}

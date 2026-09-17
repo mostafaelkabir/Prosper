@@ -14,5 +14,8 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         TotalTimeScene { total in
             TotalTimeView(total: total)
         }
+        WhenHeatmapScene { usage in
+            HourlyHeatmapView(usage: usage)
+        }
     }
 }

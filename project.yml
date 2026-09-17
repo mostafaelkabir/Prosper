@@ -22,6 +22,8 @@ targets:
       # can render them with sample data (the extension renders the real data).
       - path: ProsperReport/UsageSummary.swift
       - path: ProsperReport/UsageSummaryView.swift
+      - path: ProsperReport/HourlyUsage.swift
+      - path: ProsperReport/HourlyHeatmapView.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper

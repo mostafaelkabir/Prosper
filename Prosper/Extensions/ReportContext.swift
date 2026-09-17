@@ -9,4 +9,6 @@ extension DeviceActivityReport.Context {
     static let usageSummary = Self("Usage Summary")
     /// Compact card with total screen time and pickups only.
     static let totalTime = Self("Total Time")
+    /// Time-of-day breakdown: hourly bars for a single day, or a 7×24 week grid.
+    static let whenHeatmap = Self("When Heatmap")
 }
