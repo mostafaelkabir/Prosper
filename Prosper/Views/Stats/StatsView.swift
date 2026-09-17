@@ -9,7 +9,14 @@ struct StatsView: View {
         var id: String { rawValue }
     }
 
+    enum Lens: String, CaseIterable, Identifiable {
+        case usage = "Usage"
+        case when = "When"
+        var id: String { rawValue }
+    }
+
     @State private var range: Range = .today
+    @State private var lens: Lens = .usage
     @Query private var allSettings: [UserSettings]
 
     private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
@@ -17,6 +24,13 @@ struct StatsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                Picker("View", selection: $lens) {
+                    ForEach(Lens.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.top)
+
                 Picker("Range", selection: $range) {
                     ForEach(Range.allCases) { Text($0.rawValue).tag($0) }
                 }
@@ -32,17 +46,30 @@ struct StatsView: View {
                         .padding(.bottom, 8)
                 }
 
-                UsageReportView(filter: filter)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                switch lens {
+                case .usage:
+                    UsageReportView(filter: usageFilter)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                case .when:
+                    UsageReportView(filter: whenFilter, context: .whenHeatmap)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
             .navigationTitle("Stats")
         }
     }
 
-    private var filter: DeviceActivityFilter {
+    private var usageFilter: DeviceActivityFilter {
         switch range {
         case .today: UsageReportFilter.today()
         case .week: UsageReportFilter.lastSevenDays()
+        }
+    }
+
+    private var whenFilter: DeviceActivityFilter {
+        switch range {
+        case .today: UsageReportFilter.todayHourly()
+        case .week: UsageReportFilter.lastSevenDaysHourly()
         }
     }
 }
@@ -60,6 +87,8 @@ struct UsageReportView: View {
         Group {
             if context == .totalTime {
                 TotalTimeView(total: .sample)
+            } else if context == .whenHeatmap {
+                HourlyHeatmapView(usage: .sample(days: sampleDayCount))
             } else {
                 UsageSummaryView(summary: .sample(days: sampleDayCount))
             }
@@ -81,7 +110,12 @@ struct UsageReportView: View {
     #if targetEnvironment(simulator)
     /// Number of calendar days the filter spans, so sample data matches the range.
     private var sampleDayCount: Int {
-        guard case .daily(let interval) = filter.segmentInterval else { return 1 }
+        let interval: DateInterval
+        switch filter.segmentInterval {
+        case .daily(let i): interval = i
+        case .hourly(let i): interval = i
+        default: return 1
+        }
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: interval.start)
         let end = calendar.startOfDay(for: interval.end)
