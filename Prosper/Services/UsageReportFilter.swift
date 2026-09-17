@@ -24,4 +24,26 @@ enum UsageReportFilter {
             devices: .init([.iPhone])
         )
     }
+
+    /// Today, segmented hour by hour — drives the 24-hour "When" bars.
+    static func todayHourly() -> DeviceActivityFilter {
+        let start = Calendar.current.startOfDay(for: .now)
+        return DeviceActivityFilter(
+            segment: .hourly(during: DateInterval(start: start, end: .now)),
+            users: .all,
+            devices: .init([.iPhone])
+        )
+    }
+
+    /// The last seven days segmented hour by hour — drives the 7×24 week grid.
+    static func lastSevenDaysHourly() -> DeviceActivityFilter {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: .now)
+        let start = calendar.date(byAdding: .day, value: -6, to: todayStart) ?? todayStart
+        return DeviceActivityFilter(
+            segment: .hourly(during: DateInterval(start: start, end: .now)),
+            users: .all,
+            devices: .init([.iPhone])
+        )
+    }
 }

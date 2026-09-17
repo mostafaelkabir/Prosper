@@ -10,7 +10,16 @@ nonisolated struct UsageSummaryScene: DeviceActivityReportScene {
     let content: (UsageSummary) -> UsageSummaryView
 
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
-        await UsageSummary.build(from: data)
+        await UsageSummary.build(from: data, sortApps: .time)
+    }
+}
+
+nonisolated struct UsageByOpensScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .usageByOpens
+    let content: (UsageSummary) -> UsageSummaryView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
+        await UsageSummary.build(from: data, sortApps: .opens)
     }
 }
 
@@ -21,5 +30,14 @@ nonisolated struct TotalTimeScene: DeviceActivityReportScene {
     func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> TotalTime {
         let summary = await UsageSummary.build(from: data)
         return TotalTime(duration: summary.totalDuration, pickups: summary.totalPickups)
+    }
+}
+
+nonisolated struct WhenHeatmapScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .whenHeatmap
+    let content: (HourlyUsage) -> HourlyHeatmapView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> HourlyUsage {
+        await HourlyUsage.build(from: data)
     }
 }

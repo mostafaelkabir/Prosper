@@ -3,6 +3,9 @@ import SwiftData
 import FamilyControls
 
 struct SettingsView: View {
+    /// Reopens the post-authorization setup flow ("Set up again").
+    var onOpenSetup: () -> Void = {}
+
     @Environment(\.modelContext) private var modelContext
     @Query private var settingsQuery: [UserSettings]
 
@@ -11,13 +14,10 @@ struct SettingsView: View {
     @State private var warningsEnabled = true
     @State private var selection = FamilyActivitySelection()
     @State private var typedDomains: [String] = []
-    @State private var domainInput = ""
-    @State private var domainError: String?
     @State private var thresholdMinutes: Double = 30
 
-    @State private var isPickerPresented = false
-    @State private var didRequestNotifications = false
     @State private var loaded = false
+    @State private var didRequestNotifications = false
 
     private var settings: UserSettings {
         UserSettings.current(context: modelContext)
@@ -28,18 +28,19 @@ struct SettingsView: View {
             Form {
                 warningsToggleSection
                 if warningsEnabled {
-                    wasteAppsSection
-                    wasteWebsitesSection
-                    thresholdSection
+                    WasteListEditor(
+                        selection: $selection,
+                        typedDomains: $typedDomains,
+                        thresholdMinutes: $thresholdMinutes,
+                        onChange: persist
+                    )
                     infoSection
                 }
+                setupSection
             }
             .navigationTitle("Settings")
-            .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
             .onAppear(perform: loadIfNeeded)
             .onChange(of: warningsEnabled) { _, _ in persist() }
-            .onChange(of: selection) { _, _ in persist() }
-            .onChange(of: thresholdMinutes) { _, _ in persist() }
         }
     }
 
@@ -53,93 +54,24 @@ struct SettingsView: View {
         }
     }
 
-    private var wasteAppsSection: some View {
-        Section {
-            Button {
-                isPickerPresented = true
-            } label: {
-                HStack {
-                    Label("Pick waste apps", systemImage: "hourglass")
-                    Spacer()
-                    Text("\(selection.applicationTokens.count + selection.categoryTokens.count) selected")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            if !selection.applicationTokens.isEmpty || !selection.categoryTokens.isEmpty {
-                Button {
-                    isPickerPresented = true
-                } label: {
-                    SelectionChips(
-                        selection: selection,
-                        placeholderCount: selection.applicationTokens.count + selection.categoryTokens.count
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.plain)
-            }
-        } header: {
-            Text("Waste apps")
-        } footer: {
-            Text("Apps or Screen Time categories that count as waste on this device.")
-        }
-    }
-
-    private var wasteWebsitesSection: some View {
-        Section {
-            HStack {
-                TextField("reddit.com", text: $domainInput)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .keyboardType(.URL)
-                    .textContentType(.URL)
-                    .onSubmit(addTypedDomain)
-                Button("Add", action: addTypedDomain)
-                    .disabled(domainInput.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-            if let domainError {
-                Text(domainError)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-            ForEach(typedDomains, id: \.self) { domain in
-                Label(domain, systemImage: "globe")
-            }
-            .onDelete { offsets in
-                typedDomains.remove(atOffsets: offsets)
-                persist()
-            }
-        } header: {
-            Text("Waste websites")
-        } footer: {
-            Text("These are used both for warnings and as the default list when you open the New Block sheet.")
-        }
-    }
-
-    private var thresholdSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Warn after")
-                    Spacer()
-                    Text("\(Int(thresholdMinutes)) min")
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                }
-                Slider(value: $thresholdMinutes, in: 5...240, step: 5)
-            }
-        } header: {
-            Text("Threshold")
-        } footer: {
-            Text("Combined time across your waste apps and sites in a single day before Prosper warns you.")
-        }
-    }
-
     private var infoSection: some View {
         Section {
             Label("Warnings arrive as a local notification. Turn them on in iOS Settings if you did not accept the prompt.",
                   systemImage: "bell.badge")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private var setupSection: some View {
+        Section {
+            Button {
+                onOpenSetup()
+            } label: {
+                Label("Set up again", systemImage: "sparkles")
+            }
+        } footer: {
+            Text("Walk through picking waste apps, sites, and notifications again.")
         }
     }
 
@@ -158,19 +90,6 @@ struct SettingsView: View {
             didRequestNotifications = true
             Task { _ = await NotificationService.shared.requestPermission() }
         }
-    }
-
-    private func addTypedDomain() {
-        guard let normalized = BlockDomain.normalize(domainInput) else {
-            domainError = "Enter a website like reddit.com"
-            return
-        }
-        domainError = nil
-        if !typedDomains.contains(normalized) {
-            typedDomains.append(normalized)
-        }
-        domainInput = ""
-        persist()
     }
 
     private func persist() {
