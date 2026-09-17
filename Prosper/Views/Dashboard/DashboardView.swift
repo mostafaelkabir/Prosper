@@ -160,20 +160,23 @@ struct DashboardView: View {
     private func activeBlockCard(_ session: BlockSession) -> some View {
         ProsperCard {
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "lock.fill")
-                        .foregroundStyle(ProsperColor.slate)
-                    LabelCaps("Locked")
-                    Spacer()
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text(Self.remaining(session.endTime.timeIntervalSince(context.date)))
-                            .font(ProsperFont.dataRow.weight(.semibold))
-                            .foregroundStyle(ProsperColor.ink)
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    let remaining = max(0, session.endTime.timeIntervalSince(context.date))
+                    let progress = session.duration > 0 ? remaining / session.duration : 0
+                    HStack(spacing: 14) {
+                        CountdownRing(progress: progress, centerText: "", caption: nil, size: 44, lineWidth: 4)
+                        VStack(alignment: .leading, spacing: 2) {
+                            LabelCaps("Locked")
+                            Text(Self.remaining(remaining))
+                                .font(ProsperFont.dataRow.weight(.semibold))
+                                .foregroundStyle(ProsperColor.ink)
+                        }
+                        Spacer()
+                        Text("until \(session.endTime.formatted(date: .omitted, time: .shortened))")
+                            .font(.footnote)
+                            .foregroundStyle(ProsperColor.ink3)
                     }
                 }
-                Text("Until \(session.endTime.formatted(date: .omitted, time: .shortened))")
-                    .font(.footnote)
-                    .foregroundStyle(ProsperColor.ink3)
                 if session.appCount > 0 {
                     SelectionChips(
                         selection: WasteSelectionCodec.decode(session.selectionData),
