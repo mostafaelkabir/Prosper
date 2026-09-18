@@ -31,6 +31,18 @@ final class UserSettings {
     /// show honest "data is still accumulating" empty states on day one.
     var firstLaunchAt: Date = Date.now
 
+    // MARK: - Time classification (UX-9)
+    // The four classes are Productive / Distracting / Intentional rest /
+    // Unclassified. "Distracting" reuses the existing waste list
+    // (`wasteAppSelectionData` + `wasteDomains`) so warnings and quick-block
+    // presets keep working and the migration is automatic. Everything not
+    // explicitly listed stays Unclassified — nothing becomes productive by
+    // subtraction.
+    var productiveSelectionData: Data?
+    var productiveDomains: [String] = []
+    var restSelectionData: Data?
+    var restDomains: [String] = []
+
     init() {
         self.id = UUID()
         self.dailyScreenTimeGoal = 7200
@@ -46,6 +58,10 @@ final class UserSettings {
         self.savedBlockDomains = []
         self.hasCompletedSetup = false
         self.firstLaunchAt = .now
+        self.productiveSelectionData = nil
+        self.productiveDomains = []
+        self.restSelectionData = nil
+        self.restDomains = []
     }
 
     /// True during the first calendar day after install, when Screen Time data
