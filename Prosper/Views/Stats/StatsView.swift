@@ -4,39 +4,40 @@ import DeviceActivity
 
 struct StatsView: View {
     enum Range: String, CaseIterable, Identifiable {
-        case today = "Today"
-        case week = "7 Days"
+        case day = "Day"
+        case week = "Week"
+        case month = "Month"
         var id: String { rawValue }
     }
 
-    enum Lens: String, CaseIterable, Identifiable {
-        case usage = "Usage"
+    enum Section: String, CaseIterable {
+        case overview = "Overview"
         case when = "When"
-        var id: String { rawValue }
+        case what = "What"
+        case patterns = "Patterns"
     }
 
-    @State private var range: Range = .today
-    @State private var lens: Lens = .usage
+    @State private var range: Range = .day
+    @State private var sectionIndex = 0
     @State private var appSort: AppSort = .time
     @Query private var allSettings: [UserSettings]
 
     private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
+    private var section: Section { Section.allCases[sectionIndex] }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("View", selection: $lens) {
-                    ForEach(Lens.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top)
-
                 Picker("Range", selection: $range) {
                     ForEach(Range.allCases) { Text($0.rawValue).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                .padding()
+                .padding(.horizontal)
+                .padding(.top, 6)
+
+                SectionIndex(sections: Section.allCases.map(\.rawValue), selection: $sectionIndex)
+                    .padding(.horizontal)
+                    .padding(.vertical, 10)
 
                 if isFirstDay {
                     Text("Screen Time fills in through the day, so early numbers may be incomplete.")
@@ -44,42 +45,72 @@ struct StatsView: View {
                         .foregroundStyle(ProsperColor.ink3)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 6)
                 }
 
-                switch lens {
-                case .usage:
-                    HStack {
-                        Spacer()
-                        Picker("Sort apps by", selection: $appSort) {
-                            Label("Most time", systemImage: "clock").tag(AppSort.time)
-                            Label("Most opens", systemImage: "hand.tap").tag(AppSort.opens)
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    .padding(.horizontal)
-                    UsageReportView(filter: usageFilter, context: appSort == .time ? .usageSummary : .usageByOpens)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                case .when:
-                    UsageReportView(filter: whenFilter, context: .whenHeatmap)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+                Divider().overlay(ProsperColor.line)
+
+                sectionContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .background(ProsperColor.ground)
             .navigationTitle("Insights")
         }
     }
 
-    private var usageFilter: DeviceActivityFilter {
-        switch range {
-        case .today: UsageReportFilter.today()
-        case .week: UsageReportFilter.lastSevenDays()
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch section {
+        case .overview:
+            UsageReportView(filter: dailyFilter, context: .overview)
+        case .when:
+            UsageReportView(filter: hourlyFilter, context: .whenHeatmap)
+        case .what:
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Picker("Sort apps by", selection: $appSort) {
+                        Label("Most time", systemImage: "clock").tag(AppSort.time)
+                        Label("Most opens", systemImage: "hand.tap").tag(AppSort.opens)
+                    }
+                    .pickerStyle(.menu)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByOpens)
+            }
+        case .patterns:
+            patternsPlaceholder
         }
     }
 
-    private var whenFilter: DeviceActivityFilter {
+    private var patternsPlaceholder: some View {
+        VStack {
+            Spacer()
+            ProsperCard {
+                InsightSentence(
+                    text: "Patterns will appear once Prosper has learned your week.",
+                    footnote: "Ranked insights — checking reflex, notification pull, rabbit holes — land with the insight engine."
+                )
+            }
+            .padding()
+            Spacer()
+        }
+    }
+
+    private var dailyFilter: DeviceActivityFilter {
         switch range {
-        case .today: UsageReportFilter.todayHourly()
+        case .day: UsageReportFilter.today()
+        case .week: UsageReportFilter.lastSevenDays()
+        case .month: UsageReportFilter.lastThirtyDays()
+        }
+    }
+
+    private var hourlyFilter: DeviceActivityFilter {
+        switch range {
+        case .day: UsageReportFilter.todayHourly()
         case .week: UsageReportFilter.lastSevenDaysHourly()
+        case .month: UsageReportFilter.lastThirtyDaysHourly()
         }
     }
 }
@@ -102,7 +133,10 @@ struct UsageReportView: View {
             } else if context == .whenHeatmap {
                 HourlyHeatmapView(usage: .sample(days: sampleDayCount))
             } else {
-                UsageSummaryView(summary: sampleSummary)
+                // .overview shows total+chart only; the list contexts show lists only.
+                UsageSummaryView(summary: sampleSummary,
+                                 showsHeader: context == .overview,
+                                 showsLists: context != .overview)
             }
         }
         .overlay(alignment: .bottomTrailing) {

@@ -3,6 +3,10 @@ import Charts
 
 struct UsageSummaryView: View {
     let summary: UsageSummary
+    /// The Overview section shows the total + by-day chart; the What section
+    /// shows only the ranked lists. Splitting keeps each report view small.
+    var showsHeader: Bool = true
+    var showsLists: Bool = true
 
     var body: some View {
         ScrollView {
@@ -10,18 +14,22 @@ struct UsageSummaryView: View {
                 emptyState
             } else {
                 VStack(alignment: .leading, spacing: 24) {
-                    header
-                    if summary.days.count > 1 {
-                        dailyChart
+                    if showsHeader {
+                        header
+                        if summary.days.count > 1 {
+                            dailyChart
+                        }
                     }
-                    if !summary.apps.isEmpty {
-                        usageList(title: "Apps", icon: "app.fill", items: summary.apps, showDetails: true)
-                    }
-                    if !summary.sites.isEmpty {
-                        usageList(title: "Websites", icon: "globe", items: summary.sites, showDetails: false)
-                    }
-                    if !summary.categories.isEmpty {
-                        usageList(title: "Categories", icon: "square.grid.2x2", items: summary.categories, showDetails: false)
+                    if showsLists {
+                        if !summary.apps.isEmpty {
+                            usageList(title: "Apps", icon: "app.fill", items: summary.apps, showDetails: true)
+                        }
+                        if !summary.sites.isEmpty {
+                            usageList(title: "Websites", icon: "globe", items: summary.sites, showDetails: false)
+                        }
+                        if !summary.categories.isEmpty {
+                            usageList(title: "Categories", icon: "square.grid.2x2", items: summary.categories, showDetails: false)
+                        }
                     }
                 }
                 .padding(.horizontal)

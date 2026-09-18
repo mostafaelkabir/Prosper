@@ -41,3 +41,12 @@ nonisolated struct WhenHeatmapScene: DeviceActivityReportScene {
         await HourlyUsage.build(from: data)
     }
 }
+
+nonisolated struct OverviewScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .overview
+    let content: (UsageSummary) -> UsageSummaryView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> UsageSummary {
+        await UsageSummary.build(from: data, sortApps: .time)
+    }
+}
