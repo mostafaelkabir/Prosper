@@ -39,9 +39,9 @@ struct StatsView: View {
                 .padding()
 
                 if isFirstDay {
-                    Text("Screen Time data builds up over the first day. Until then these numbers are an example.")
+                    Text("Screen Time fills in through the day, so early numbers may be incomplete.")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ProsperColor.ink3)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                         .padding(.bottom, 8)
@@ -93,7 +93,9 @@ struct UsageReportView: View {
     var body: some View {
         #if targetEnvironment(simulator)
         // The simulator has no Screen Time data, so render the extension's views
-        // with sample numbers. On a device the system renders them with real data.
+        // with example numbers. On a device the system renders them with real data.
+        // The label reads "Example data" — quietly, not an orange demo stamp — and
+        // only here, because this content really is fabricated (DS-8).
         Group {
             if context == .totalTime {
                 TotalTimeView(total: .sample)
@@ -103,14 +105,11 @@ struct UsageReportView: View {
                 UsageSummaryView(summary: sampleSummary)
             }
         }
-        .overlay(alignment: .top) {
-            Text("SAMPLE")
-                .font(.caption2.weight(.bold))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(.orange.opacity(0.2))
-                .clipShape(Capsule())
-                .padding(.top, 6)
+        .overlay(alignment: .bottomTrailing) {
+            Text("Example data")
+                .labelCaps()
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
         }
         #else
         DeviceActivityReport(context, filter: filter)
