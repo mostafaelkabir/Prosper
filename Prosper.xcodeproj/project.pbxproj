@@ -12,6 +12,7 @@
 		12A4F7B9CCF7D96FF1E8DAE4 /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
 		17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */; };
 		1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
+		22FB096565980E1D1D005DFA /* AuroraComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE6DA47D979165CC918A89E /* AuroraComponents.swift */; };
 		24B893714D4533FB5AA6D111 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DF7522319D26BE76512424 /* ProsperReportExtension.swift */; };
 		2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
@@ -38,6 +39,7 @@
 		77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		80BE6AEA393AA35702434B88 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
 		84911D8643111011B7AD7091 /* CreateBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C798094F2F921F57D4E9DA /* CreateBlockView.swift */; };
+		853B22820FDACA330350A95D /* AuroraComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE6DA47D979165CC918A89E /* AuroraComponents.swift */; };
 		8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */; };
 		87D9ACCAE9A3CBF70D76E6E2 /* ProsperShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
@@ -163,6 +165,7 @@
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
 		B8F0966BDF79094A611FF59E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9571C24CF734505B0A04A5F /* ProsperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperApp.swift; sourceTree = "<group>"; };
+		BBE6DA47D979165CC918A89E /* AuroraComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraComponents.swift; sourceTree = "<group>"; };
 		C0A5392C1BFA98EA99B7C63B /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		C0BEECE923A1EB6C084F9C26 /* ProsperMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperMonitor.entitlements; sourceTree = "<group>"; };
 		C72AD9387F5DEB57CF802404 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -238,6 +241,7 @@
 		299071F07BE43006A1F79C59 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				BBE6DA47D979165CC918A89E /* AuroraComponents.swift */,
 				0F25C5A89EC5E58636D2C353 /* LockComponents.swift */,
 				33C7C894E4F3AE214D525759 /* ProsperColor.swift */,
 				9314AE9A9C3D53B04778361F /* ProsperComponents.swift */,
@@ -540,6 +544,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				853B22820FDACA330350A95D /* AuroraComponents.swift in Sources */,
 				8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */,
 				47A95850D574972EFDB091EA /* BlockSession.swift in Sources */,
 				65A8D0BAFC6B66B418F5D706 /* BlockView.swift in Sources */,
@@ -609,6 +614,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22FB096565980E1D1D005DFA /* AuroraComponents.swift in Sources */,
 				9A3564894D135C232E22F704 /* HourlyHeatmapView.swift in Sources */,
 				6EBA330352C4EBB49E02EE17 /* HourlyUsage.swift in Sources */,
 				B8742D2E3979E22EA03CCC0B /* LockComponents.swift in Sources */,
