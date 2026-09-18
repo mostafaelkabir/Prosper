@@ -36,6 +36,7 @@ struct SettingsView: View {
                     )
                     infoSection
                 }
+                classificationSection
                 setupSection
             }
             .navigationTitle("Settings")
@@ -60,6 +61,20 @@ struct SettingsView: View {
                   systemImage: "bell.badge")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private var classificationSection: some View {
+        Section {
+            NavigationLink {
+                ClassificationEditorView()
+            } label: {
+                Label("Classify your time", systemImage: "circle.grid.2x2")
+            }
+        } header: {
+            Text("Time classes")
+        } footer: {
+            Text("Mark apps and sites as Productive, Distracting or Intentional rest. Your waste list counts as Distracting; the rest stays Unclassified until you decide.")
         }
     }
 
