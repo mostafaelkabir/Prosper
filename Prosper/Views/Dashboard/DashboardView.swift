@@ -108,16 +108,14 @@ struct DashboardView: View {
                             .foregroundStyle(ProsperColor.ink2)
                     }
                     StackedBar(waste: Double(minutes), other: Double(max(0, thresholdMinutes - minutes)))
-                    Text(minutes >= thresholdMinutes
-                         ? "\(minutes - thresholdMinutes)m over your \(thresholdMinutes)m limit · at least"
-                         : "\(thresholdMinutes - minutes)m left of your \(thresholdMinutes)m limit")
+                    Text("Rough estimate from \(todaysWarnings.count) warning\(todaysWarnings.count == 1 ? "" : "s") crossing your \(thresholdMinutes)m limit — not measured time.")
                         .font(.footnote)
-                        .foregroundStyle(minutes >= thresholdMinutes ? ProsperColor.ember : ProsperColor.ink3)
+                        .foregroundStyle(ProsperColor.ink3)
                 } else {
-                    Text("None flagged")
+                    Text("No warning yet")
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(ProsperColor.sage)
-                    Text("A clean run so far. Limit \(thresholdMinutes)m.")
+                        .foregroundStyle(ProsperColor.ink)
+                    Text("No threshold warning recorded today. This isn't a measure of distraction time yet.")
                         .font(.footnote)
                         .foregroundStyle(ProsperColor.ink3)
                 }
@@ -143,15 +141,17 @@ struct DashboardView: View {
                 text: "Prosper is still learning your day.",
                 footnote: "Come back tonight for your first read."
             )
-        } else if let count = wasteMinutesToday.map({ _ in todaysWarnings.count }), count > 0 {
+        } else if !todaysWarnings.isEmpty {
             InsightSentence(
-                text: "You slipped past your waste limit \(count) time\(count == 1 ? "" : "s") today.",
+                text: "You crossed your waste limit \(todaysWarnings.count) time\(todaysWarnings.count == 1 ? "" : "s") today.",
                 footnote: "Limit \(thresholdMinutes)m · tap Lock to close the door."
             )
         } else {
             InsightSentence(
-                text: "A clean run so far — nothing has pulled you off today.",
-                footnote: hasWasteList ? nil : "Set a waste list so Prosper can watch for you."
+                text: "No threshold warning recorded today.",
+                footnote: hasWasteList
+                    ? "That's the absence of a warning, not a measure of your time."
+                    : "Set a waste list so Prosper can watch for you."
             )
         }
     }
