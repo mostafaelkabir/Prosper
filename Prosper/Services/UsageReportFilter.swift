@@ -25,6 +25,30 @@ enum UsageReportFilter {
         )
     }
 
+    /// The last 30 days, one segment per day (Insights "Month" range).
+    static func lastThirtyDays() -> DeviceActivityFilter {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: .now)
+        let start = calendar.date(byAdding: .day, value: -29, to: todayStart) ?? todayStart
+        return DeviceActivityFilter(
+            segment: .daily(during: DateInterval(start: start, end: .now)),
+            users: .all,
+            devices: .init([.iPhone])
+        )
+    }
+
+    /// The last 30 days segmented hour by hour (Month "When" grid).
+    static func lastThirtyDaysHourly() -> DeviceActivityFilter {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: .now)
+        let start = calendar.date(byAdding: .day, value: -29, to: todayStart) ?? todayStart
+        return DeviceActivityFilter(
+            segment: .hourly(during: DateInterval(start: start, end: .now)),
+            users: .all,
+            devices: .init([.iPhone])
+        )
+    }
+
     /// Today, segmented hour by hour — drives the 24-hour "When" bars.
     static func todayHourly() -> DeviceActivityFilter {
         let start = Calendar.current.startOfDay(for: .now)

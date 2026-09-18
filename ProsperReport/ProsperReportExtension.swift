@@ -8,11 +8,14 @@ import SwiftUI
 @main
 struct ProsperReportExtension: DeviceActivityReportExtension {
     var body: some DeviceActivityReportScene {
+        OverviewScene { summary in
+            UsageSummaryView(summary: summary, showsLists: false)
+        }
         UsageSummaryScene { summary in
-            UsageSummaryView(summary: summary)
+            UsageSummaryView(summary: summary, showsHeader: false)
         }
         UsageByOpensScene { summary in
-            UsageSummaryView(summary: summary)
+            UsageSummaryView(summary: summary, showsHeader: false)
         }
         TotalTimeScene { total in
             TotalTimeView(total: total)
