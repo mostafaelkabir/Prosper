@@ -23,6 +23,8 @@ struct HeroNumber: View {
     var deltaIsGood: Bool = true
     var size: CGFloat = 48
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -30,6 +32,9 @@ struct HeroNumber: View {
                     .font(ProsperFont.hero(size))
                     .monospacedDigit()
                     .foregroundStyle(ProsperColor.ink)
+                    // Numbers roll over when the value refreshes — "this is live".
+                    .contentTransition(.numericText())
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.5), value: value)
                 if let unit {
                     Text(unit)
                         .font(.title3.weight(.semibold))
@@ -90,6 +95,9 @@ struct StackedBar: View {
     let other: Double
     var height: CGFloat = 10
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var drawn = false
+
     var body: some View {
         GeometryReader { geo in
             let total = max(waste + other, 0.0001)
@@ -101,8 +109,17 @@ struct StackedBar: View {
                 Capsule()
                     .fill(ProsperColor.slate)
             }
+            // Draw in from the leading edge on first appear.
+            .scaleEffect(x: drawn ? 1 : 0, anchor: .leading)
         }
         .frame(height: height)
+        .onAppear {
+            if reduceMotion {
+                drawn = true
+            } else {
+                withAnimation(.easeOut(duration: 0.4)) { drawn = true }
+            }
+        }
     }
 }
 

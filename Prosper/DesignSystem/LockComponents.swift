@@ -9,6 +9,9 @@ struct CountdownRing: View {
     var caption: String? = "remaining"
     var size: CGFloat = 196
     var lineWidth: CGFloat = 5
+    /// The final stretch (e.g. last 60s): the ring goes ember to signal urgency
+    /// without an idle animation that would encourage watching the timer.
+    var emphasize: Bool = false
 
     var body: some View {
         ZStack {
@@ -16,7 +19,8 @@ struct CountdownRing: View {
                 .stroke(ProsperColor.line, lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: max(0, min(1, progress)))
-                .stroke(ProsperColor.slate, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(emphasize ? ProsperColor.ember : ProsperColor.slate,
+                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 2) {
                 Text(centerText)

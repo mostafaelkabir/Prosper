@@ -74,6 +74,7 @@ struct DashboardView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { refreshToken = .now }
             }
+            .sensoryFeedback(.selection, trigger: pendingPrefill)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
         }

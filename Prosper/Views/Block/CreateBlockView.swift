@@ -86,6 +86,7 @@ struct CreateBlockView: View {
                 }
             }
             .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
+            .sensoryFeedback(.selection, trigger: duration)
             .onAppear(perform: loadSavedDomains)
         }
     }
