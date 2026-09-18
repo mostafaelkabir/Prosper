@@ -23,5 +23,8 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         WhenHeatmapScene { usage in
             HourlyHeatmapView(usage: usage)
         }
+        TodayBalanceScene { snapshot in
+            TodayHeroReportView(snapshot: snapshot)
+        }
     }
 }

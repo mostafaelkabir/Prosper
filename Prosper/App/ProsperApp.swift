@@ -28,6 +28,9 @@ struct ProsperApp: App {
     private func refreshWarningSchedule() {
         let context = ModelContext(PersistenceConfig.sharedModelContainer)
         let settings = UserSettings.current(context: context)
+        // Mirror existing labels into the App Group so the report extension can
+        // build a real balance even for users who classified before this build.
+        settings.syncClassificationSnapshot()
         WarningService.shared.refreshSchedule(
             enabled: settings.warningsEnabled,
             selection: WasteSelectionCodec.decode(settings.wasteAppSelectionData),
