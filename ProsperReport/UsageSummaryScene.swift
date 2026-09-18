@@ -42,6 +42,15 @@ nonisolated struct WhenHeatmapScene: DeviceActivityReportScene {
     }
 }
 
+nonisolated struct TodayBalanceScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .todayBalance
+    let content: (TodaySnapshot) -> TodayHeroReportView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> TodaySnapshot {
+        await TodaySnapshot.build(from: data, classification: SharedClassification.load())
+    }
+}
+
 nonisolated struct OverviewScene: DeviceActivityReportScene {
     let context: DeviceActivityReport.Context = .overview
     let content: (UsageSummary) -> UsageSummaryView

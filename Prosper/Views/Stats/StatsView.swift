@@ -130,6 +130,8 @@ struct UsageReportView: View {
         Group {
             if context == .totalTime {
                 TotalTimeView(total: .sample)
+            } else if context == .todayBalance {
+                TodayHeroReportView(snapshot: .sample)
             } else if context == .whenHeatmap {
                 HourlyHeatmapView(usage: .sample(days: sampleDayCount))
             } else {

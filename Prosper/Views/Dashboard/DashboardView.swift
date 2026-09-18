@@ -1,11 +1,12 @@
 import SwiftUI
 import SwiftData
+import DeviceActivity
 
-/// Today — the approved Aurora dashboard (UX-10). This is the Slice-A visual
-/// shell: the hero four-class balance, streak and milestone use clearly labelled
-/// example fixtures until live classification (UX-9/E2.5b) and streak (UX-13)
-/// data are wired. The "Plan a focus block" action is real and opens the block
-/// flow. Reference: docs/design/approved-prosper/HANDOFF.md.
+/// Today — the approved Aurora dashboard (UX-10). The hero four-class balance is
+/// now live: the ProsperReport extension classifies real Screen Time by the
+/// user's labels (UX-9/E2.5b) and renders it via `DeviceActivityReport`. Streak
+/// and milestone are real (UX-13). The "Plan a focus block" action opens the
+/// block flow. Reference: docs/design/approved-prosper/HANDOFF.md.
 struct DashboardView: View {
     var onResumeSetup: () -> Void = {}
 
@@ -15,6 +16,7 @@ struct DashboardView: View {
     enum Range: Hashable { case day, week }
     @State private var range: Range = .day
     @State private var showCreateBlock = false
+    @State private var showClassify = false
     @State private var pendingPrefill: BlockPrefill?
 
     private var settings: UserSettings? { allSettings.first }
@@ -23,12 +25,20 @@ struct DashboardView: View {
         (settings?.wasteAppCount ?? 0) > 0 || !(settings?.wasteDomains.isEmpty ?? true)
     }
 
-    // Canonical preview fixtures from HANDOFF.md (example data).
-    private var balance: TimeBalance {
-        switch range {
-        case .day:  return TimeBalance(productive: 130*60, distracting: 35*60, rest: 30*60, unclassified: 15*60)
-        case .week: return TimeBalance(productive: 880*60, distracting: 245*60, rest: 210*60, unclassified: 105*60)
-        }
+    /// Whether the user has labelled anything in any of the three classes. Drives
+    /// the "classify your apps" nudge — without labels the hero is all
+    /// Unclassified, and this is the honest fix (not fake data).
+    private var hasAnyClassification: Bool {
+        guard let s = settings else { return false }
+        return (s.wasteAppCount > 0)
+            || !s.wasteDomains.isEmpty
+            || s.productiveSelectionData != nil || !s.productiveDomains.isEmpty
+            || s.restSelectionData != nil || !s.restDomains.isEmpty
+    }
+
+    /// Filter for the selected range, passed to the live `DeviceActivityReport`.
+    private var balanceFilter: DeviceActivityFilter {
+        range == .day ? UsageReportFilter.today() : UsageReportFilter.lastSevenDays()
     }
 
     // MARK: - Real focus streak (UX-13)
@@ -99,7 +109,7 @@ struct DashboardView: View {
                     }
 
                     heroCard
-                    exampleNote
+                    if !hasAnyClassification { classifyCTA }
 
                     if let session = activeSession {
                         activeBlockCard(session)
@@ -120,6 +130,7 @@ struct DashboardView: View {
             .background(ProsperColor.background)
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
+            .sheet(isPresented: $showClassify) { NavigationStack { ClassificationEditorView() } }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
         }
     }
@@ -149,34 +160,46 @@ struct DashboardView: View {
 
     // MARK: - Hero
 
+    /// Live balance: the report extension classifies real Screen Time and renders
+    /// the waste-first hero (`TodayHeroReportView`). The app never sees the raw
+    /// numbers — it just hosts the extension inside the Aurora card.
     private var heroCard: some View {
         AuroraHeroCard {
-            VStack(alignment: .leading, spacing: 22) {
-                HStack(alignment: .top, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Productive time").labelCaps()
-                        Text(balance.productive.usageFormatted)
-                            .font(.system(size: 38, weight: .semibold))
-                            .monospacedDigit()
-                            .foregroundStyle(ProsperColor.ink)
-                            .contentTransition(.numericText())
-                            .animation(.easeOut(duration: 0.4), value: balance)
-                        Text("Based on your classifications")
-                            .font(.system(size: 12))
-                            .foregroundStyle(ProsperColor.ink2)
-                    }
-                    Spacer()
-                    TimeRing(balance: balance)
-                }
-                CategoryBreakdown(balance: balance)
-            }
+            UsageReportView(filter: balanceFilter, context: .todayBalance)
+                .id(range) // re-embed the report when the range changes
+                .frame(minHeight: 300, alignment: .top)
         }
     }
 
-    private var exampleNote: some View {
-        Text("Example data — live once you classify your apps.")
-            .labelCaps()
-            .frame(maxWidth: .infinity, alignment: .trailing)
+    private var classifyCTA: some View {
+        Button { showClassify = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "tag.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(ProsperColor.accent)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Classify your apps")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(ProsperColor.ink)
+                    Text("Label what's productive, distracting or rest so the numbers above become yours.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(ProsperColor.ink2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ProsperColor.accent)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(ProsperColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(ProsperColor.line, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Streak / milestone (real, from completed sessions)

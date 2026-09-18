@@ -115,6 +115,7 @@ struct SettingsView: View {
         s.wasteDomains = typedDomains
         s.wasteWarningThresholdMinutes = Int(thresholdMinutes)
         try? modelContext.save()
+        s.syncClassificationSnapshot()
 
         WarningService.shared.refreshSchedule(
             enabled: warningsEnabled,

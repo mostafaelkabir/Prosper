@@ -15,4 +15,7 @@ extension DeviceActivityReport.Context {
     static let totalTime = Self("Total Time")
     /// Time-of-day breakdown: hourly bars for a single day, or a 7×24 week grid.
     static let whenHeatmap = Self("When Heatmap")
+    /// Waste-first Today hero: four-class balance from the user's labels, plus
+    /// pickups and notifications. The only place the classification is applied.
+    static let todayBalance = Self("Today Balance")
 }

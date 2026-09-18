@@ -125,6 +125,7 @@ struct SetupFlowView: View {
         s.wasteDomains = typedDomains
         s.wasteWarningThresholdMinutes = Int(thresholdMinutes)
         try? modelContext.save()
+        s.syncClassificationSnapshot()
 
         WarningService.shared.refreshSchedule(
             enabled: s.warningsEnabled,
