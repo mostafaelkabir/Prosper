@@ -31,12 +31,56 @@ struct DashboardView: View {
         }
     }
 
-    private let streakDays: [StreakDay] = [
-        .init(label: "MON", state: .done), .init(label: "TUE", state: .done),
-        .init(label: "WED", state: .done), .init(label: "THU", state: .done),
-        .init(label: "FRI", state: .done), .init(label: "SAT", state: .current),
-        .init(label: "SUN", state: .upcoming)
-    ]
+    // MARK: - Real focus streak (UX-13)
+
+    /// Finished focus sessions (ended), newest first.
+    private var finishedSessions: [BlockSession] {
+        sessions.filter { !$0.isActive }
+    }
+    private var completedCount: Int { finishedSessions.count }
+    private var milestoneTarget: Int { ((completedCount / 10) + 1) * 10 }
+
+    private func dayHasSession(_ day: Date) -> Bool {
+        let cal = Calendar.current
+        return finishedSessions.contains { cal.isDate($0.startedAt, inSameDayAs: day) }
+    }
+
+    /// Consecutive days with a completed session, counting back from today. A
+    /// pending (not-yet-completed) today does not break yesterday's streak.
+    private var currentStreak: Int {
+        let cal = Calendar.current
+        var day = cal.startOfDay(for: .now)
+        if !dayHasSession(day) {
+            day = cal.date(byAdding: .day, value: -1, to: day) ?? day
+        }
+        var streak = 0
+        while dayHasSession(day) {
+            streak += 1
+            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
+            day = prev
+        }
+        return streak
+    }
+
+    /// This calendar week's seven cells (locale week-to-date).
+    private var weekDays: [StreakDay] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        guard let week = cal.dateInterval(of: .weekOfYear, for: today) else { return [] }
+        return (0..<7).compactMap { offset in
+            guard let d = cal.date(byAdding: .day, value: offset, to: week.start) else { return nil }
+            let label = d.formatted(.dateTime.weekday(.abbreviated)).uppercased()
+            let state: StreakDay.State
+            if cal.isDate(d, inSameDayAs: today) {
+                state = .current
+            } else if d > today {
+                state = .upcoming
+            } else {
+                state = dayHasSession(d) ? .done : .upcoming
+            }
+            return StreakDay(label: label, state: state)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -135,14 +179,32 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
-    // MARK: - Streak / milestone (example fixtures)
+    // MARK: - Streak / milestone (real, from completed sessions)
 
+    @ViewBuilder
     private var streakSection: some View {
-        StreakStrip(title: "6-day focus streak", days: streakDays, onGoal: {})
+        if completedCount == 0 {
+            OpportunityCard(
+                eyebrow: "Focus streak",
+                headline: "Start your first focus session.",
+                evidence: "Complete one focus block a day to build a streak. Nothing here is pre-filled.",
+                ctaTitle: "Plan a focus block",
+                onPlan: startPlan
+            )
+        } else {
+            StreakStrip(
+                title: "\(currentStreak)-day focus streak",
+                days: weekDays,
+                onGoal: {}
+            )
+        }
     }
 
+    @ViewBuilder
     private var milestoneRow: some View {
-        MilestoneRow(completed: 9, target: 10)
+        if completedCount > 0 {
+            MilestoneRow(completed: completedCount, target: milestoneTarget)
+        }
     }
 
     // MARK: - Active block
