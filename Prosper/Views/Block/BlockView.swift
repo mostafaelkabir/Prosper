@@ -25,6 +25,7 @@ struct BlockView: View {
             }
             .navigationTitle("Lock")
             .navigationBarTitleDisplayMode(activeSession == nil ? .large : .inline)
+            .sensoryFeedback(.selection, trigger: pendingPrefill)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
         }
@@ -42,7 +43,8 @@ struct BlockView: View {
                 CountdownRing(
                     progress: progress,
                     centerText: formatTime(remaining),
-                    size: 208
+                    size: 208,
+                    emphasize: remaining <= 60
                 )
 
                 Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(session.endTime.formatted(date: .omitted, time: .shortened))")
