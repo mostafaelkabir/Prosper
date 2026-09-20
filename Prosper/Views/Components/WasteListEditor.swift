@@ -106,7 +106,7 @@ struct WasteListEditor: View {
         } header: {
             Text("Threshold")
         } footer: {
-            Text("Combined time across your waste apps and sites in a single day before Prosper warns you.")
+            Text("Combined time across your waste apps and sites in a single day before Prosper warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
         }
     }
 

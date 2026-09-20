@@ -5,10 +5,9 @@ import SwiftData
 enum PersistenceConfig {
     static let appGroupID = "group.com.mostafa.prosper"
     nonisolated(unsafe) static let unblockActivityName = DeviceActivityName("prosper.unblock")
-    /// Daily interval that watches the waste selection and fires the
-    /// `wasteThresholdEvent` when the user has spent enough time in it.
+    /// Daily interval that watches the waste selection and fires one event per
+    /// rung of the warning ladder (see `WarningLevel`).
     nonisolated(unsafe) static let wasteActivityName = DeviceActivityName("prosper.waste")
-    nonisolated(unsafe) static let wasteThresholdEvent = DeviceActivityEvent.Name("prosper.waste.threshold")
 
     static let sharedModelContainer: ModelContainer = {
         let schema = Schema([

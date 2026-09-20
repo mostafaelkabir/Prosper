@@ -64,6 +64,24 @@ final class BlockingService: @unchecked Sendable {
         SharedBlockState.clear()
     }
 
+    /// Lifts restrictions when the block's timer has already elapsed but the
+    /// system never cleared them — e.g. the interval was below iOS's ~15-minute
+    /// `DeviceActivityMonitor` minimum, the app was force-quit, or the device
+    /// rebooted, so `intervalDidEnd` never fired and Safari stays filtered.
+    ///
+    /// This is NOT an early cancel (see CLAUDE.md): it only ever acts once no
+    /// `BlockSession` is still within its timer, so an active block is untouched.
+    /// Call on launch and whenever the app returns to the foreground.
+    func clearExpiredBlockIfNeeded() {
+        guard hasActiveBlock else { return }
+        let context = ModelContext(PersistenceConfig.sharedModelContainer)
+        let sessions = (try? context.fetch(FetchDescriptor<BlockSession>())) ?? []
+        let stillLocked = sessions.contains { $0.isActive }
+        if !stillLocked {
+            clearBlock()
+        }
+    }
+
     var hasActiveBlock: Bool {
         store.shield.applications != nil
             || store.shield.webDomains != nil

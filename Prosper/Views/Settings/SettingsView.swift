@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var selection = FamilyActivitySelection()
     @State private var typedDomains: [String] = []
     @State private var thresholdMinutes: Double = 30
+    @State private var requirePhrase = true
 
     @State private var loaded = false
     @State private var didRequestNotifications = false
@@ -34,6 +35,7 @@ struct SettingsView: View {
                         thresholdMinutes: $thresholdMinutes,
                         onChange: persist
                     )
+                    escalationSection
                     infoSection
                 }
                 classificationSection
@@ -42,6 +44,7 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .onAppear(perform: loadIfNeeded)
             .onChange(of: warningsEnabled) { _, _ in persist() }
+            .onChange(of: requirePhrase) { _, _ in persist() }
         }
     }
 
@@ -52,6 +55,16 @@ struct SettingsView: View {
             Toggle("Warn me about waste time", isOn: $warningsEnabled)
         } footer: {
             Text("Prosper watches the apps and sites you list here and pings you when today's total goes past the threshold.")
+        }
+    }
+
+    private var escalationSection: some View {
+        Section {
+            Toggle("Type a phrase to dismiss", isOn: $requirePhrase)
+        } header: {
+            Text("Third warning")
+        } footer: {
+            Text("At three times your threshold Prosper takes over the screen instead of sending another notification. With this on, you have to type \u{201C}\(InterventionView.phrase)\u{201D} to get past it.")
         }
     }
 
@@ -100,6 +113,7 @@ struct SettingsView: View {
         selection = WasteSelectionCodec.decode(s.wasteAppSelectionData)
         typedDomains = s.wasteDomains
         thresholdMinutes = Double(max(5, s.wasteWarningThresholdMinutes))
+        requirePhrase = s.level3PhraseRequired
 
         if !didRequestNotifications && warningsEnabled {
             didRequestNotifications = true
@@ -114,6 +128,7 @@ struct SettingsView: View {
         s.wasteAppCount = selection.applicationTokens.count + selection.categoryTokens.count
         s.wasteDomains = typedDomains
         s.wasteWarningThresholdMinutes = Int(thresholdMinutes)
+        s.level3PhraseRequired = requirePhrase
         try? modelContext.save()
         s.syncClassificationSnapshot()
 

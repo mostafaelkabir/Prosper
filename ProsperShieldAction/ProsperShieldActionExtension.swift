@@ -7,14 +7,10 @@ class ProsperShieldActionExtension: ShieldActionDelegate {
         for application: ApplicationToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        switch action {
-        case .primaryButtonPressed:
-            completionHandler(.close)
-        case .secondaryButtonPressed:
-            completionHandler(.close)
-        @unknown default:
-            completionHandler(.close)
-        }
+        // Prosper never offers an override — every button just closes the app
+        // (see CLAUDE.md "Close only"). One response for every action avoids a
+        // non-exhaustive switch over the non-frozen ShieldAction enum (QA-5).
+        completionHandler(.close)
     }
 
     override func handle(
@@ -22,13 +18,6 @@ class ProsperShieldActionExtension: ShieldActionDelegate {
         for webDomain: WebDomainToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        switch action {
-        case .primaryButtonPressed:
-            completionHandler(.close)
-        case .secondaryButtonPressed:
-            completionHandler(.close)
-        @unknown default:
-            completionHandler(.close)
-        }
+        completionHandler(.close)
     }
 }
