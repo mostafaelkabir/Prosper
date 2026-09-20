@@ -26,6 +26,8 @@ targets:
       - path: ProsperReport/TodayHeroReportView.swift
       - path: ProsperReport/HourlyUsage.swift
       - path: ProsperReport/HourlyHeatmapView.swift
+      - path: ProsperReport/InsightEngine.swift
+      - path: ProsperReport/InsightsReportView.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper

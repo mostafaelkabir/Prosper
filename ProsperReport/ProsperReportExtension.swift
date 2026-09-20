@@ -26,5 +26,11 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         TodayBalanceScene { snapshot in
             TodayHeroReportView(snapshot: snapshot)
         }
+        InsightsScene { cards in
+            // Today shows the single strongest insight (glanceable, and a
+            // predictable host height — DeviceActivityReport does not self-size,
+            // see QA-7). The full ranked list will live in Insights.
+            InsightsReportView(cards: cards, limit: 1)
+        }
     }
 }

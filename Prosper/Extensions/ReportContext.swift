@@ -18,4 +18,7 @@ extension DeviceActivityReport.Context {
     /// Waste-first Today hero: four-class balance from the user's labels, plus
     /// pickups and notifications. The only place the classification is applied.
     static let todayBalance = Self("Today Balance")
+    /// Ranked plain-English insights (E7.0): the engine reads raw usage and
+    /// emits `InsightCard`s; the app just hosts the result.
+    static let insights = Self("Insights")
 }

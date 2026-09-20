@@ -133,6 +133,8 @@ struct DashboardView: View {
                     heroCard
                     if !hasAnyClassification { classifyCTA }
 
+                    insightSpotlight
+
                     if let session = activeSession {
                         activeBlockCard(session)
                     } else {
@@ -203,6 +205,18 @@ struct DashboardView: View {
                 // hero (balance + "Where it went" + reflex) once real data loaded,
                 // so reserve enough for the whole design. See QA-7.
                 .frame(minHeight: 420, alignment: .top)
+        }
+    }
+
+    /// Today's ranked insight(s) (E7.0). The ProsperReport extension computes them
+    /// from raw usage and renders the cards; we reserve a fixed height because the
+    /// hosted report does not report its own size (same constraint as the hero).
+    private var insightSpotlight: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Today's insight").labelCaps()
+            InsightSpotlightHost(filter: balanceFilter)
+                .id("insights-\(range)")
+                .frame(minHeight: 140, alignment: .top)
         }
     }
 
