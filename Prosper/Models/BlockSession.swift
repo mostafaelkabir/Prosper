@@ -14,8 +14,20 @@ final class BlockSession {
     var startedAt: Date
     var createdAt: Date
 
+    /// The shortest block that counts as a real focus session. Below this it's a
+    /// trial run, not an achievement — so it must never inflate the streak or the
+    /// milestone (UX-21). Keeping the streak earned is what makes it mean anything.
+    static let minMeaningfulFocus: TimeInterval = 15 * 60
+
     var isActive: Bool {
         Date.now < startedAt.addingTimeInterval(duration)
+    }
+
+    /// A genuinely-completed focus session: it ran to the end and lasted at least
+    /// `minMeaningfulFocus`. Only these count toward the streak, the completed
+    /// count and the milestone, so the numbers stay true.
+    var countsAsFocus: Bool {
+        !isActive && duration >= Self.minMeaningfulFocus
     }
 
     var remainingTime: TimeInterval {
