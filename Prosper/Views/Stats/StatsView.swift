@@ -172,8 +172,11 @@ struct UsageReportView: View {
         }
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: interval.start)
-        let end = calendar.startOfDay(for: interval.end)
-        return (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1
+        // The system widens a daily filter to whole days, so `end` is midnight at
+        // the *start of the next day*. Step back a second before bucketing, or
+        // today alone would count as two days.
+        let end = calendar.startOfDay(for: interval.end.addingTimeInterval(-1))
+        return max(1, (calendar.dateComponents([.day], from: start, to: end).day ?? 0) + 1)
     }
     #endif
 }

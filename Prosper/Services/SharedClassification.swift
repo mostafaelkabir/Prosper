@@ -36,12 +36,19 @@ enum SharedClassification {
         restDomains: [String]
     ) {
         guard let defaults else { return }
+        // Enforce one-class-per-domain before storing (QA-1). Distracting wins,
+        // then rest, then productive — a waste site can never leak in as productive.
+        let distinctDistracting = distractingDomains
+        let distinctRest = restDomains.filter { !distinctDistracting.contains($0) }
+        let distinctProductive = productiveDomains.filter {
+            !distinctDistracting.contains($0) && !distinctRest.contains($0)
+        }
         defaults.set(encode(productive), forKey: productiveSelKey)
         defaults.set(encode(distracting), forKey: distractingSelKey)
         defaults.set(encode(rest), forKey: restSelKey)
-        defaults.set(productiveDomains, forKey: productiveDomainsKey)
-        defaults.set(distractingDomains, forKey: distractingDomainsKey)
-        defaults.set(restDomains, forKey: restDomainsKey)
+        defaults.set(distinctProductive, forKey: productiveDomainsKey)
+        defaults.set(distinctDistracting, forKey: distractingDomainsKey)
+        defaults.set(distinctRest, forKey: restDomainsKey)
     }
 
     // MARK: - Read (report extension)
@@ -65,28 +72,56 @@ enum SharedClassification {
 
         /// The class an application token belongs to, or nil if unlabelled. Checks
         /// the app token first, then its category token (a whole-category label).
-        func timeClass(appToken: ApplicationToken?, categoryToken: ActivityCategoryToken?) -> ClassKind? {
+        ///
+        /// Priority is **distracting > rest > productive** (QA-1): if the same item
+        /// is somehow tagged in more than one class, a known waste item must never
+        /// be counted as productive time. Classification writes are kept exclusive,
+        /// so this only matters for dirty data from older builds.
+        func timeClass(appToken: ApplicationToken?, categoryToken: ActivityCategoryToken?, appName: String?) -> ClassKind? {
+            // Cluster by name first: an app called "YouTube" is YouTube whatever
+            // its token, so a platform label reaches it without Apple's picker.
+            if let c = platformClass(forText: appName) { return c }
             if let appToken {
-                if productive.applicationTokens.contains(appToken) { return .productive }
                 if distracting.applicationTokens.contains(appToken) { return .distracting }
                 if rest.applicationTokens.contains(appToken) { return .rest }
+                if productive.applicationTokens.contains(appToken) { return .productive }
             }
             if let categoryToken {
-                if productive.categoryTokens.contains(categoryToken) { return .productive }
                 if distracting.categoryTokens.contains(categoryToken) { return .distracting }
                 if rest.categoryTokens.contains(categoryToken) { return .rest }
+                if productive.categoryTokens.contains(categoryToken) { return .productive }
             }
             return nil
         }
 
-        /// The class a web domain belongs to, matched by normalised host. A bare
-        /// host matches with or without a leading "www.".
+        /// The class a web domain belongs to. Platform keyword clustering runs
+        /// first (so `googlevideo.com`, `fbcdn.net` and every subdomain fold into
+        /// their platform), then falls back to exact custom-site matching. Same
+        /// distracting > rest > productive priority as apps (QA-1).
         func timeClass(domain: String?) -> ClassKind? {
+            if let c = platformClass(forText: domain) { return c }
             guard let host = domain?.lowercased() else { return nil }
-            if Self.matches(host, productiveDomains) { return .productive }
             if Self.matches(host, distractingDomains) { return .distracting }
             if Self.matches(host, restDomains) { return .rest }
+            if Self.matches(host, productiveDomains) { return .productive }
             return nil
+        }
+
+        /// The class a platform was assigned, read from whether the editor stored
+        /// its domains in a class list (all of a platform's hosts move together,
+        /// so its primary domain represents the group).
+        func platformClass(_ platform: Platform) -> ClassKind? {
+            let d = platform.primaryDomain.lowercased()
+            if distractingDomains.contains(where: { $0.lowercased() == d }) { return .distracting }
+            if restDomains.contains(where: { $0.lowercased() == d }) { return .rest }
+            if productiveDomains.contains(where: { $0.lowercased() == d }) { return .productive }
+            return nil
+        }
+
+        /// Cluster a name or host to its platform, then to that platform's class.
+        func platformClass(forText text: String?) -> ClassKind? {
+            guard let platform = PlatformCatalog.match(text) else { return nil }
+            return platformClass(platform)
         }
 
         /// A recorded host matches a tagged entry when it is that domain or any

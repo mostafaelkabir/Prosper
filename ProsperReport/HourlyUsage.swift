@@ -103,6 +103,10 @@ extension HourlyUsage {
             18, 10, 8, 9, 13, 21,  // 12–17 afternoon
             28, 34, 40, 33, 24, 10 // 18–23 evening peak
         ]
+        // Normalise so a single day totals 134m, matching Today / Insights /
+        // TotalTime sample data (QA-4). The raw curve sums to 325m.
+        let sampleDayMinutes = 134.0
+        let normalise = sampleDayMinutes / base.reduce(0, +)
 
         var cells: [Cell] = []
         var days: [Date] = []
@@ -112,8 +116,8 @@ extension HourlyUsage {
             // Vary each day a little so the grid does not look uniform.
             let scale = [1.0, 0.7, 1.2, 0.9, 1.1, 0.6, 1.15][offset % 7]
             for hour in 0..<24 {
-                let minutes = base[hour] * scale
-                if minutes >= 1 {
+                let minutes = base[hour] * scale * normalise
+                if minutes >= 0.5 {
                     cells.append(Cell(day: day, hour: hour, duration: minutes * 60))
                 }
             }

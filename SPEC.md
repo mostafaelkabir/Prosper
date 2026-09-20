@@ -207,8 +207,12 @@ Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
 - 3.4 ✅ Countdown with no cancel path; OS-level unblock via ProsperMonitor
 - 3.5 ⬜ Quick Block presets · 3.6 ⬜ Recurring schedules · 3.7 🟡 single active block shown on Block + Dashboard · 3.8 ⬜ completion notification
 
-### Epic 4: Distraction Warnings — ⬜ not started
-4.6 🟡 monitor extension exists (used for unblock only)
+### Epic 4: Distraction Warnings — 🟡 ladder built
+- 4.1 ✅ trigger = daily total across the waste list · 4.2 ✅ local notification from ProsperMonitor
+- 4.3 🟡 three rungs at T / 2T / 3T (nudge → firm reminder → full-screen intervention). Rungs are separate DeviceActivityEvents, so firing is unverified until DEV-1
+- 4.4 🟡 typed acknowledgment ("I choose to waste my time"), toggleable in Settings; the in-app half is simulator-verified
+- 4.5 ⬜ per-app / per-category thresholds
+- 4.6 🟡 monitor extension runs the ladder and the unblock
 
 ### Epic 5: Self-Accountability — ⬜ · Epic 6: Settings — 🟡 (6.2 + 6.3 in review) · Epic 7: Insights — ⬜ (ticketed 2026-09-17)
 

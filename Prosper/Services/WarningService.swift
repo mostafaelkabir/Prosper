@@ -4,9 +4,10 @@ import FamilyControls
 import ManagedSettings
 
 /// Schedules the daily DeviceActivity that watches the user's waste selection
-/// and fires when it crosses the threshold. The actual warning notification is
-/// delivered by the `ProsperMonitor` extension (see `eventDidReachThreshold`),
-/// which runs even when the app is not in the foreground.
+/// and fires as it crosses each rung of the warning ladder. The warnings
+/// themselves are delivered by the `ProsperMonitor` extension (see
+/// `eventDidReachThreshold`), which runs even when the app is not in the
+/// foreground.
 final class WarningService: @unchecked Sendable {
     static let shared = WarningService()
 
@@ -25,7 +26,12 @@ final class WarningService: @unchecked Sendable {
     ) {
         center.stopMonitoring([PersistenceConfig.wasteActivityName])
 
-        guard enabled, thresholdMinutes > 0 else { return }
+        guard enabled, thresholdMinutes > 0 else {
+            // Warnings off — drop an intervention the user never saw rather
+            // than ambushing them with it on the next launch.
+            WarningInterventionState.clear()
+            return
+        }
         let hasAnyWaste = !selection.applicationTokens.isEmpty
             || !selection.categoryTokens.isEmpty
             || !selection.webDomainTokens.isEmpty
@@ -37,18 +43,28 @@ final class WarningService: @unchecked Sendable {
             intervalEnd: DateComponents(hour: 23, minute: 59, second: 59),
             repeats: true
         )
-        let event = DeviceActivityEvent(
-            applications: selection.applicationTokens,
-            categories: selection.categoryTokens,
-            webDomains: selection.webDomainTokens,
-            threshold: DateComponents(minute: thresholdMinutes)
-        )
+
+        // One event per rung of the ladder (T, 2T, 3T). A rung that cannot fit
+        // inside a single day is dropped instead of being scheduled and never
+        // reached.
+        var events: [DeviceActivityEvent.Name: DeviceActivityEvent] = [:]
+        for level in WarningLevel.allCases {
+            let minutes = level.thresholdMinutes(base: thresholdMinutes)
+            guard minutes < 24 * 60 else { continue }
+            events[level.eventName] = DeviceActivityEvent(
+                applications: selection.applicationTokens,
+                categories: selection.categoryTokens,
+                webDomains: selection.webDomainTokens,
+                threshold: DateComponents(minute: minutes)
+            )
+        }
+        guard !events.isEmpty else { return }
 
         do {
             try center.startMonitoring(
                 PersistenceConfig.wasteActivityName,
                 during: schedule,
-                events: [PersistenceConfig.wasteThresholdEvent: event]
+                events: events
             )
         } catch {
             print("WarningService: failed to schedule waste monitor: \(error)")

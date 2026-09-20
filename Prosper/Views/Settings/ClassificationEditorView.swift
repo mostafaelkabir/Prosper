@@ -31,10 +31,6 @@ struct ClassificationEditorView: View {
     @State private var showUsage = true
     @State private var loaded = false
 
-    /// One-tap suggestions of the usual time-sinks (the set the user chose).
-    private let commonSites = ["youtube.com", "facebook.com", "instagram.com",
-                               "tiktok.com", "reddit.com", "x.com", "netflix.com"]
-
     private let appClasses: [TimeClass] = [.distracting, .productive, .rest]
 
     /// Presenter supplies navigation: Settings pushes this in its own stack, the
@@ -45,6 +41,7 @@ struct ClassificationEditorView: View {
             VStack(alignment: .leading, spacing: 22) {
                 intro
                 usageReference
+                platformsSection
                 appsSection
                 websitesSection
             }
@@ -68,10 +65,48 @@ struct ClassificationEditorView: View {
     // MARK: - Intro
 
     private var intro: some View {
-        Text("Tell Prosper what each app and site means to you. Start with your biggest time-sinks below. Anything you don't classify stays Unclassified — nothing is assumed productive.")
+        Text("Tell Prosper what each platform, app and site means to you. A platform is one thing however you reach it — Facebook is Facebook in the app or in Safari — so tag it once below. Anything you don't classify stays Unclassified; nothing is assumed productive.")
             .font(.system(size: 13))
             .foregroundStyle(ProsperColor.ink2)
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // MARK: - Platforms (one toggle per product, all its hosts at once)
+
+    private var platformsSection: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Platforms").labelCaps()
+                Text("One tap classifies every way you reach it — the app and all its websites. Tap again to clear.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(ProsperColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+                VStack(spacing: 10) {
+                    ForEach(PlatformCatalog.all) { platform in
+                        platformRow(platform)
+                    }
+                }
+            }
+        }
+    }
+
+    private func platformRow(_ platform: Platform) -> some View {
+        let current = platformClass(platform)
+        return HStack(spacing: 10) {
+            Image(systemName: platform.symbol)
+                .font(.system(size: 17))
+                .foregroundStyle(current?.color ?? ProsperColor.ink2)
+                .frame(width: 24)
+            Text(platform.name)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(ProsperColor.ink)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            PlatformSegments(current: current) { tapped in
+                // Tapping the active class again clears the platform.
+                setPlatform(platform, to: current == tapped ? nil : tapped)
+            }
+        }
     }
 
     // MARK: - Usage reference (guide, not interactive)
@@ -159,14 +194,11 @@ struct ClassificationEditorView: View {
     private var websitesSection: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Websites").labelCaps()
-
-                // Quick-pick common time-sinks.
-                FlowLayout(spacing: 8) {
-                    ForEach(commonSites, id: \.self) { site in
-                        quickChip(site)
-                    }
-                }
+                Text("Other sites").labelCaps()
+                Text("Anything the platforms above don't cover. Tag it once — new subdomains are caught automatically.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(ProsperColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 // Add a custom site.
                 HStack(spacing: 8) {
@@ -202,26 +234,6 @@ struct ClassificationEditorView: View {
         }
     }
 
-    private func quickChip(_ site: String) -> some View {
-        let added = classOf(domain: site) != nil
-        return Button {
-            if !added { setClass(domain: site, to: .distracting) }
-        } label: {
-            HStack(spacing: 5) {
-                Image(systemName: added ? "checkmark.circle.fill" : "plus.circle")
-                    .font(.system(size: 12, weight: .semibold))
-                Text(site).font(.system(size: 13, weight: .medium))
-            }
-            .foregroundStyle(added ? ProsperColor.distracting : ProsperColor.ink)
-            .padding(.vertical, 7)
-            .padding(.horizontal, 11)
-            .background(added ? ProsperColor.distracting.opacity(0.12) : ProsperColor.surface2)
-            .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .disabled(added)
-    }
-
     private func siteRow(_ domain: String, current: TimeClass) -> some View {
         HStack(spacing: 10) {
             Circle().fill(current.color).frame(width: 8, height: 8)
@@ -247,18 +259,52 @@ struct ClassificationEditorView: View {
 
     private struct SiteEntry { let domain: String; let cls: TimeClass }
 
-    /// Every tagged site with its class, distracting first, then productive, rest.
+    /// Custom tagged sites with their class, distracting first, then productive,
+    /// rest. Hosts owned by a catalog platform are hidden here — the Platforms
+    /// section is their home, so they don't show up twice.
     private var taggedSites: [SiteEntry] {
-        distractingDomains.map { SiteEntry(domain: $0, cls: .distracting) }
-        + productiveDomains.map { SiteEntry(domain: $0, cls: .productive) }
-        + restDomains.map { SiteEntry(domain: $0, cls: .rest) }
+        let entries = distractingDomains.map { SiteEntry(domain: $0, cls: .distracting) }
+            + productiveDomains.map { SiteEntry(domain: $0, cls: .productive) }
+            + restDomains.map { SiteEntry(domain: $0, cls: .rest) }
+        return entries.filter { !PlatformCatalog.allDomains.contains($0.domain.lowercased()) }
     }
 
     private func classOf(domain: String) -> TimeClass? {
+        // Distracting > rest > productive, matching the report's resolution (QA-1).
         if distractingDomains.contains(domain) { return .distracting }
-        if productiveDomains.contains(domain) { return .productive }
         if restDomains.contains(domain) { return .rest }
+        if productiveDomains.contains(domain) { return .productive }
         return nil
+    }
+
+    // MARK: - Platform model helpers
+
+    /// A platform's class, read from its primary domain (all its domains move
+    /// together, so the first one represents the group).
+    private func platformClass(_ platform: Platform) -> TimeClass? {
+        classOf(domain: platform.primaryDomain)
+    }
+
+    /// Move every host of a platform into one class at once — or, when `c` is
+    /// nil, remove them all. Keeps the three domain lists exclusive so a platform
+    /// is never half-productive, half-distracting.
+    private func setPlatform(_ platform: Platform, to c: TimeClass?) {
+        for domain in platform.domains {
+            productiveDomains.removeAll { $0 == domain }
+            distractingDomains.removeAll { $0 == domain }
+            restDomains.removeAll { $0 == domain }
+        }
+        if let c {
+            for domain in platform.domains {
+                switch c {
+                case .productive: productiveDomains.append(domain)
+                case .distracting: distractingDomains.append(domain)
+                case .rest: restDomains.append(domain)
+                case .unclassified: break
+                }
+            }
+        }
+        persist()
     }
 
     private func addSite() {
@@ -381,6 +427,44 @@ private struct ClassSegments: View {
             ForEach(classes, id: \.self) { c in
                 let selected = c == current
                 Button { onSelect(c) } label: {
+                    Text(letter(c))
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(width: 26, height: 26)
+                        .foregroundStyle(selected ? .white : c.color)
+                        .background(selected ? c.color : c.color.opacity(0.14))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(c.label)
+                .accessibilityAddTraits(selected ? [.isSelected] : [])
+            }
+        }
+    }
+
+    private func letter(_ c: TimeClass) -> String {
+        switch c {
+        case .productive: return "P"
+        case .distracting: return "D"
+        case .rest: return "R"
+        case .unclassified: return "?"
+        }
+    }
+}
+
+/// Like `ClassSegments` but for a platform row: `current` may be nil (the
+/// platform is unclassified), and the caller decides what a tap means (setting a
+/// class, or clearing when the active one is tapped again).
+private struct PlatformSegments: View {
+    let current: TimeClass?
+    let onTap: (TimeClass) -> Void
+
+    private let classes: [TimeClass] = [.productive, .distracting, .rest]
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(classes, id: \.self) { c in
+                let selected = c == current
+                Button { onTap(c) } label: {
                     Text(letter(c))
                         .font(.system(size: 12, weight: .bold))
                         .frame(width: 26, height: 26)

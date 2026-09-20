@@ -8,6 +8,12 @@ struct UsageSummaryView: View {
     var showsHeader: Bool = true
     var showsLists: Bool = true
 
+    /// Largest single-day value on any ranked row, so every row's week strip is
+    /// drawn to the same scale and rows stay comparable at a glance.
+    private var peakDay: TimeInterval {
+        summary.products.flatMap(\.days).map(\.duration).max() ?? 0
+    }
+
     var body: some View {
         ScrollView {
             if summary.isEmpty {
@@ -21,21 +27,42 @@ struct UsageSummaryView: View {
                         }
                     }
                     if showsLists {
+                        if !summary.products.isEmpty {
+                            usageList(
+                                title: "Where your time goes",
+                                subtitle: productSubtitle,
+                                items: summary.products,
+                                showDetails: true,
+                                showStrip: true
+                            )
+                        }
                         if !summary.apps.isEmpty {
-                            usageList(title: "Apps", icon: "app.fill", items: summary.apps, showDetails: true)
+                            usageList(title: "Apps", subtitle: "Time in the app itself.", items: summary.apps, showDetails: true)
                         }
                         if !summary.sites.isEmpty {
-                            usageList(title: "Websites", icon: "globe", items: summary.sites, showDetails: false)
+                            usageList(title: "Websites", subtitle: "Already counted inside the browser above.", items: summary.sites)
                         }
                         if !summary.categories.isEmpty {
-                            usageList(title: "Categories", icon: "square.grid.2x2", items: summary.categories, showDetails: false)
+                            usageList(title: "Categories", subtitle: nil, items: summary.categories, fallbackSymbol: "square.grid.2x2")
                         }
                     }
                 }
+                // Fill the width, or a short day (no chart, no lists) would
+                // shrink-wrap and float centred in the scroll view.
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
-                .padding(.bottom, 32)
+                // Clears the floating tab bar, which overlays the report.
+                .padding(.bottom, 96)
             }
         }
+    }
+
+    /// Says plainly what the merged list did with the numbers.
+    private var productSubtitle: String {
+        let grouping = "Each platform counted once — its app and all its sites together."
+        return summary.dayCount > 1
+            ? grouping + " Bars are the last \(summary.dayCount) days."
+            : grouping
     }
 
     private var header: some View {
@@ -45,11 +72,18 @@ struct UsageSummaryView: View {
                 .foregroundStyle(.secondary)
             Text(summary.totalDuration.usageFormatted)
                 .font(.system(size: 44, weight: .bold, design: .rounded))
-            Text("\(summary.totalPickups) pickups")
+            Text(headerDetail)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
         .padding(.top, 8)
+    }
+
+    /// "2h 5m a day · 63 pickups" over a range, "63 pickups" for a single day.
+    private var headerDetail: String {
+        let pickups = "\(summary.totalPickups) pickups"
+        guard summary.dayCount > 1 else { return pickups }
+        return "\(summary.perDay.usageFormatted) a day · \(pickups)"
     }
 
     private var dailyChart: some View {
@@ -83,48 +117,37 @@ struct UsageSummaryView: View {
         }
     }
 
-    private func usageList(title: String, icon: String, items: [UsageItem], showDetails: Bool) -> some View {
+    private func usageList(
+        title: String,
+        subtitle: String?,
+        items: [UsageItem],
+        showDetails: Bool = false,
+        showStrip: Bool = false,
+        fallbackSymbol: String? = nil
+    ) -> some View {
         let maxDuration = items.map(\.duration).max() ?? 1
-        return VStack(alignment: .leading, spacing: 12) {
-            Label(title, systemImage: icon)
-                .font(.headline)
-            ForEach(items) { item in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 10) {
-                        Text(item.name)
-                            .lineLimit(1)
-                        Spacer(minLength: 8)
-                        if showDetails && item.pickups > 0 {
-                            metric("\(item.pickups)", systemImage: "hand.tap.fill")
-                        }
-                        if showDetails && item.notifications > 0 {
-                            metric("\(item.notifications)", systemImage: "bell.fill")
-                        }
-                        Text(item.duration.usageFormatted)
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.subheadline)
-                    GeometryReader { geo in
-                        Capsule()
-                            .fill(Color.accentColor.opacity(0.85))
-                            .frame(width: max(4, geo.size.width * item.duration / maxDuration))
-                    }
-                    .frame(height: 6)
-                    .background(Capsule().fill(Color(.systemGray5)))
+        return VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.headline)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            ForEach(items) { item in
+                UsageRow(
+                    item: item,
+                    maxDuration: maxDuration,
+                    dayCount: summary.dayCount,
+                    showDetails: showDetails,
+                    peakDay: showStrip ? peakDay : 0,
+                    fallbackSymbol: fallbackSymbol
+                )
+            }
         }
-    }
-
-    /// A compact "icon + count" badge for opens / notifications on an app row.
-    private func metric(_ value: String, systemImage: String) -> some View {
-        HStack(spacing: 2) {
-            Image(systemName: systemImage)
-            Text(value).monospacedDigit()
-        }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
     }
 
     private var emptyState: some View {
@@ -141,6 +164,132 @@ struct UsageSummaryView: View {
         }
         .padding(32)
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - One row: logo, name, hours
+
+/// A single app / platform / website, led by its real logo.
+///
+/// Over a multi-day range the row states both numbers the user asks of it: the
+/// range total on the right, and the daily average under the name — with a
+/// per-day strip so an hour spread across the week reads differently from an
+/// hour lost in one evening.
+struct UsageRow: View {
+    let item: UsageItem
+    let maxDuration: TimeInterval
+    var dayCount: Int = 1
+    var showDetails: Bool = false
+    /// Largest single-day value across the whole list; 0 hides the strip.
+    var peakDay: TimeInterval = 0
+    /// Glyph for rows that are not an app or platform (categories).
+    var fallbackSymbol: String? = nil
+
+    private var showsStrip: Bool { peakDay > 0 && item.days.count > 1 }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            UsageIcon(item, size: 38, fallbackSymbol: fallbackSymbol)
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 8) {
+                    Text(item.name)
+                        .font(.system(size: 15, weight: .medium))
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    Text(item.duration.usageFormatted)
+                        .font(.system(size: 15, weight: .semibold))
+                        .monospacedDigit()
+                }
+                detailLine
+                if showsStrip {
+                    weekStrip
+                } else {
+                    proportionBar
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibleSummary)
+    }
+
+    /// "12m a day · 18 opens · 32 notifications" — only the parts that apply.
+    @ViewBuilder
+    private var detailLine: some View {
+        let parts = detailParts
+        if !parts.isEmpty {
+            HStack(spacing: 10) {
+                if dayCount > 1 {
+                    Text("\(item.perDay(over: dayCount).usageFormatted) a day")
+                        .monospacedDigit()
+                }
+                if showDetails && item.pickups > 0 {
+                    metric("\(item.pickups)", systemImage: "hand.tap.fill")
+                }
+                if showDetails && item.notifications > 0 {
+                    metric("\(item.notifications)", systemImage: "bell.fill")
+                }
+                Spacer(minLength: 0)
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    private var detailParts: [String] {
+        var parts: [String] = []
+        if dayCount > 1 { parts.append("day") }
+        if showDetails && item.pickups > 0 { parts.append("opens") }
+        if showDetails && item.notifications > 0 { parts.append("notifications") }
+        return parts
+    }
+
+    /// Share of the biggest row in this list.
+    private var proportionBar: some View {
+        GeometryReader { geo in
+            Capsule()
+                .fill(Color.accentColor.opacity(0.85))
+                .frame(width: max(4, geo.size.width * item.duration / max(maxDuration, 1)))
+        }
+        .frame(height: 6)
+        .background(Capsule().fill(Color(.systemGray5)))
+    }
+
+    /// One bar per day of the range, every row drawn to the same scale, on a
+    /// faint full-height track so a quiet day still reads as a day.
+    private var weekStrip: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(item.days) { day in
+                ZStack(alignment: .bottom) {
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color(.systemGray5))
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(Color.accentColor.opacity(0.85))
+                        .frame(height: max(2, stripHeight * day.duration / max(peakDay, 1)))
+                }
+                .frame(width: stripBarWidth)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(height: stripHeight)
+    }
+
+    private let stripHeight: CGFloat = 22
+    /// Narrow bars read as a chart; full-width ones read as a segmented pill.
+    private let stripBarWidth: CGFloat = 11
+
+    private func metric(_ value: String, systemImage: String) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: systemImage)
+            Text(value).monospacedDigit()
+        }
+    }
+
+    private var accessibleSummary: String {
+        var text = "\(item.name), \(item.duration.usageFormatted)"
+        if dayCount > 1 { text += ", \(item.perDay(over: dayCount).usageFormatted) a day" }
+        if showDetails && item.pickups > 0 { text += ", \(item.pickups) opens" }
+        if showDetails && item.notifications > 0 { text += ", \(item.notifications) notifications" }
+        return text
     }
 }
 

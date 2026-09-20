@@ -25,7 +25,10 @@ struct TodayHeroReportView: View {
                 reflexRow
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        // Fill and pin to the top of the host frame. The app hosts this in a
+        // fixed-height card (DeviceActivityReport does not report its own height),
+        // so top-align keeps the content anchored instead of floating centred.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.bottom, 16) // clears the simulator "Example data" overlay
     }
 
@@ -55,7 +58,9 @@ struct TodayHeroReportView: View {
             Text("Where it went").labelCaps()
             ForEach(snapshot.topWaste) { item in
                 HStack(spacing: 8) {
-                    Circle().fill(ProsperColor.distracting).frame(width: 6, height: 6)
+                    // The real app icon where iOS gives us a token, the platform's
+                    // brand tile otherwise — so the line is recognisable at a glance.
+                    UsageIcon(item, size: 20)
                     Text(item.name)
                         .font(.system(size: 14))
                         .foregroundStyle(ProsperColor.ink)

@@ -94,13 +94,17 @@ struct HoldToLock: View {
         let step = 0.02
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: step, repeats: true) { _ in
-            progress = min(1, progress + step / duration)
-            let tick = Int((progress * duration) / 0.5)
-            if tick > lastTick {
-                lastTick = tick
-                if !reduceMotion { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+            // scheduledTimer fires on the main run loop, so this really is the main
+            // actor; assert it to satisfy Swift 6 concurrency (QA-5).
+            MainActor.assumeIsolated {
+                progress = min(1, progress + step / duration)
+                let tick = Int((progress * duration) / 0.5)
+                if tick > lastTick {
+                    lastTick = tick
+                    if !reduceMotion { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+                }
+                if progress >= 1 { complete() }
             }
-            if progress >= 1 { complete() }
         }
     }
 

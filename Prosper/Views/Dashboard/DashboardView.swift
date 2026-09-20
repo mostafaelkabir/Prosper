@@ -41,6 +41,28 @@ struct DashboardView: View {
         range == .day ? UsageReportFilter.today() : UsageReportFilter.lastSevenDays()
     }
 
+    /// A fingerprint of the current four-class labels. The `.todayBalance` report
+    /// is rendered by the ProsperReport extension in a separate process and iOS
+    /// caches it by `(context, filter)` — `SharedClassification.load()` only runs
+    /// inside `makeConfiguration`, which the system will not call again while the
+    /// context and filter are unchanged. So after the user tags a site or app the
+    /// hero would keep showing the stale, pre-classification split. Folding this
+    /// signature into the report's `.id` re-embeds it on any label change, forcing
+    /// a fresh `makeConfiguration` that re-reads the snapshot. Derived from the
+    /// SwiftData `settings` (updated by the editor via @Query), so it changes
+    /// whether the labels were edited from Settings or the Today "Classify" sheet.
+    private var classificationSignature: Int {
+        guard let s = settings else { return 0 }
+        var hasher = Hasher()
+        hasher.combine(s.wasteAppSelectionData)   // distracting apps
+        hasher.combine(s.wasteDomains)            // distracting sites
+        hasher.combine(s.productiveSelectionData)
+        hasher.combine(s.productiveDomains)
+        hasher.combine(s.restSelectionData)
+        hasher.combine(s.restDomains)
+        return hasher.finalize()
+    }
+
     // MARK: - Real focus streak (UX-13)
 
     /// Finished focus sessions (ended), newest first.
@@ -115,12 +137,17 @@ struct DashboardView: View {
                         activeBlockCard(session)
                     } else {
                         streakSection
-                        OpportunityCard(
-                            eyebrow: "Make room for what matters",
-                            headline: "Protect time for what you value.",
-                            evidence: "Choose a focus block to lock your distractions for a set stretch.",
-                            onPlan: startPlan
-                        )
+                        // Only when a streak already exists: the empty-state streak
+                        // card already carries a "Plan a focus block" CTA, so showing
+                        // this second identical CTA would duplicate it (QA-2).
+                        if completedCount > 0 {
+                            OpportunityCard(
+                                eyebrow: "Make room for what matters",
+                                headline: "Protect time for what you value.",
+                                evidence: "Choose a focus block to lock your distractions for a set stretch.",
+                                onPlan: startPlan
+                            )
+                        }
                         milestoneRow
                     }
                 }
@@ -166,8 +193,16 @@ struct DashboardView: View {
     private var heroCard: some View {
         AuroraHeroCard {
             UsageReportView(filter: balanceFilter, context: .todayBalance)
-                .id(range) // re-embed the report when the range changes
-                .frame(minHeight: 300, alignment: .top)
+                // Re-embed on a range change *or* any classification edit, so the
+                // extension re-runs makeConfiguration instead of serving iOS's
+                // cached (context, filter) result. See `classificationSignature`.
+                .id("\(range)-\(classificationSignature)")
+                // DeviceActivityReport renders in a separate process and does not
+                // report its content height back to us; inside this ScrollView the
+                // frame is the only thing reserving space. 300pt clipped the full
+                // hero (balance + "Where it went" + reflex) once real data loaded,
+                // so reserve enough for the whole design. See QA-7.
+                .frame(minHeight: 420, alignment: .top)
         }
     }
 
