@@ -91,7 +91,8 @@ enum SharedClassification {
                 if rest.categoryTokens.contains(categoryToken) { return .rest }
                 if productive.categoryTokens.contains(categoryToken) { return .productive }
             }
-            return nil
+            // Last resort: the catalog's built-in default for a known platform.
+            return platformDefaultClass(forText: appName)
         }
 
         /// The class a web domain belongs to. Platform keyword clustering runs
@@ -104,7 +105,8 @@ enum SharedClassification {
             if Self.matches(host, distractingDomains) { return .distracting }
             if Self.matches(host, restDomains) { return .rest }
             if Self.matches(host, productiveDomains) { return .productive }
-            return nil
+            // Last resort: the catalog's built-in default for a known platform.
+            return platformDefaultClass(forText: host)
         }
 
         /// The class a platform was assigned, read from whether the editor stored
@@ -124,6 +126,13 @@ enum SharedClassification {
             return platformClass(platform)
         }
 
+        /// The catalog's built-in default for a well-known platform (UX-20). Used
+        /// only as a last resort, after every user label, so pre-classification
+        /// never overrides a choice the user actually made.
+        func platformDefaultClass(forText text: String?) -> ClassKind? {
+            PlatformCatalog.match(text)?.defaultClass
+        }
+
         /// A recorded host matches a tagged entry when it is that domain or any
         /// subdomain of it. Tagging `youtube.com` therefore also catches
         /// `m.youtube.com`, `www.youtube.com` and `music.youtube.com` — the forms
@@ -139,7 +148,7 @@ enum SharedClassification {
     }
 
     /// The three classes we can assign; Unclassified is the absence of a match.
-    enum ClassKind { case productive, distracting, rest }
+    enum ClassKind: Sendable, Hashable { case productive, distracting, rest }
 
     static func load() -> Snapshot {
         guard let defaults else { return Snapshot() }

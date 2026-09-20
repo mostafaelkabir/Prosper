@@ -27,6 +27,12 @@ struct Platform: Identifiable, Hashable, Sendable {
     /// specific (never a bare letter) so clustering doesn't over-reach. Includes
     /// the CDN/asset hosts iOS actually books the time against.
     let keywords: [String]
+    /// A sensible built-in class for platforms whose nature is unambiguous — the
+    /// big social feeds are `.distracting`, work tools are `.productive`. Applied
+    /// only as a last resort, so a user's own label always wins (UX-20). Genuinely
+    /// ambiguous products (YouTube, WhatsApp, Netflix…) leave this `nil` so the
+    /// user decides.
+    var defaultClass: SharedClassification.ClassKind? = nil
 
     /// The host shown to represent the platform.
     var primaryDomain: String { domains[0] }
@@ -53,18 +59,23 @@ enum PlatformCatalog {
     /// Ordered roughly by how often they eat time. The custom-site field handles
     /// anything not here.
     static let all: [Platform] = [
-        Platform(id: "facebook",  name: "Facebook",    symbol: "f.cursive",        tintHex: 0x1877F2, domains: ["facebook.com", "fb.com", "messenger.com"], keywords: ["facebook", "fbcdn", "fbsbx", "messenger"]),
-        Platform(id: "instagram", name: "Instagram",   symbol: "camera.fill",      tintHex: 0xE1306C, domains: ["instagram.com"],                            keywords: ["instagram", "cdninstagram"]),
+        Platform(id: "facebook",  name: "Facebook",    symbol: "f.cursive",        tintHex: 0x1877F2, domains: ["facebook.com", "fb.com", "messenger.com"], keywords: ["facebook", "fbcdn", "fbsbx", "messenger"], defaultClass: .distracting),
+        Platform(id: "instagram", name: "Instagram",   symbol: "camera.fill",      tintHex: 0xE1306C, domains: ["instagram.com"],                            keywords: ["instagram", "cdninstagram"], defaultClass: .distracting),
         Platform(id: "youtube",   name: "YouTube",     symbol: "play.fill",        tintHex: 0xFF0000, domains: ["youtube.com", "youtu.be"],                  keywords: ["youtube", "youtu.be", "ytimg", "googlevideo", "ggpht"]),
-        Platform(id: "tiktok",    name: "TikTok",      symbol: "music.note",       tintHex: 0xFF0050, domains: ["tiktok.com"],                               keywords: ["tiktok", "musical.ly", "tiktokcdn", "tiktokv"]),
-        Platform(id: "x",         name: "X (Twitter)", symbol: "xmark",            tintHex: 0x14171A, domains: ["x.com", "twitter.com", "t.co"],             keywords: ["twitter", "twimg", "t.co", "x.com"]),
-        Platform(id: "reddit",    name: "Reddit",      symbol: "bubble.left.fill", tintHex: 0xFF4500, domains: ["reddit.com", "redd.it"],                    keywords: ["reddit", "redd.it", "redditmedia", "redditstatic"]),
-        Platform(id: "snapchat",  name: "Snapchat",    symbol: "bolt.fill",        tintHex: 0xFFFC00, domains: ["snapchat.com"],                             keywords: ["snapchat", "sc-cdn", "snapkit"]),
+        Platform(id: "tiktok",    name: "TikTok",      symbol: "music.note",       tintHex: 0xFF0050, domains: ["tiktok.com"],                               keywords: ["tiktok", "musical.ly", "tiktokcdn", "tiktokv"], defaultClass: .distracting),
+        Platform(id: "x",         name: "X (Twitter)", symbol: "xmark",            tintHex: 0x14171A, domains: ["x.com", "twitter.com", "t.co"],             keywords: ["twitter", "twimg", "t.co", "x.com"], defaultClass: .distracting),
+        Platform(id: "reddit",    name: "Reddit",      symbol: "bubble.left.fill", tintHex: 0xFF4500, domains: ["reddit.com", "redd.it"],                    keywords: ["reddit", "redd.it", "redditmedia", "redditstatic"], defaultClass: .distracting),
+        Platform(id: "snapchat",  name: "Snapchat",    symbol: "bolt.fill",        tintHex: 0xFFFC00, domains: ["snapchat.com"],                             keywords: ["snapchat", "sc-cdn", "snapkit"], defaultClass: .distracting),
         Platform(id: "whatsapp",  name: "WhatsApp",    symbol: "phone.fill",       tintHex: 0x25D366, domains: ["whatsapp.com"],                             keywords: ["whatsapp"]),
         Platform(id: "netflix",   name: "Netflix",     symbol: "film.fill",        tintHex: 0xE50914, domains: ["netflix.com"],                              keywords: ["netflix", "nflx"]),
         Platform(id: "twitch",    name: "Twitch",      symbol: "gamecontroller.fill", tintHex: 0x9146FF, domains: ["twitch.tv"],                             keywords: ["twitch", "ttvnw", "jtvnw"]),
-        Platform(id: "pinterest", name: "Pinterest",   symbol: "pin.fill",         tintHex: 0xE60023, domains: ["pinterest.com"],                            keywords: ["pinterest", "pinimg"]),
+        Platform(id: "pinterest", name: "Pinterest",   symbol: "pin.fill",         tintHex: 0xE60023, domains: ["pinterest.com"],                            keywords: ["pinterest", "pinimg"], defaultClass: .distracting),
         Platform(id: "linkedin",  name: "LinkedIn",    symbol: "briefcase.fill",   tintHex: 0x0A66C2, domains: ["linkedin.com"],                             keywords: ["linkedin", "licdn"]),
+        // Work tools — pre-classified productive (a user can still relabel them).
+        Platform(id: "zoom",      name: "Zoom",        symbol: "video.fill",       tintHex: 0x2D8CFF, domains: ["zoom.us"],                                  keywords: ["zoom.us", "zoomgov.com", "zoom"], defaultClass: .productive),
+        Platform(id: "slack",     name: "Slack",       symbol: "message.fill",     tintHex: 0x4A154B, domains: ["slack.com"],                                keywords: ["slack.com", "slack-edge.com", "slack-imgs.com", "slack"], defaultClass: .productive),
+        Platform(id: "teams",     name: "Microsoft Teams", symbol: "person.2.fill", tintHex: 0x6264A7, domains: ["teams.microsoft.com"],                    keywords: ["microsoft teams", "teams.microsoft.com", "teams.live.com", "msteams"], defaultClass: .productive),
+        Platform(id: "gmail",     name: "Gmail",       symbol: "envelope.fill",    tintHex: 0xEA4335, domains: ["mail.google.com", "gmail.com"],             keywords: ["gmail", "googlemail.com", "mail.google.com"], defaultClass: .productive),
     ]
 
     /// Every domain owned by any catalog platform, lowercased — used to keep the
