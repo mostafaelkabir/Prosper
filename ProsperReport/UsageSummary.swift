@@ -313,7 +313,10 @@ struct TodaySnapshot: Sendable {
         // Insights → What. Keeping it short also bounds the hero's height so the
         // (non-self-sizing) report fits the host frame without clipping.
         snapshot.topWaste = Array(waste.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }.prefix(3))
-        snapshot.hasClassification = !classification.isEmpty
+        // "Classified" if the user labelled anything OR the catalog's built-in
+        // defaults placed real time into a class (UX-20) — so the "everything is
+        // unclassified" nudge doesn't show once known apps are auto-classified.
+        snapshot.hasClassification = !classification.isEmpty || (productive + distracting + rest) > 0
         return snapshot
     }
 
