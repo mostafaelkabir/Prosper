@@ -163,19 +163,30 @@ struct AuroraHeroCard<Content: View>: View {
 struct AuroraSegmented<T: Hashable>: View {
     let options: [(value: T, label: String)]
     @Binding var selection: T
+    /// Drives the sliding-pill animation so the selected segment glides instead
+    /// of hard-cutting — the tap feels instant even while the report reloads.
+    @Namespace private var pill
 
     var body: some View {
         HStack(spacing: 4) {
             ForEach(options, id: \.value) { opt in
                 let selected = opt.value == selection
-                Button { selection = opt.value } label: {
+                Button {
+                    withAnimation(.snappy(duration: 0.26)) { selection = opt.value }
+                } label: {
                     Text(opt.label)
                         .font(.subheadline.weight(.medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .foregroundStyle(selected ? ProsperColor.onAccent : ProsperColor.ink2)
-                        .background(selected ? ProsperColor.accent : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                        .background {
+                            if selected {
+                                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                    .fill(ProsperColor.accent)
+                                    .matchedGeometryEffect(id: "segPill", in: pill)
+                            }
+                        }
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }

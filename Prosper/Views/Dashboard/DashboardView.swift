@@ -65,16 +65,18 @@ struct DashboardView: View {
 
     // MARK: - Real focus streak (UX-13)
 
-    /// Finished focus sessions (ended), newest first.
-    private var finishedSessions: [BlockSession] {
-        sessions.filter { !$0.isActive }
+    /// Genuine focus sessions only — completed *and* at least the meaningful
+    /// minimum (UX-21). A short trial block never counts toward the streak or the
+    /// milestone, so both mean something and the numbers are true.
+    private var focusSessions: [BlockSession] {
+        sessions.filter { $0.countsAsFocus }
     }
-    private var completedCount: Int { finishedSessions.count }
+    private var completedCount: Int { focusSessions.count }
     private var milestoneTarget: Int { ((completedCount / 10) + 1) * 10 }
 
     private func dayHasSession(_ day: Date) -> Bool {
         let cal = Calendar.current
-        return finishedSessions.contains { cal.isDate($0.startedAt, inSameDayAs: day) }
+        return focusSessions.contains { cal.isDate($0.startedAt, inSameDayAs: day) }
     }
 
     /// Consecutive days with a completed session, counting back from today. A
@@ -259,7 +261,7 @@ struct DashboardView: View {
             OpportunityCard(
                 eyebrow: "Focus streak",
                 headline: "Start your first focus session.",
-                evidence: "Complete one focus block a day to build a streak. Nothing here is pre-filled.",
+                evidence: "Finish a focus block of at least 15 minutes to earn a day. Short trial blocks don't count — the streak only means something if it's real.",
                 ctaTitle: "Plan a focus block",
                 onPlan: startPlan
             )
