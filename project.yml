@@ -64,6 +64,9 @@ targets:
       - path: Prosper/Services/PersistenceConfig.swift
       # Warning ladder + pending-intervention flag are shared with the app.
       - path: Prosper/Services/WarningEscalation.swift
+      # The active-block snapshot, so the monitor can sweep a block that has
+      # outlived its timer without opening SwiftData (REL-7).
+      - path: Prosper/Services/SharedBlockState.swift
       - path: PrivacyManifests/ProsperMonitor/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:

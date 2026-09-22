@@ -20,6 +20,9 @@ struct ProsperApp: App {
                                 UsageTrackingService.shared.startDailyMonitoring()
                                 refreshWarningSchedule()
                                 BlockingService.shared.clearExpiredBlockIfNeeded()
+                                // A running block whose timers were lost gets
+                                // them back, so it can still end on its own.
+                                BlockingService.shared.reassertScheduleIfNeeded()
                             }
                     } else {
                         AuthorizationView(authManager: authManager)

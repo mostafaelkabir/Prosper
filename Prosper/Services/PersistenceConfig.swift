@@ -42,6 +42,10 @@ enum PersistenceHealth: String, Sendable {
 enum PersistenceConfig {
     static let appGroupID = "group.com.mostafa.prosper"
     nonisolated(unsafe) static let unblockActivityName = DeviceActivityName("prosper.unblock")
+    /// A second, independent interval that ends a few minutes after the block
+    /// does. If the primary `prosper.unblock` interval is never delivered, this
+    /// one still wakes the monitor so the shield comes down (REL-7).
+    nonisolated(unsafe) static let unblockSafetyActivityName = DeviceActivityName("prosper.unblock.safety")
     /// Daily interval that watches the waste selection and fires one event per
     /// rung of the warning ladder (see `WarningLevel`).
     nonisolated(unsafe) static let wasteActivityName = DeviceActivityName("prosper.waste")

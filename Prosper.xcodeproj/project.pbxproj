@@ -90,6 +90,7 @@
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
 		ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE86A244991500CE0C12F76 /* SelectionChips.swift */; };
 		F51354BDC478A3C6E868C199 /* InsightsReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3332376609E00896D14B23 /* InsightsReportView.swift */; };
+		FA331E3D4B6A2C91716BD81B /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -760,6 +761,7 @@
 				A6996DD6B8D595F40A67B814 /* BlockSession.swift in Sources */,
 				43C54EF4DE40026B1F26D20B /* PersistenceConfig.swift in Sources */,
 				E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */,
+				FA331E3D4B6A2C91716BD81B /* SharedBlockState.swift in Sources */,
 				1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */,
 				483703E5A19843B96AFDE43C /* UserSettings.swift in Sources */,
 				793E6B1F0F13A28B6115AFF2 /* WarningEscalation.swift in Sources */,
