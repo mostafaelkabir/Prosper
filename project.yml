@@ -28,6 +28,8 @@ targets:
       - path: ProsperReport/HourlyHeatmapView.swift
       - path: ProsperReport/InsightEngine.swift
       - path: ProsperReport/InsightsReportView.swift
+      - path: PrivacyManifests/Prosper/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper
@@ -52,6 +54,24 @@ targets:
       - target: ProsperShield
       - target: ProsperShieldAction
       - target: ProsperReport
+    scheme:
+      testTargets:
+        - ProsperTests
+
+  # Covers the pure logic that ships silently: BlockDomain.normalize, where a
+  # wrong answer means a site the user believes is blocked simply is not, and
+  # the WarningLevel ladder maths (REL-15).
+  ProsperTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ProsperTests
+    dependencies:
+      - target: Prosper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.tests
+        GENERATE_INFOPLIST_FILE: YES
 
   ProsperMonitor:
     type: app-extension
@@ -62,6 +82,11 @@ targets:
       - path: Prosper/Services/PersistenceConfig.swift
       # Warning ladder + pending-intervention flag are shared with the app.
       - path: Prosper/Services/WarningEscalation.swift
+      # The active-block snapshot, so the monitor can sweep a block that has
+      # outlived its timer without opening SwiftData (REL-7).
+      - path: Prosper/Services/SharedBlockState.swift
+      - path: PrivacyManifests/ProsperMonitor/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.monitor
@@ -87,6 +112,10 @@ targets:
     sources:
       - path: ProsperShield
       - path: Prosper/Services/SharedBlockState.swift
+      # One source for the "deleting Prosper ends a block" line (REL-8).
+      - path: Prosper/Services/LockExitCopy.swift
+      - path: PrivacyManifests/ProsperShield/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.shield
@@ -110,12 +139,24 @@ targets:
     platform: iOS
     sources:
       - path: ProsperShieldAction
+      - path: PrivacyManifests/ProsperShieldAction/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.shieldaction
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
+    # Matches ProsperShield, the other ManagedSettingsUI extension, which ships
+    # with the App Group and no family-controls entitlement. The App Group is
+    # what E7.7 needs to count block attempts. If DEV-1 shows shield actions
+    # misbehaving on device, add com.apple.developer.family-controls here and
+    # extend the REL-1 request to com.mostafa.prosper.shieldaction (REL-16).
+    entitlements:
+      path: ProsperShieldAction/ProsperShieldAction.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.mostafa.prosper
     info:
       path: ProsperShieldAction/Info.plist
       properties:
@@ -132,6 +173,8 @@ targets:
       - path: Prosper/DesignSystem
       - path: Prosper/Services/SharedClassification.swift
       - path: Prosper/Services/PlatformCatalog.swift
+      - path: PrivacyManifests/ProsperReport/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.report

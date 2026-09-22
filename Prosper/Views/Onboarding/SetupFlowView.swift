@@ -2,9 +2,10 @@ import SwiftUI
 import SwiftData
 import FamilyControls
 
-/// Post-authorization setup: pick the waste list, then opt into notifications.
-/// Skippable at any point and resumable later from the Dashboard banner or the
-/// "Set up again" entry in Settings.
+/// Post-authorization setup: pick the waste list, opt into notifications, then
+/// hear how a block ends before ever starting one (REL-8). Skippable at any
+/// point and resumable later from the Dashboard banner or the "Set up again"
+/// entry in Settings.
 struct SetupFlowView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -18,13 +19,13 @@ struct SetupFlowView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if step == 0 {
-                    wasteStep
-                } else {
-                    notificationsStep
+                switch step {
+                case 0: wasteStep
+                case 1: notificationsStep
+                default: lockStep
                 }
             }
-            .navigationTitle(step == 0 ? "What wastes your time?" : "Stay in the loop")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -32,6 +33,14 @@ struct SetupFlowView: View {
                 }
             }
             .onAppear(perform: loadIfNeeded)
+        }
+    }
+
+    private var title: String {
+        switch step {
+        case 0: "What wastes your time?"
+        case 1: "Stay in the loop"
+        default: "How a block ends"
         }
     }
 
@@ -83,7 +92,7 @@ struct SetupFlowView: View {
                 Button {
                     Task {
                         _ = await NotificationService.shared.requestPermission()
-                        finish()
+                        step = 2
                     }
                 } label: {
                     Text("Enable notifications")
@@ -93,8 +102,41 @@ struct SetupFlowView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button("Not now") { finish() }
+                Button("Not now") { step = 2 }
             }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 24)
+        }
+    }
+
+    /// The last thing setup says, because it is the thing a user most needs to
+    /// have heard before their first block rather than during it: the lock is
+    /// real, and the one way out is deleting the app (REL-8).
+    private var lockStep: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Image(systemName: "lock.shield")
+                .font(.system(size: 56))
+                .foregroundStyle(.tint)
+            Text("A block cannot be cancelled")
+                .font(.title2.bold())
+                .multilineTextAlignment(.center)
+            Text(LockExitCopy.full)
+                .font(.subheadline)
+                .multilineTextAlignment(.leading)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 28)
+            Spacer()
+            Button {
+                finish()
+            } label: {
+                Text("Got it")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+            }
+            .buttonStyle(.borderedProminent)
             .padding(.horizontal, 32)
             .padding(.bottom, 24)
         }

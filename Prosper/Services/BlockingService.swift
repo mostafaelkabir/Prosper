@@ -3,6 +3,7 @@ import ManagedSettings
 import FamilyControls
 import DeviceActivity
 import SwiftData
+import UserNotifications
 
 final class BlockingService: @unchecked Sendable {
     static let shared = BlockingService()
@@ -46,7 +47,9 @@ final class BlockingService: @unchecked Sendable {
             store.webContent.blockedByFilter = .specific(Set(typedDomains.map { WebDomain(domain: $0) }))
         }
 
-        scheduleUnblock(duration: duration)
+        let startedAt = Date.now
+        scheduleUnblock(from: startedAt, duration: duration)
+        scheduleEndNotification(duration: duration)
         persistBlockSession(
             selection: selection,
             appCount: apps.count,
@@ -60,7 +63,10 @@ final class BlockingService: @unchecked Sendable {
         store.shield.applications = nil
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
-        activityCenter.stopMonitoring([PersistenceConfig.unblockActivityName])
+        activityCenter.stopMonitoring([
+            PersistenceConfig.unblockActivityName,
+            PersistenceConfig.unblockSafetyActivityName,
+        ])
         SharedBlockState.clear()
     }
 
@@ -69,17 +75,42 @@ final class BlockingService: @unchecked Sendable {
     /// `DeviceActivityMonitor` minimum, the app was force-quit, or the device
     /// rebooted, so `intervalDidEnd` never fired and Safari stays filtered.
     ///
-    /// This is NOT an early cancel (see CLAUDE.md): it only ever acts once no
-    /// `BlockSession` is still within its timer, so an active block is untouched.
+    /// This is NOT an early cancel (see CLAUDE.md). It clears only when *every*
+    /// record agrees the timer has run out: the App Group snapshot and the
+    /// SwiftData sessions are consulted as a union, so either one still showing
+    /// a live block leaves the shield exactly where it is. That union matters —
+    /// asking SwiftData alone (as this did) meant a lost or reset store read as
+    /// "nothing is running" and would have lifted a block that was very much
+    /// running, turning a storage fault into the early cancel the app promises
+    /// does not exist.
+    ///
     /// Call on launch and whenever the app returns to the foreground.
     func clearExpiredBlockIfNeeded() {
         guard hasActiveBlock else { return }
+
+        if SharedBlockState.active != nil { return }
+
         let context = ModelContext(PersistenceConfig.sharedModelContainer)
         let sessions = (try? context.fetch(FetchDescriptor<BlockSession>())) ?? []
-        let stillLocked = sessions.contains { $0.isActive }
-        if !stillLocked {
-            clearBlock()
-        }
+        if sessions.contains(where: { $0.isActive }) { return }
+
+        clearBlock()
+    }
+
+    /// Re-installs the unblock schedules for a block that is still running.
+    ///
+    /// DeviceActivity schedules are system state, and a reinstall, a restore or
+    /// a long-evicted extension can lose them — at which point the only thing
+    /// left to lift the block is the user reopening the app. Called on launch,
+    /// this puts the timers back so the block can end on its own again.
+    func reassertScheduleIfNeeded() {
+        guard let snapshot = SharedBlockState.active else { return }
+        let running = Set(activityCenter.activities)
+        guard !running.contains(PersistenceConfig.unblockActivityName)
+                || !running.contains(PersistenceConfig.unblockSafetyActivityName) else { return }
+
+        scheduleUnblock(from: snapshot.startedAt, duration: snapshot.duration)
+        scheduleEndNotification(duration: snapshot.remaining, identifier: Self.endNotificationID)
     }
 
     var hasActiveBlock: Bool {
@@ -88,28 +119,75 @@ final class BlockingService: @unchecked Sendable {
             || store.webContent.blockedByFilter != nil
     }
 
-    private func scheduleUnblock(duration: TimeInterval) {
-        let endDate = Date.now.addingTimeInterval(duration)
-        let endComponents = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: endDate
-        )
-        let startComponents = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: .now
-        )
+    /// iOS refuses a `DeviceActivitySchedule` whose interval is shorter than
+    /// about fifteen minutes, which is why a short block cannot rely on the
+    /// primary schedule alone.
+    private static let minimumScheduleSpan: TimeInterval = 16 * 60
+    /// How long after the block ends the safety interval closes.
+    private static let safetyGrace: TimeInterval = 5 * 60
+    static let endNotificationID = "prosper.block.end"
 
+    /// Installs both unblock timers: the exact one, and a second that closes a
+    /// few minutes later. They are independent activities, so losing one still
+    /// leaves a path that lifts the block without the user's help (REL-7).
+    private func scheduleUnblock(from startedAt: Date, duration: TimeInterval) {
+        let endDate = startedAt.addingTimeInterval(duration)
+
+        start(PersistenceConfig.unblockActivityName, from: startedAt, to: endDate)
+
+        // The safety interval is kept to a short window ending after the block
+        // so its span is always a legal length without ever spanning a whole
+        // day: for a five-minute block it starts with the block, for a long one
+        // it opens shortly before the end.
+        let safetyEnd = max(
+            endDate.addingTimeInterval(Self.safetyGrace),
+            startedAt.addingTimeInterval(Self.minimumScheduleSpan)
+        )
+        let safetyStart = max(startedAt, safetyEnd.addingTimeInterval(-Self.minimumScheduleSpan))
+        start(PersistenceConfig.unblockSafetyActivityName, from: safetyStart, to: safetyEnd)
+    }
+
+    private func start(_ activity: DeviceActivityName, from start: Date, to end: Date) {
+        let fields: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
         let schedule = DeviceActivitySchedule(
-            intervalStart: startComponents,
-            intervalEnd: endComponents,
+            intervalStart: Calendar.current.dateComponents(fields, from: start),
+            intervalEnd: Calendar.current.dateComponents(fields, from: end),
             repeats: false
         )
 
         do {
-            try activityCenter.startMonitoring(PersistenceConfig.unblockActivityName, during: schedule)
+            try activityCenter.startMonitoring(activity, during: schedule)
         } catch {
-            print("Failed to schedule unblock: \(error)")
+            // A refused schedule is survivable — the other timer, the monitor's
+            // sweep and the foreground sweep all still end the block — but it is
+            // the reason a block can overstay, so it is worth the log line.
+            print("Failed to schedule \(activity.rawValue): \(error)")
         }
+    }
+
+    /// A local notification timed to the end of the block.
+    ///
+    /// Unlike the DeviceActivity callbacks this needs no extension to be alive
+    /// and survives a reboot, so it is the path that still reaches the user when
+    /// everything else is evicted: opening the app runs the foreground sweep.
+    private func scheduleEndNotification(
+        duration: TimeInterval,
+        identifier: String = endNotificationID
+    ) {
+        guard duration > 0 else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "Block finished"
+        content.body = "Your Prosper block just expired. Nice work — the door is unlocked again."
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: identifier,
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: duration, repeats: false)
+        )
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        center.add(request)
     }
 
     private func persistBlockSession(
@@ -161,7 +239,19 @@ enum BlockDomain {
             s.removeFirst(4)
         }
 
-        let allowed = s.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "." }
+        // An internationalised domain has to reach WebDomain as punycode. The
+        // check below used Character.isLetter, which is true for "ü" and "中",
+        // so "bücher.de" sailed through and was handed to the filter as UTF-8 —
+        // accepted without complaint and blocking nothing. A site the user
+        // believes is blocked and is not is the worst failure this type has, so
+        // the conversion happens here and anything that will not convert is
+        // refused out loud instead.
+        if !s.allSatisfy(\.isASCII) {
+            guard let encoded = URL(string: "https://" + s)?.host?.lowercased() else { return nil }
+            s = encoded
+        }
+
+        let allowed = s.allSatisfy { ($0.isASCII && ($0.isLetter || $0.isNumber)) || $0 == "-" || $0 == "." }
         guard allowed, s.contains("."), !s.hasPrefix("."), !s.hasSuffix("."), !s.contains("..") else {
             return nil
         }

@@ -37,10 +37,25 @@ enum SharedBlockState {
 
     /// The active block snapshot, or nil when none is stored or it has expired.
     static var active: Snapshot? {
+        guard let snapshot = stored, snapshot.endsAt.timeIntervalSinceNow > 0 else { return nil }
+        return snapshot
+    }
+
+    /// The stored snapshot whether or not its timer has run out. Callers that
+    /// must distinguish "no block was ever recorded" from "a block ended" need
+    /// this; `active` collapses both to nil.
+    static var stored: Snapshot? {
         guard let defaults,
               let start = defaults.object(forKey: startKey) as? Date,
-              let end = defaults.object(forKey: endKey) as? Date,
-              end.timeIntervalSinceNow > 0 else { return nil }
+              let end = defaults.object(forKey: endKey) as? Date else { return nil }
         return Snapshot(startedAt: start, endsAt: end, duration: defaults.double(forKey: durationKey))
+    }
+
+    /// True when a block was recorded and its timer has run out — the state a
+    /// sweep is allowed to clean up. Deliberately false when nothing is stored,
+    /// so a missing snapshot can never be read as "expired" (REL-7).
+    static var hasExpired: Bool {
+        guard let stored else { return false }
+        return stored.endsAt.timeIntervalSinceNow <= 0
     }
 }

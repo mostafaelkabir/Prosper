@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prosper — Privacy Policy</title>
+<style>
+  :root {
+    --bg: #F3F2FC; --surface: #FFFFFF; --ink: #1C2440; --ink2: #5C6680;
+    --line: #E0E4F0; --accent: #6144DE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #090D18; --surface: #141B2B; --ink: #F0F3FF; --ink2: #A8B3CD;
+      --line: #28334B; --accent: #A58AFF;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 16px 96px;
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 21px; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .updated { color: var(--ink2); font-size: 15px; margin: 0 0 32px; }
+  p, li { color: var(--ink); }
+  .lede { font-size: 19px; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px 22px; margin: 24px 0;
+  }
+  .card p:first-child { margin-top: 0; }
+  .card p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  a { color: var(--accent); }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--ink2); font-size: 15px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prosper — Privacy Policy</h1>
+  <p class="updated">Last updated 22 September 2026</p>
+
+  <p class="lede">Prosper does not collect your data. There is no account to
+  create, no server to send anything to, no analytics, and no third-party SDKs.
+  Everything Prosper knows about you stays on your iPhone.</p>
+
+  <div class="card">
+    <p><strong>The short version.</strong> Prosper has no backend. Nothing you do
+    in the app is transmitted anywhere. Your Screen Time data is never seen by
+    the app itself — it is read inside a sandboxed Apple extension that can draw
+    charts but cannot send anything out. Deleting Prosper deletes everything.</p>
+  </div>
+
+  <h2>What Prosper stores, and where</h2>
+  <p>All of this lives in Prosper's own storage on your device, shared between
+  the app and its extensions through an Apple App Group. None of it is backed up
+  to a server we control, because there isn't one.</p>
+  <ul>
+    <li><strong>Your block history</strong> — when a block started, how long it
+    ran, how many apps and sites it covered, and any website addresses you typed.</li>
+    <li><strong>Your settings</strong> — your distraction threshold, which apps
+    and sites you have labelled Productive, Distracting or Intentional rest, and
+    your notification preferences.</li>
+    <li><strong>Your warning history</strong> — which warnings fired and whether
+    you acknowledged them.</li>
+  </ul>
+
+  <h2>Screen Time data</h2>
+  <p>Prosper uses Apple's Screen Time APIs (Family Controls, Device Activity and
+  Managed Settings) with your explicit permission. This part is worth being
+  precise about, because it is the most sensitive data involved:</p>
+  <ul>
+    <li>Your per-app and per-website usage is only ever read inside Apple's
+    <strong>Device Activity Report extension</strong>. Apple designed this
+    extension so that it can display your usage but cannot pass it back to the
+    app or send it over the network. The Prosper app itself never receives your
+    raw usage numbers.</li>
+    <li>The apps and websites you choose to block or classify are handled as
+    opaque tokens issued by iOS. These tokens are meaningless outside your
+    device and cannot be turned back into a list of apps by anyone else.</li>
+    <li>Blocks are enforced by iOS on Prosper's behalf. Prosper asks the system
+    to shield an app; the system does the rest.</li>
+  </ul>
+
+  <h2>What Prosper does not do</h2>
+  <ul>
+    <li>No accounts, sign-in, or email address.</li>
+    <li>No analytics, crash reporting, telemetry, or usage tracking of any kind.</li>
+    <li>No advertising, and no advertising identifiers.</li>
+    <li>No third-party SDKs.</li>
+    <li>No network requests. Prosper does not talk to any server, including ours.</li>
+    <li>No selling, sharing or disclosing of your information, because none of it
+    reaches us to begin with.</li>
+  </ul>
+
+  <h2>Notifications</h2>
+  <p>If you allow notifications, Prosper sends them locally from your own device
+  — a warning when you cross your threshold, and a note when a block ends. They
+  are composed on your iPhone and never routed through a push server.</p>
+
+  <h2>Deleting your data</h2>
+  <p>Settings ▸ Your data ▸ <strong>Delete my data</strong> erases everything
+  Prosper has stored on your iPhone. One deliberate exception: if a block is
+  currently running, its record is kept so that deleting your data cannot be used
+  to cancel a block early. The block still ends at its own time.</p>
+  <p>Deleting the Prosper app removes all of its data, and also lifts any block
+  that is running, because the restrictions are applied by iOS on Prosper's
+  behalf and go away with the app.</p>
+
+  <h2>Children</h2>
+  <p>Prosper requests individual Screen Time authorization, which Apple only
+  grants to an Apple Account managing its own Screen Time. Accounts under 18 in a
+  Family Sharing group cannot grant it, and Prosper will tell you so rather than
+  leaving you at a wall. Prosper is not directed at children and collects no
+  information from anyone.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy ever changes, the updated version will be posted at this
+  address with a new date at the top.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, or something here that does not match what you observe?
+  <a href="https://github.com/mostafaelkabir/Prosper/issues">Open an issue</a>.</p>
+
+  <footer>Prosper is a personal project. It has no company behind it and no
+  business model that depends on your attention.</footer>
+</main>
+</body>
+</html>

@@ -3,16 +3,22 @@ import SwiftData
 
 /// The level-3 intervention (E4.3 / E4.4): the one warning that does not wait
 /// politely in Notification Centre. `ProsperMonitor` flags it from the
-/// background; the app shows it full-screen on the next open and — unless the
-/// user turned the phrase off — only lets it go once they have typed out what
-/// they are choosing.
+/// background and the app shows it full-screen on the next open.
 ///
 /// It cannot start or stop a block. Deciding is the user's job; this screen
 /// only makes the number impossible to scroll past.
+///
+/// A screen that takes over the device must always be closable (REL-12). The
+/// typed phrase is friction the user opted into — it gates the acknowledgment
+/// button, not the exit — and a plain dismiss is present in every state. An
+/// intervention that could trap someone would be the wrong thing to build
+/// regardless of what App Review thinks of it.
 struct InterventionView: View {
     /// Minutes of waste time that tripped the intervention.
     let minutes: Int
-    /// When false, a single button dismisses it (Settings → typed phrase off).
+    /// When true the user asked for the extra step: "Keep going anyway" only
+    /// lights up once the phrase is typed. The plain dismiss below it works
+    /// either way.
     var requiresPhrase: Bool
     /// Dismiss and hand over to the Lock tab so the user can act immediately.
     var onLockItDown: () -> Void
@@ -31,7 +37,9 @@ struct InterventionView: View {
             .caseInsensitiveCompare(Self.phrase) == .orderedSame
     }
 
-    private var canDismiss: Bool { !requiresPhrase || phraseMatches }
+    /// Whether the deliberate acknowledgment is available. Never gates leaving
+    /// the screen — see `plainDismiss`.
+    private var canAcknowledge: Bool { !requiresPhrase || phraseMatches }
 
     var body: some View {
         ZStack {
@@ -75,7 +83,7 @@ struct InterventionView: View {
     private var phraseField: some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("To close this, type")
+                Text("You asked to type this out first")
                     .font(.footnote)
                     .foregroundStyle(ProsperColor.ink2)
                 Text(Self.phrase)
@@ -119,13 +127,35 @@ struct InterventionView: View {
                     .font(.system(size: 15, weight: .medium))
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: 45)
-                    .foregroundStyle(canDismiss ? ProsperColor.ink2 : ProsperColor.unclassified)
+                    .foregroundStyle(canAcknowledge ? ProsperColor.ink2 : ProsperColor.unclassified)
                     .background(ProsperColor.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .buttonStyle(.plain)
-            .disabled(!canDismiss)
+            .disabled(!canAcknowledge)
+
+            if requiresPhrase {
+                plainDismiss
+            }
         }
+    }
+
+    /// The way out that is always open. Quiet rather than hidden: someone who
+    /// does not want to type the phrase should not have to hunt for it, and
+    /// should not be able to end up stuck behind a full-screen takeover.
+    private var plainDismiss: some View {
+        Button {
+            acknowledge()
+            onAcknowledge()
+        } label: {
+            Text("Close without typing")
+                .font(.footnote)
+                .foregroundStyle(ProsperColor.ink2)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Closes this warning without typing the phrase")
     }
 
     /// Clears the pending flag and stamps the stored warnings as acknowledged,

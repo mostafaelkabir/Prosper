@@ -20,6 +20,10 @@ final class UserSettings {
     /// warning fires. Range enforced by the UI (5…240).
     var wasteWarningThresholdMinutes: Int = 30
     var warningsEnabled: Bool
+    /// Opt-in extra friction on the level-3 intervention: type a phrase out
+    /// before the "keep going" button lights up. Off by default (REL-12) — the
+    /// screen is dismissible for everyone, and the ritual is for users who ask
+    /// for it, not something a first-time user is handed.
     var level3PhraseRequired: Bool
     /// Websites the user last typed into the block creator, so the list is
     /// remembered between blocks (e.g. ["reddit.com", "youtube.com"]).
@@ -54,7 +58,7 @@ final class UserSettings {
         self.wasteDomains = []
         self.wasteWarningThresholdMinutes = 30
         self.warningsEnabled = true
-        self.level3PhraseRequired = true
+        self.level3PhraseRequired = false
         self.savedBlockDomains = []
         self.hasCompletedSetup = false
         self.firstLaunchAt = .now

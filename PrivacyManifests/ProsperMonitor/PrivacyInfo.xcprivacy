@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Prosper has no backend, no accounts, no analytics and no third-party
+	     SDKs. Nothing is collected, nothing is transmitted, nothing is used for
+	     tracking. Screen Time data is read only inside the DeviceActivityReport
+	     extension and never leaves the device. -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- UserDefaults(suiteName: "group.com.mostafa.prosper"): the active
+			     block snapshot, the pending intervention flag, the classification
+			     snapshot and the store-health flag are shared between the app and
+			     its own extensions. CA92.1 = access is limited to the app group
+			     the app is a member of. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

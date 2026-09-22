@@ -87,7 +87,14 @@ func hourLabel(_ hour: Int) -> String {
     }
 }
 
-// MARK: - Sample data (simulator and previews only)
+// MARK: - Sample data
+//
+// Fabricated numbers, compiled ONLY for the simulator, which has no Screen Time
+// to read. A shipped user must never see invented figures presented as their own
+// usage, so this is a compile-time guarantee rather than a rule to remember: on
+// any device build — debug or release — these declarations do not exist, and a
+// call site that forgets its #if fails to build instead of shipping (REL-11).
+#if targetEnvironment(simulator)
 
 extension HourlyUsage {
     /// - Parameter dayCount: 1 = a single day's 24-hour bars, >1 = week grid.
@@ -129,3 +136,4 @@ extension HourlyUsage {
         return usage
     }
 }
+#endif

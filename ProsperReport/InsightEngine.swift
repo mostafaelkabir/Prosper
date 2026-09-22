@@ -117,7 +117,14 @@ enum InsightEngine {
     }
 }
 
-// MARK: - Sample (simulator / previews only)
+// MARK: - Sample data
+//
+// Fabricated numbers, compiled ONLY for the simulator, which has no Screen Time
+// to read. A shipped user must never see invented figures presented as their own
+// usage, so this is a compile-time guarantee rather than a rule to remember: on
+// any device build — debug or release — these declarations do not exist, and a
+// call site that forgets its #if fails to build instead of shipping (REL-11).
+#if targetEnvironment(simulator)
 
 extension InsightCard {
     /// Consistent with the Today hero sample (2h 14m tracked, Instagram 20m over
@@ -135,3 +142,4 @@ extension InsightCard {
         ]
     }
 }
+#endif
