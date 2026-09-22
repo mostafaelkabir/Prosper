@@ -15,7 +15,7 @@ struct SettingsView: View {
     @State private var selection = FamilyActivitySelection()
     @State private var typedDomains: [String] = []
     @State private var thresholdMinutes: Double = 30
-    @State private var requirePhrase = true
+    @State private var requirePhrase = false
 
     @State private var loaded = false
     @State private var didRequestNotifications = false
@@ -64,7 +64,7 @@ struct SettingsView: View {
         } header: {
             Text("Third warning")
         } footer: {
-            Text("At three times your threshold Prosper takes over the screen instead of sending another notification. With this on, you have to type \u{201C}\(InterventionView.phrase)\u{201D} to get past it.")
+            Text("At three times your threshold Prosper takes over the screen instead of sending another notification. With this on, \u{201C}Keep going anyway\u{201D} only lights up once you have typed \u{201C}\(InterventionView.phrase)\u{201D}. You can always close the screen either way — the friction is a choice, not a lock.")
         }
     }
 
