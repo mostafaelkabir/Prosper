@@ -40,6 +40,11 @@ targets:
         # system white, killing the cold-launch flash (QA-3).
         INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        # iPhone only. Without this the bundle ships UIDeviceFamily [1,2] and
+        # App Store validation demands the full iPad orientation set (90474) —
+        # but nothing here has been designed or tested on iPad, and shipping an
+        # untested iPad build is worse than not shipping one (REL-17).
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
@@ -190,5 +195,8 @@ targets:
     info:
       path: ProsperReport/Info.plist
       properties:
+        # Required by App Store validation for this extension; without it the
+        # upload is rejected with 90360 (REL-17).
+        CFBundleDisplayName: Prosper
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.deviceactivityui.report-extension
