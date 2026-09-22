@@ -51,6 +51,18 @@ enum SharedClassification {
         defaults.set(distinctRest, forKey: restDomainsKey)
     }
 
+    /// Forgets every label. Used by "delete my data" (REL-13); the report
+    /// extension then falls back to everything being Unclassified.
+    static func clear() {
+        guard let defaults else { return }
+        for key in [
+            productiveSelKey, distractingSelKey, restSelKey,
+            productiveDomainsKey, distractingDomainsKey, restDomainsKey,
+        ] {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
     // MARK: - Read (report extension)
 
     struct Snapshot {

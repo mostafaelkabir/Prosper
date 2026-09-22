@@ -94,6 +94,8 @@ targets:
     sources:
       - path: ProsperShield
       - path: Prosper/Services/SharedBlockState.swift
+      # One source for the "deleting Prosper ends a block" line (REL-8).
+      - path: Prosper/Services/LockExitCopy.swift
       - path: PrivacyManifests/ProsperShield/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:

@@ -32,6 +32,10 @@ class ProsperShieldConfiguration: ShieldConfigurationDataSource {
         lines.append("You set this \(Self.durationText(block.duration)) block at \(setAt). \(Self.remainingText(block.remaining)) left.")
         // Attempt count line (E7.7) will slot in here once the ShieldAction
         // counter lands.
+        // The exit, stated where it is least convenient to act on and most
+        // useful to know (REL-8). Phrased as the closed door it is: naming the
+        // only way out also says there is no easier one.
+        lines.append(LockExitCopy.shield)
 
         return ShieldConfiguration(
             backgroundBlurStyle: .systemThickMaterial,
@@ -48,7 +52,7 @@ class ProsperShieldConfiguration: ShieldConfigurationDataSource {
         ShieldConfiguration(
             backgroundBlurStyle: .systemThickMaterial,
             title: ShieldConfiguration.Label(text: "Locked by Prosper", color: .label),
-            subtitle: ShieldConfiguration.Label(text: "This is the block you set. It stays locked until the timer ends.", color: .secondaryLabel),
+            subtitle: ShieldConfiguration.Label(text: "This is the block you set. It stays locked until the timer ends.\n\(LockExitCopy.shield)", color: .secondaryLabel),
             primaryButtonLabel: ShieldConfiguration.Label(text: "Close", color: .white),
             primaryButtonBackgroundColor: .systemBlue
         )
