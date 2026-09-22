@@ -7,14 +7,27 @@ Blocked by REL-1 (entitlement) and REL-2 (distribution certificate) for the
 *build*, but the record itself can be created now — do that while REL-1 is in
 Apple's queue rather than after.
 
-## App record
+## App record — it already exists
+
+`altool --list-apps` found a record already holding this bundle ID:
+
+```
+Name: StolenEyes    ID: 6814272036
+Bundle ID: com.mostafa.prosper    SKU: 100
+Created: 2026-09-20    Version 1.0 — PREPARE_FOR_SUBMISSION
+```
+
+"Prosper" was taken on the App Store, so the shipping name is **StolenEyes** —
+the phone stealing your eyes. "Prosper" survives as the project and repository
+name only, which is why the GitHub and Pages URLs still say Prosper. Do not
+create a second record; fill in the one above.
 
 | Field | Value |
 |---|---|
-| Name | `Prosper` |
+| Name | `StolenEyes` |
 | Subtitle | `Blocks you can't talk yourself out of` |
 | Bundle ID | `com.mostafa.prosper` |
-| SKU | `prosper-ios-001` |
+| SKU | `100` (already set on the existing record; not editable) |
 | Primary category | Health & Fitness |
 | Secondary category | Productivity |
 | Age rating | 4+ (no objectionable content; answer "None" to every questionnaire item) |
@@ -38,7 +51,7 @@ upload is flagged, so do not hand-wave this one.
 ## Description
 
 ```
-Prosper is for the gap between knowing you're on your phone too much and
+StolenEyes is for the gap between knowing you're on your phone too much and
 actually doing something about it.
 
 SEE WHERE IT GOES
@@ -57,8 +70,8 @@ full-screen stop at three times. Always dismissible — the numbers are the
 argument, not a trap.
 
 ONE EXCEPTION, STATED PLAINLY
-Deleting Prosper ends any block, because the restrictions are applied by iOS on
-Prosper's behalf and go away with the app. You are never locked out of your own
+Deleting StolenEyes ends any block, because the restrictions are applied by iOS on
+its behalf and go away with the app. You are never locked out of your own
 phone. It also throws away your history and your streak, which is the price.
 
 YOUR DATA STAYS YOURS
@@ -66,7 +79,7 @@ No account. No server. No analytics. No third-party SDKs. No network requests at
 all. Your Screen Time data is read inside a sandboxed Apple extension that
 cannot send it anywhere, and the app itself never sees the raw numbers.
 
-Prosper requires Screen Time access and works on the Apple Account that manages
+StolenEyes requires Screen Time access and works on the Apple Account that manages
 its own Screen Time. Accounts under 18 in a Family Sharing group cannot grant
 it.
 ```
@@ -92,7 +105,7 @@ External testing needs Beta App Review, which needs all three of these.
 
 **Beta app description**
 ```
-Prosper tracks where your phone time goes and lets you block distracting apps
+StolenEyes tracks where your phone time goes and lets you block distracting apps
 and websites for a fixed period that cannot be cancelled early. Test the Lock
 tab (pick apps or type a site, choose a length, hold to lock), the Today and
 Insights tabs for usage, and the warning ladder in Settings.
@@ -104,7 +117,7 @@ purpose; the in-app support link points at GitHub issues instead (REL-13).
 **Beta App Review notes — this one matters. Paste verbatim:**
 ```
 WHAT THE APP DOES
-Prosper is a personal digital wellbeing app. It uses Family Controls with
+StolenEyes is a personal digital wellbeing app. It uses Family Controls with
 .individual authorization only — the user authorizes their own Apple Account. It
 is not a parental control app and does not manage anyone else's device.
 

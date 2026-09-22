@@ -54,7 +54,7 @@ struct ConfirmBlockView: View {
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Nothing in Prosper can end this before \(endText).")
+                Text("Nothing in StolenEyes can end this before \(endText).")
                     .font(ProsperFont.insight)
                     .foregroundStyle(ProsperColor.ink)
                     .fixedSize(horizontal: false, vertical: true)
@@ -99,7 +99,7 @@ struct ConfirmBlockView: View {
         } header: {
             Text("^[\(categories.count) category](inflect: true)")
         } footer: {
-            Text("A category covers every app iOS files under it — including apps you did not pick yourself, and ones you install later. iOS does not let Prosper list them, so check this is what you want.")
+            Text("A category covers every app iOS files under it — including apps you did not pick yourself, and ones you install later. iOS does not let StolenEyes list them, so check this is what you want.")
         }
     }
 

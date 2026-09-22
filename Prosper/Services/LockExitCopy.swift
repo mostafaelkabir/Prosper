@@ -2,9 +2,9 @@ import Foundation
 
 /// The one honest sentence about how a block can actually end (REL-8).
 ///
-/// Prosper's promise is that a block has no cancel button, and that stays true:
+/// The promise of StolenEyes is that a block has no cancel button, and that stays true:
 /// nothing in this app ends one early. But the promise is enforced by iOS
-/// applying restrictions on Prosper's behalf, and removing Prosper removes them.
+/// applying restrictions on its behalf, and removing StolenEyes removes them.
 /// That escape hatch exists whether or not it is mentioned, so the only choice
 /// is whether the user hears it from us or discovers it at the worst moment.
 ///
@@ -19,30 +19,30 @@ import Foundation
 enum LockExitCopy {
     /// Settings and onboarding: the full explanation.
     static let full = """
-    A block has no cancel button. Once you start one, nothing in Prosper will \
+    A block has no cancel button. Once you start one, nothing in StolenEyes will \
     end it early — not settings, not deleting your data, not reinstalling your \
     lists. That is the whole point.
 
     There is one way out, and you should hear it from us rather than find it \
-    at your worst moment: deleting Prosper removes the block. Your blocks are \
-    applied by iOS on Prosper's behalf, so removing the app removes them. It \
+    at your worst moment: deleting StolenEyes removes the block. Your blocks are \
+    applied by iOS on its behalf, so removing the app removes them. It \
     also throws away your history and your streak, which is the price.
     """
 
     /// One line, for places with no room for the full version.
-    static let short = "Deleting Prosper ends any block. Nothing else does."
+    static let short = "Deleting StolenEyes ends any block. Nothing else does."
 
     /// The shield screen, where the user is at their least patient. Phrased so
     /// it reads as the closed door it is rather than as a suggestion.
-    static let shield = "Deleting Prosper would end this block. Nothing else will."
+    static let shield = "Deleting StolenEyes would end this block. Nothing else will."
 
     /// For the App Store / TestFlight description.
     static let storeDescription = """
-    Prosper's blocks cannot be cancelled. There is no override, no "just five \
+    StolenEyes blocks cannot be cancelled. There is no override, no "just five \
     more minutes", no hidden setting. A block ends when its timer ends.
 
-    One exception, stated plainly: deleting Prosper ends any block, because the \
-    restrictions are applied by iOS on Prosper's behalf and go away with the \
+    One exception, stated plainly: deleting StolenEyes ends any block, because the \
+    restrictions are applied by iOS on its behalf and go away with the \
     app. You are never locked out of your own phone.
     """
 

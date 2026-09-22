@@ -45,6 +45,11 @@ targets:
         # but nothing here has been designed or tested on iPad, and shipping an
         # untested iPad build is worse than not shipping one (REL-17).
         TARGETED_DEVICE_FAMILY: "1"
+        # The App Store listing is StolenEyes ("Prosper" was taken), so the home
+        # screen says StolenEyes too. A device name that disagrees with the store
+        # name confuses users and risks Apple's metadata rules. "Prosper" stays
+        # as the project/repo name only.
+        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
@@ -197,6 +202,6 @@ targets:
       properties:
         # Required by App Store validation for this extension; without it the
         # upload is rejected with 90360 (REL-17).
-        CFBundleDisplayName: Prosper
+        CFBundleDisplayName: StolenEyes
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.deviceactivityui.report-extension

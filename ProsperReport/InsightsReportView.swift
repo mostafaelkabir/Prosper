@@ -26,7 +26,7 @@ struct InsightsReportView: View {
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Still learning your day").labelCaps()
-            Text("Insights appear once Prosper has enough of today's usage to say something true.")
+            Text("Insights appear once StolenEyes has enough of today's usage to say something true.")
                 .font(.system(size: 13))
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
