@@ -239,7 +239,19 @@ enum BlockDomain {
             s.removeFirst(4)
         }
 
-        let allowed = s.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "." }
+        // An internationalised domain has to reach WebDomain as punycode. The
+        // check below used Character.isLetter, which is true for "ü" and "中",
+        // so "bücher.de" sailed through and was handed to the filter as UTF-8 —
+        // accepted without complaint and blocking nothing. A site the user
+        // believes is blocked and is not is the worst failure this type has, so
+        // the conversion happens here and anything that will not convert is
+        // refused out loud instead.
+        if !s.allSatisfy(\.isASCII) {
+            guard let encoded = URL(string: "https://" + s)?.host?.lowercased() else { return nil }
+            s = encoded
+        }
+
+        let allowed = s.allSatisfy { ($0.isASCII && ($0.isLetter || $0.isNumber)) || $0 == "-" || $0 == "." }
         guard allowed, s.contains("."), !s.hasPrefix("."), !s.hasSuffix("."), !s.contains("..") else {
             return nil
         }

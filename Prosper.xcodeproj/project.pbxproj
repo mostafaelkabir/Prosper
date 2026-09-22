@@ -69,6 +69,7 @@
 		99076840B8674B3BCCA2ACC1 /* ClassificationEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8DF145EC7642551AACA4BBB /* ClassificationEditorView.swift */; };
 		99701B527EA2A66A130E14EC /* ProsperReport.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 787F80B30CAB4A7432226247 /* ProsperReport.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A3564894D135C232E22F704 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
+		9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */; };
 		9A8DB93EE8E27B05A6E2A252 /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
 		9C156748E46C031230501B97 /* InsightSpotlightHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EC67B48BC3EEEC96B70271 /* InsightSpotlightHost.swift */; };
 		A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF1BA9DD8B110676DBE404 /* DashboardView.swift */; };
@@ -81,6 +82,7 @@
 		B8742D2E3979E22EA03CCC0B /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
 		BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8F0966BDF79094A611FF59E /* Assets.xcassets */; };
 		C014141D3E331459D3806FE0 /* LockExitCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283C469D74CE36C6247FDE46 /* LockExitCopy.swift */; };
+		C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */; };
 		C38694944BB561C81CFD2ACB /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		C5A8D26E2373DCF8C7DF16B2 /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA0E27E5CD977B8750BB3FC /* PlatformCatalog.swift */; };
 		C8FDD09917FE7507FE2DABDB /* HourlyUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */; };
@@ -128,6 +130,13 @@
 			remoteGlobalIDString = BCDD04D5E5E8EB077EF1377C;
 			remoteInfo = ProsperMonitor;
 		};
+		D6BBBE7E2B0CF969DD8DE9AE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED575DA574B9DD2E37E11EB1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79E807E5BA2A73A80F588CF9;
+			remoteInfo = Prosper;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -170,6 +179,7 @@
 		283C469D74CE36C6247FDE46 /* LockExitCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockExitCopy.swift; sourceTree = "<group>"; };
 		2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrackingService.swift; sourceTree = "<group>"; };
 		2C648096F2236C1D2415DB68 /* UserSettingsClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsClassification.swift; sourceTree = "<group>"; };
+		328D6AEF1BCB5C897D6B23CE /* ProsperTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ProsperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		33C7C894E4F3AE214D525759 /* ProsperColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperColor.swift; sourceTree = "<group>"; };
 		363E1B2D164246C5150D6D51 /* Prosper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Prosper.entitlements; sourceTree = "<group>"; };
 		380FF60661EA74BC8735A26D /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
@@ -196,6 +206,7 @@
 		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
 		8E408975B92219D4F495551F /* ProsperType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperType.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
+		8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningLevelTests.swift; sourceTree = "<group>"; };
 		912B1621B5ECD8CF9E64759D /* UsageIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageIcon.swift; sourceTree = "<group>"; };
 		9314AE9A9C3D53B04778361F /* ProsperComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperComponents.swift; sourceTree = "<group>"; };
 		935508F248C2264EECC3FF3C /* DataReset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataReset.swift; sourceTree = "<group>"; };
@@ -218,6 +229,7 @@
 		C72AD9387F5DEB57CF802404 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		C8DF145EC7642551AACA4BBB /* ClassificationEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationEditorView.swift; sourceTree = "<group>"; };
 		C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageReportFilter.swift; sourceTree = "<group>"; };
+		CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockDomainTests.swift; sourceTree = "<group>"; };
 		CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyHeatmapView.swift; sourceTree = "<group>"; };
 		DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldActionExtension.swift; sourceTree = "<group>"; };
 		DBFC27FB7E78B2F0FA5FFCA9 /* ProsperShieldAction.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperShieldAction.entitlements; sourceTree = "<group>"; };
@@ -275,6 +287,7 @@
 				4E3B08F25788129C60C6955C /* ProsperReport */,
 				A5C391FE50F4110CDE5939F9 /* ProsperShield */,
 				365EB966ADD071B747DD6E6B /* ProsperShieldAction */,
+				848FABDCD89C2CE018A9F006 /* ProsperTests */,
 				6A5B1B8958B386AD79BF9A2D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -372,6 +385,7 @@
 				787F80B30CAB4A7432226247 /* ProsperReport.appex */,
 				DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */,
 				FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */,
+				328D6AEF1BCB5C897D6B23CE /* ProsperTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -411,6 +425,15 @@
 				00B4ABC1CFA6F0C70DAC220D /* WasteListEditor.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		848FABDCD89C2CE018A9F006 /* ProsperTests */ = {
+			isa = PBXGroup;
+			children = (
+				CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */,
+				8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */,
+			);
+			path = ProsperTests;
 			sourceTree = "<group>";
 		};
 		938E34B426A1097A4033CC15 /* ProsperReport */ = {
@@ -580,6 +603,24 @@
 			productReference = 787F80B30CAB4A7432226247 /* ProsperReport.appex */;
 			productType = "com.apple.product-type.extensionkit-extension";
 		};
+		979B98CE1E0CA7DB9D403C68 /* ProsperTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03A9782F82E2988E7A45B73D /* Build configuration list for PBXNativeTarget "ProsperTests" */;
+			buildPhases = (
+				A6DC3A0C2FE3E7D7D81B1976 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				165A042726AEB9B344CF030C /* PBXTargetDependency */,
+			);
+			name = ProsperTests;
+			packageProductDependencies = (
+			);
+			productName = ProsperTests;
+			productReference = 328D6AEF1BCB5C897D6B23CE /* ProsperTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		BCDD04D5E5E8EB077EF1377C /* ProsperMonitor */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A04DB176E4108F218F703481 /* Build configuration list for PBXNativeTarget "ProsperMonitor" */;
@@ -634,6 +675,9 @@
 					7C45EEB71FE21263942EF22C = {
 						DevelopmentTeam = V9WJ9X99FX;
 					};
+					979B98CE1E0CA7DB9D403C68 = {
+						DevelopmentTeam = V9WJ9X99FX;
+					};
 					BCDD04D5E5E8EB077EF1377C = {
 						DevelopmentTeam = V9WJ9X99FX;
 					};
@@ -657,6 +701,7 @@
 			projectRoot = "";
 			targets = (
 				79E807E5BA2A73A80F588CF9 /* Prosper */,
+				979B98CE1E0CA7DB9D403C68 /* ProsperTests */,
 				BCDD04D5E5E8EB077EF1377C /* ProsperMonitor */,
 				C12D40161C0CB3AB3699DE60 /* ProsperShield */,
 				0C58C44EBA07697DC7855819 /* ProsperShieldAction */,
@@ -825,9 +870,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A6DC3A0C2FE3E7D7D81B1976 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */,
+				9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		165A042726AEB9B344CF030C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79E807E5BA2A73A80F588CF9 /* Prosper */;
+			targetProxy = D6BBBE7E2B0CF969DD8DE9AE /* PBXContainerItemProxy */;
+		};
 		3B98AD3B893BF9D84E2A126F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = C12D40161C0CB3AB3699DE60 /* ProsperShield */;
@@ -851,6 +910,23 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		04196037CC728672935F1AB6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mostafa.prosper.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Prosper.app/Prosper";
+			};
+			name = Release;
+		};
 		2E23290F29DABB2AC2641E08 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1027,6 +1103,23 @@
 			};
 			name = Debug;
 		};
+		B2EB8503D1F57A06E9064D38 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mostafa.prosper.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Prosper.app/Prosper";
+			};
+			name = Debug;
+		};
 		B6F963DF3CB4EC0A2153A82B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1173,6 +1266,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		03A9782F82E2988E7A45B73D /* Build configuration list for PBXNativeTarget "ProsperTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2EB8503D1F57A06E9064D38 /* Debug */,
+				04196037CC728672935F1AB6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		18C8EFAA24434D073D219072 /* Build configuration list for PBXNativeTarget "ProsperShieldAction" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

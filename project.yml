@@ -54,6 +54,24 @@ targets:
       - target: ProsperShield
       - target: ProsperShieldAction
       - target: ProsperReport
+    scheme:
+      testTargets:
+        - ProsperTests
+
+  # Covers the pure logic that ships silently: BlockDomain.normalize, where a
+  # wrong answer means a site the user believes is blocked simply is not, and
+  # the WarningLevel ladder maths (REL-15).
+  ProsperTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ProsperTests
+    dependencies:
+      - target: Prosper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.tests
+        GENERATE_INFOPLIST_FILE: YES
 
   ProsperMonitor:
     type: app-extension
