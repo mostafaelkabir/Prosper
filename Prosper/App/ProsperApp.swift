@@ -31,9 +31,14 @@ struct ProsperApp: App {
             }
             .modelContainer(PersistenceConfig.sharedModelContainer)
             .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
                 // Returning to the app is the reliable moment to lift a block whose
                 // timer elapsed while the system monitor didn't fire.
-                if phase == .active { BlockingService.shared.clearExpiredBlockIfNeeded() }
+                BlockingService.shared.clearExpiredBlockIfNeeded()
+                // Screen Time access can be withdrawn in iOS Settings while
+                // Prosper is in the background, so it is re-read here rather
+                // than trusted from launch (REL-10).
+                authManager.refresh()
             }
         }
     }
@@ -52,27 +57,5 @@ struct ProsperApp: App {
             typedDomains: settings.wasteDomains,
             thresholdMinutes: settings.wasteWarningThresholdMinutes
         )
-    }
-}
-
-@MainActor
-class AuthorizationManager: ObservableObject {
-    @Published var isAuthorized = false
-
-    init() {
-        #if targetEnvironment(simulator)
-        isAuthorized = true
-        #else
-        isAuthorized = AuthorizationCenter.shared.authorizationStatus == .approved
-        #endif
-    }
-
-    func requestAuthorization() async {
-        do {
-            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-            isAuthorized = true
-        } catch {
-            isAuthorized = false
-        }
     }
 }

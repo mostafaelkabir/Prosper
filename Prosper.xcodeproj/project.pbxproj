@@ -35,6 +35,7 @@
 		483703E5A19843B96AFDE43C /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */; };
 		4BFE11BA6D11945D58CF3887 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
 		4D6A8C8E17E2B2025B3628A4 /* TodayHeroReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49565334CAB253E5F9C6CAA9 /* TodayHeroReportView.swift */; };
+		500B54F4B4C9326266E5BB1B /* AuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD2D6A524A67AC8C6385C8A /* AuthorizationManager.swift */; };
 		55EF66B110B9B1FD26B456C3 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		5608EF8E891C496698D984A1 /* UsageIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912B1621B5ECD8CF9E64759D /* UsageIcon.swift */; };
 		5B3E77F66242484182855F8C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70907B88A840AC6A25FAA3B6 /* SettingsView.swift */; };
@@ -172,6 +173,7 @@
 		4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedBlockState.swift; sourceTree = "<group>"; };
 		4AF67A965E96E1E1DF05935A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyUsage.swift; sourceTree = "<group>"; };
+		4BD2D6A524A67AC8C6385C8A /* AuthorizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationManager.swift; sourceTree = "<group>"; };
 		6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		643BD5F882BBCEBFC2911F9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		68D2F2EB4ABB65B26F5BC408 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 		AAB6DC317D5ABB3CE7BA8595 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				4BD2D6A524A67AC8C6385C8A /* AuthorizationManager.swift */,
 				380FF60661EA74BC8735A26D /* BlockingService.swift */,
 				FD81363CEE9AFA44997EAE05 /* NotificationService.swift */,
 				24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */,
@@ -699,6 +702,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				853B22820FDACA330350A95D /* AuroraComponents.swift in Sources */,
+				500B54F4B4C9326266E5BB1B /* AuthorizationManager.swift in Sources */,
 				8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */,
 				47A95850D574972EFDB091EA /* BlockSession.swift in Sources */,
 				65A8D0BAFC6B66B418F5D706 /* BlockView.swift in Sources */,
