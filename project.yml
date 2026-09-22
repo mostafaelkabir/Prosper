@@ -100,6 +100,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.monitor
+        # Must match the app; an extension claiming iPad while the app is
+        # iPhone-only is an inconsistent bundle (REL-17).
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
@@ -112,8 +115,9 @@ targets:
     info:
       path: ProsperMonitor/Info.plist
       properties:
+        CFBundleDisplayName: StolenEyes
         NSExtension:
-          NSExtensionPointIdentifier: com.apple.deviceactivitymonitor
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperDeviceActivityMonitor
 
   ProsperShield:
@@ -129,6 +133,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.shield
+        # Must match the app; an extension claiming iPad while the app is
+        # iPhone-only is an inconsistent bundle (REL-17).
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
@@ -140,8 +147,9 @@ targets:
     info:
       path: ProsperShield/Info.plist
       properties:
+        CFBundleDisplayName: StolenEyes
         NSExtension:
-          NSExtensionPointIdentifier: com.apple.shieldconfiguration
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperShieldConfiguration
 
   ProsperShieldAction:
@@ -154,6 +162,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.shieldaction
+        # Must match the app; an extension claiming iPad while the app is
+        # iPhone-only is an inconsistent bundle (REL-17).
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
@@ -170,8 +181,9 @@ targets:
     info:
       path: ProsperShieldAction/Info.plist
       properties:
+        CFBundleDisplayName: StolenEyes
         NSExtension:
-          NSExtensionPointIdentifier: com.apple.shieldaction
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperShieldActionExtension
 
   ProsperReport:
@@ -188,6 +200,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.report
+        # Must match the app; an extension claiming iPad while the app is
+        # iPhone-only is an inconsistent bundle (REL-17).
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 1.0
