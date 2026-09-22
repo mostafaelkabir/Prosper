@@ -52,6 +52,7 @@
 		71C9B13C0501932F059C4879 /* InsightsReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3332376609E00896D14B23 /* InsightsReportView.swift */; };
 		733FFE56124EA7481251B14A /* WarningService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E6B811AC6801D9D1952ACD /* WarningService.swift */; };
 		74A891C2EDBD5F8BD8BB0AA8 /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
+		7600ACED3E92C37BA63D9D02 /* ConfirmBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAAE34D997A74ECD4C5CC2B /* ConfirmBlockView.swift */; };
 		77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		793E6B1F0F13A28B6115AFF2 /* WarningEscalation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4785AFA626F9A90CBD3D6BC /* WarningEscalation.swift */; };
 		80BE6AEA393AA35702434B88 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
@@ -209,6 +210,7 @@
 		AB3332376609E00896D14B23 /* InsightsReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsReportView.swift; sourceTree = "<group>"; };
 		B8F0966BDF79094A611FF59E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9571C24CF734505B0A04A5F /* ProsperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperApp.swift; sourceTree = "<group>"; };
+		BAAAE34D997A74ECD4C5CC2B /* ConfirmBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmBlockView.swift; sourceTree = "<group>"; };
 		BBE6DA47D979165CC918A89E /* AuroraComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraComponents.swift; sourceTree = "<group>"; };
 		C0A5392C1BFA98EA99B7C63B /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		C0BEECE923A1EB6C084F9C26 /* ProsperMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperMonitor.entitlements; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 			isa = PBXGroup;
 			children = (
 				A632709C4CC649D29F82481B /* BlockView.swift */,
+				BAAAE34D997A74ECD4C5CC2B /* ConfirmBlockView.swift */,
 				95C798094F2F921F57D4E9DA /* CreateBlockView.swift */,
 				E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */,
 			);
@@ -719,6 +722,7 @@
 				65A8D0BAFC6B66B418F5D706 /* BlockView.swift in Sources */,
 				AE39E426B90306EB201322B4 /* BlockingService.swift in Sources */,
 				99076840B8674B3BCCA2ACC1 /* ClassificationEditorView.swift in Sources */,
+				7600ACED3E92C37BA63D9D02 /* ConfirmBlockView.swift in Sources */,
 				84911D8643111011B7AD7091 /* CreateBlockView.swift in Sources */,
 				A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */,
 				26475C206A82AEF97932A0D9 /* DataReset.swift in Sources */,

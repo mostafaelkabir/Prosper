@@ -15,6 +15,11 @@ struct CreateBlockView: View {
     @State private var showCustomPicker = false
     @State private var customHours = 1
     @State private var customMinutes = 0
+    @State private var showConfirmation = false
+
+    /// Every block ever started, used only to tell a first-timer from someone
+    /// who knows what a block feels like.
+    @Query private var allSessions: [BlockSession]
 
     /// Prefill hook for Quick Block presets: seed the sheet with the user's
     /// waste selection + typed domains and a chosen duration. The user still
@@ -29,13 +34,34 @@ struct CreateBlockView: View {
         Date.now.addingTimeInterval(duration).formatted(date: .omitted, time: .shortened)
     }
 
-    private let presets: [(label: String, seconds: TimeInterval)] = [
+    private let allPresets: [(label: String, seconds: TimeInterval)] = [
         ("30m", 1800),
         ("1h", 3600),
         ("2h", 7200),
         ("4h", 14400),
         ("8h", 28800),
     ]
+
+    /// A first block is capped well below the 23h55m the custom picker allows.
+    ///
+    /// Someone who has never felt an unbreakable block has no way to judge what
+    /// a day of one is like, and there is no undo to learn from. Four hours is
+    /// long enough to be a real session and short enough that a misjudgement is
+    /// an afternoon rather than a crisis. The cap lifts as soon as they have
+    /// finished one (REL-9).
+    private static let firstBlockMaxDuration: TimeInterval = 4 * 3600
+
+    private var isFirstBlock: Bool { allSessions.isEmpty }
+
+    private var maxDuration: TimeInterval {
+        isFirstBlock ? Self.firstBlockMaxDuration : 23 * 3600 + 55 * 60
+    }
+
+    private var presets: [(label: String, seconds: TimeInterval)] {
+        allPresets.filter { $0.seconds <= maxDuration }
+    }
+
+    private var maxCustomHours: Int { Int(maxDuration) / 3600 }
 
     private static let suggestedDomains: [(name: String, domain: String)] = [
         ("Reddit", "reddit.com"),
@@ -51,7 +77,12 @@ struct CreateBlockView: View {
     }
 
     private var hasSelection: Bool {
-        !selection.applicationTokens.isEmpty || siteCount > 0
+        !selection.applicationTokens.isEmpty
+            // A category-only pick is a real selection — and the one REL-9 cares
+            // most about, since it sweeps in apps the user never named. It used
+            // to leave the lock button hidden with no explanation.
+            || !selection.categoryTokens.isEmpty
+            || siteCount > 0
     }
 
     private var durationText: String {
@@ -87,7 +118,18 @@ struct CreateBlockView: View {
             }
             .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
             .sensoryFeedback(.selection, trigger: duration)
-            .onAppear(perform: loadSavedDomains)
+            .onAppear {
+                loadSavedDomains()
+                clampDuration()
+            }
+            .navigationDestination(isPresented: $showConfirmation) {
+                ConfirmBlockView(
+                    selection: selection,
+                    typedDomains: domains,
+                    duration: duration,
+                    onConfirm: startBlock
+                )
+            }
         }
     }
 
@@ -226,7 +268,7 @@ struct CreateBlockView: View {
             if showCustomPicker {
                 HStack {
                     Picker("Hours", selection: $customHours) {
-                        ForEach(0..<24) { Text("\($0)h").tag($0) }
+                        ForEach(0...maxCustomHours, id: \.self) { Text("\($0)h").tag($0) }
                     }
                     .pickerStyle(.wheel)
                     .frame(width: 100)
@@ -246,20 +288,34 @@ struct CreateBlockView: View {
         } header: {
             Text("How long")
         } footer: {
-            Text("Block for \(durationText)")
-                .font(.subheadline.weight(.semibold))
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Block for \(durationText)")
+                    .font(.subheadline.weight(.semibold))
+                if isFirstBlock {
+                    Text("Your first block is capped at 4 hours. There is no undo, so it is worth finding out what one feels like before committing a day to it. The cap lifts after this one.")
+                }
+            }
         }
     }
 
+    /// Leads to the confirmation screen rather than starting the block. The
+    /// hold-to-lock now lives there, so nothing can be locked without the user
+    /// having seen the full list of what it covers (REL-9).
     private var confirmBar: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Once it starts, nothing in this app can stop it before \(endTimeText).")
                 .font(ProsperFont.insight)
                 .foregroundStyle(ProsperColor.ink)
                 .fixedSize(horizontal: false, vertical: true)
-            HoldToLock(title: "Hold to lock") {
-                startBlock()
+            Button {
+                showConfirmation = true
+            } label: {
+                Text("Review what gets locked")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
             }
+            .buttonStyle(.borderedProminent)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -269,6 +325,16 @@ struct CreateBlockView: View {
     private func updateCustomDuration() {
         duration = TimeInterval(customHours * 3600 + customMinutes * 60)
         if duration == 0 { duration = 300 }
+        clampDuration()
+    }
+
+    /// Keeps the duration inside the cap — a Quick Block preset can arrive
+    /// longer than a first-timer is allowed.
+    private func clampDuration() {
+        if duration > maxDuration {
+            duration = maxDuration
+            customHours = min(customHours, maxCustomHours)
+        }
     }
 
     private func loadSavedDomains() {
