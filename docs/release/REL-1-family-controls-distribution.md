@@ -1,8 +1,17 @@
 # REL-1 — Family Controls (Distribution) entitlement request
 
-**Status: needs Mostafa's Apple Developer account. Nothing here can be filed by an agent.**
-This is the long pole: Apple reviews the request by hand, takes roughly four
-business days to several weeks, and can refuse it.
+**Status: GRANTED, 2026-09-22.** Requested and approved the same day — far
+faster than the several weeks this ticket budgeted for.
+
+> The entitlement for Family Controls (Distribution) has been assigned to your
+> account, and you can now configure this capability for eligible apps.
+
+Confirmed working rather than just announced: regenerated store provisioning
+profiles now carry `com.apple.developer.family-controls` for
+`com.mostafa.prosper`, `.monitor` and `.report`, and `xcodebuild -exportArchive`
+produces a signed `.ipa` (see REL-2).
+
+The record below is kept for the next time someone needs to make this argument.
 
 ## Why it blocks everything else
 
