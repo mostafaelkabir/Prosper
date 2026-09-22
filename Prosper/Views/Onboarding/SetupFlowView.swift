@@ -50,7 +50,7 @@ struct SetupFlowView: View {
         VStack(spacing: 0) {
             Form {
                 Section {
-                    Text("Pick the apps and sites that eat your time. Prosper watches these to warn you when today's total crosses your threshold — and they become your one-tap Focus block.")
+                    Text("Pick the apps and sites that eat your time. StolenEyes watches these to warn you when today's total crosses your threshold — and they become your one-tap Focus block.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

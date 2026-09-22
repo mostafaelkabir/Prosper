@@ -55,7 +55,7 @@ struct InterventionView: View {
                             .foregroundStyle(ProsperColor.ink2)
                     }
                     InsightSentence(
-                        text: "That is three times the limit you set for yourself. Nothing is blocked right now — this is only Prosper telling you the truth.",
+                        text: "That is three times the limit you set for yourself. Nothing is blocked right now — this is only StolenEyes telling you the truth.",
                         footnote: "Your threshold: \(WarningLevel.durationText(minutes / WarningLevel.intervention.rawValue)) a day."
                     )
                     if requiresPhrase { phraseField }

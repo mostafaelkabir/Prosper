@@ -55,46 +55,86 @@ Entitlements actually present in the archived bundle:
 | ProsperShield | no | yes |
 | ProsperShieldAction | no | **yes** (new) |
 
-## What is still missing
+## The archive path works end to end
 
-**1. An Apple Distribution certificate.** This Mac has exactly one identity:
+As of 2026-09-22, after Apple granted the Family Controls (Distribution)
+entitlement (REL-1), `scripts/archive.sh` produces a signed `.ipa`:
 
 ```
-$ security find-identity -v -p codesigning
-1) Apple Development: melkabir91@gmail.com (662BXV2B9Z)
+** ARCHIVE SUCCEEDED **
+** EXPORT SUCCEEDED **
+Prosper.ipa   2.5 MB
+Authority=Apple Distribution: Mostafa Elkabir (V9WJ9X99FX)
 ```
 
-So the archive above is Development-signed (`SigningIdentity = "Apple
-Development…"` in the archive's Info.plist) and cannot be uploaded. Create the
-certificate in Xcode ▸ Settings ▸ Accounts ▸ Manage Certificates ▸ + ▸ Apple
-Distribution, or in the portal. A distribution certificate is account-wide and
-its private key lives in this Mac's keychain — **export it to a .p12 and keep it
-somewhere safe**, because losing it means revoking and reissuing.
+The regenerated store profiles carry the entitlement on exactly the three
+bundle IDs REL-1 predicted, and not on the other two:
 
-**2. The Family Controls (Distribution) entitlement — REL-1.** Export fails on
-this and nothing else:
+| Store profile | family-controls |
+|---|---|
+| com.mostafa.prosper | yes |
+| com.mostafa.prosper.monitor | yes |
+| com.mostafa.prosper.report | yes |
+| com.mostafa.prosper.shield | no |
+| com.mostafa.prosper.shieldaction | no |
+
+### No distribution certificate to manage
+
+Signing uses **"Cloud Managed Apple Distribution"** — Apple holds the private
+key and signs through Xcode's service. `security find-identity` shows no
+distribution identity locally and that is correct, not a problem.
+
+This supersedes the earlier instruction in this file to create a certificate by
+hand and export a `.p12`. There is no private key on this Mac to back up, and
+nothing to lose when the machine is replaced. Do **not** create a manual
+distribution certificate as well; it would consume one of the account's limited
+slots for no benefit.
+
+### The trap that actually cost the time
+
+Xcode caches store provisioning profiles and does **not** refresh them when an
+App ID gains a capability. After the entitlement was granted, the export kept
+failing with:
 
 ```
 error: exportArchive Provisioning profile "iOS Team Store Provisioning Profile: com.mostafa.prosper"
        doesn't include the com.apple.developer.family-controls entitlement.
 ```
 
-The store profiles for `com.mostafa.prosper`, `.monitor` and `.report` cannot
-carry the entitlement until Apple grants it. This is the blocker, and it is
-outside our control.
+— the identical error to before the grant, because Xcode was reusing profiles
+generated while the entitlement did not exist. The message names the
+entitlement, which sends you back to the portal to re-check something that is
+already correct. The fix is to delete the cached store profiles so Xcode fetches
+fresh ones. `scripts/archive.sh` now does this on every run.
 
-## Order of operations
+## What is still missing
 
-1. Create the Apple Distribution certificate (do this now — independent of REL-1).
-2. File REL-1 for the three bundle IDs. Wait.
-3. On approval, run `scripts/archive.sh`. It archives, exports with
-   `method: app-store-connect`, and validates against App Store Connect.
-4. DoD is a validated `.ipa`. Attach the validation output to this ticket.
+Only one thing, and it is a credential rather than a capability.
+
+**An App Store Connect API key**, so the `.ipa` can be validated and uploaded:
+
+1. App Store Connect ▸ Users and Access ▸ Integrations ▸ App Store Connect API
+2. Generate a key — the **Developer** role is enough
+3. Save the `.p8` to `~/.appstoreconnect/private_keys/` (it can only be
+   downloaded once)
+4. Re-run with the key and issuer IDs:
+
+```bash
+ASC_KEY_ID=XXXXXXXXXX ASC_ISSUER_ID=<uuid> scripts/archive.sh
+```
+
+Without it the script still produces a correctly signed `.ipa` and simply skips
+the validation step.
+
+The ticket DoD is "a validated .ipa exists". The `.ipa` exists and is correctly
+signed; validation needs the key above.
 
 ## Notes
 
 - Everything here uses automatic signing with `-allowProvisioningUpdates`, which
   is why no profile is checked into the repo. Keep it that way: profiles expire
   (these run to Sept 2027) and a committed one silently rots.
+- The cloud-managed distribution certificate expires 2027-09-20. Renewal is
+  Xcode's problem, not a keychain item to nurse.
 - `DEVELOPMENT_TEAM: V9WJ9X99FX` is set once in `project.yml` under
   `settings.base`, so every target inherits it. Do not add per-target copies.

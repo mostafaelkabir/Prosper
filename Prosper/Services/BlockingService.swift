@@ -177,7 +177,7 @@ final class BlockingService: @unchecked Sendable {
         guard duration > 0 else { return }
         let content = UNMutableNotificationContent()
         content.title = "Block finished"
-        content.body = "Your Prosper block just expired. Nice work — the door is unlocked again."
+        content.body = "Your StolenEyes block just expired. Nice work — the door is unlocked again."
         content.sound = .default
 
         let request = UNNotificationRequest(

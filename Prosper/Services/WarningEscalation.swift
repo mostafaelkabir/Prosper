@@ -50,7 +50,7 @@ enum WarningLevel: Int, CaseIterable, Sendable {
         case .firm:
             return "\(spent) today, and you're still in it. Is this the day you wanted?"
         case .intervention:
-            return "\(spent) gone to distractions today. Open Prosper and decide what happens next."
+            return "\(spent) gone to distractions today. Open StolenEyes and decide what happens next."
         }
     }
 

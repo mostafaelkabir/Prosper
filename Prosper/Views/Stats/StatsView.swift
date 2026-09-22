@@ -89,7 +89,7 @@ struct StatsView: View {
             Spacer()
             ProsperCard {
                 InsightSentence(
-                    text: "Patterns will appear once Prosper has learned your week.",
+                    text: "Patterns will appear once StolenEyes has learned your week.",
                     footnote: "Ranked insights — checking reflex, notification pull, rabbit holes — land with the insight engine."
                 )
             }

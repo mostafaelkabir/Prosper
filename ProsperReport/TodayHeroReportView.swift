@@ -109,7 +109,7 @@ struct TodayHeroReportView: View {
     // MARK: - Honest states
 
     private var unclassifiedNote: some View {
-        Text("Most of your time is unclassified. Label your apps and sites so Prosper can tell productive from distracting.")
+        Text("Most of your time is unclassified. Label your apps and sites so StolenEyes can tell productive from distracting.")
             .font(.system(size: 12))
             .foregroundStyle(ProsperColor.ink2)
             .fixedSize(horizontal: false, vertical: true)

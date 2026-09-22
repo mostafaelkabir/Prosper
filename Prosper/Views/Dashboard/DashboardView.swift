@@ -316,7 +316,7 @@ struct DashboardView: View {
                     Text("Finish setting up")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(ProsperColor.ink)
-                    Text("Pick your waste apps and sites so Prosper can watch for you.")
+                    Text("Pick your waste apps and sites so StolenEyes can watch for you.")
                         .font(.system(size: 12))
                         .foregroundStyle(ProsperColor.ink2)
                 }

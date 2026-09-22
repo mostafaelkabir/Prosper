@@ -51,7 +51,7 @@ class ProsperShieldConfiguration: ShieldConfigurationDataSource {
     private func fallback() -> ShieldConfiguration {
         ShieldConfiguration(
             backgroundBlurStyle: .systemThickMaterial,
-            title: ShieldConfiguration.Label(text: "Locked by Prosper", color: .label),
+            title: ShieldConfiguration.Label(text: "Locked by StolenEyes", color: .label),
             subtitle: ShieldConfiguration.Label(text: "This is the block you set. It stays locked until the timer ends.\n\(LockExitCopy.shield)", color: .secondaryLabel),
             primaryButtonLabel: ShieldConfiguration.Label(text: "Close", color: .white),
             primaryButtonBackgroundColor: .systemBlue

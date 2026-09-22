@@ -1,10 +1,10 @@
 #!/bin/bash
 # Archives Prosper for the App Store and validates the result (REL-2).
 #
-# Works today up to the export step; the export fails until Apple grants the
-# Family Controls (Distribution) entitlement (REL-1) and an Apple Distribution
-# certificate exists in the keychain. Both failures are printed in full rather
-# than swallowed, because which one you hit tells you what to do next.
+# The whole path works as of 2026-09-22, once Apple granted the Family Controls
+# (Distribution) entitlement (REL-1). Signing is Xcode's "Cloud Managed Apple
+# Distribution" certificate — Apple holds the private key, so there is nothing
+# to back up and no .p12 to lose.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -12,11 +12,25 @@ TEAM="V9WJ9X99FX"
 OUT="${1:-build/release}"
 ARCHIVE="$OUT/Prosper.xcarchive"
 
-echo "==> Checking for a distribution certificate"
-if ! security find-identity -v -p codesigning | grep -q "Apple Distribution"; then
-  echo "    WARNING: no 'Apple Distribution' identity in the keychain."
-  echo "    The archive will be Development-signed and cannot be uploaded."
-  echo "    Xcode > Settings > Accounts > Manage Certificates > + > Apple Distribution"
+# Xcode caches store provisioning profiles and does NOT refresh them when an
+# App ID gains a capability — it happily reuses a profile generated before the
+# entitlement existed and then fails the export complaining that the profile
+# lacks the entitlement it just granted you. That error names the entitlement,
+# which sends you off re-checking the portal, when the real fix is to delete the
+# stale cache so Xcode fetches a new one. This cost several confused attempts;
+# doing it every run is cheap and profiles regenerate on demand.
+echo "==> Clearing cached store provisioning profiles"
+PROFILE_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+if [ -d "$PROFILE_DIR" ]; then
+  removed=0
+  for f in "$PROFILE_DIR"/*.mobileprovision; do
+    [ -e "$f" ] || continue
+    name=$(security cms -D -i "$f" 2>/dev/null | plutil -extract Name raw - 2>/dev/null || true)
+    case "$name" in
+      *Store*) rm -f "$f"; removed=$((removed + 1)) ;;
+    esac
+  done
+  echo "    removed $removed (development profiles left alone)"
 fi
 
 echo "==> Regenerating the Xcode project"
@@ -29,8 +43,11 @@ xcodebuild -project Prosper.xcodeproj -scheme Prosper \
   -configuration Release -destination 'generic/platform=iOS' \
   -archivePath "$ARCHIVE" -allowProvisioningUpdates archive
 
+# The archive is signed with the development identity; the DISTRIBUTION identity
+# is applied during export, so this line is informational only.
 echo "==> Archive signed with:"
-plutil -extract SigningIdentity raw -o - "$ARCHIVE/Info.plist" || true
+plutil -extract ApplicationProperties.SigningIdentity raw -o - "$ARCHIVE/Info.plist" 2>/dev/null \
+  | sed 's/^/    /' || echo "    (unknown)"
 
 cat > "$OUT/ExportOptions.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -54,7 +71,36 @@ xcodebuild -exportArchive -archivePath "$ARCHIVE" \
 IPA="$(find "$OUT/export" -name '*.ipa' | head -1)"
 echo "==> Exported $IPA"
 
+# codesign cannot read a .ipa (it is a zip), so the identity comes from the
+# export's own summary, which also names the certificate type.
+echo "==> Exported build signed with:"
+plutil -extract DistributionSummary raw -o - "$OUT/export/DistributionSummary.plist" >/dev/null 2>&1 || true
+python3 - "$OUT/export/DistributionSummary.plist" <<'PYEOF' || echo "    (unknown)"
+import plistlib, sys
+with open(sys.argv[1], "rb") as f:
+    data = plistlib.load(f)
+seen = set()
+for entries in data.values():
+    for entry in entries if isinstance(entries, list) else []:
+        cert = entry.get("certificate") or {}
+        label = cert.get("type") or cert.get("SHA1")
+        if label and label not in seen:
+            seen.add(label)
+            print(f"    {label} (expires {cert.get('dateExpires', '?')})")
+PYEOF
+
+if [ -z "${ASC_KEY_ID:-}" ] || [ -z "${ASC_ISSUER_ID:-}" ]; then
+  echo
+  echo "==> Skipping validation: no App Store Connect API key configured."
+  echo "    Create one at App Store Connect > Users and Access > Integrations > App Store Connect API"
+  echo "    (Developer role is enough), save the .p8 to ~/.appstoreconnect/private_keys/,"
+  echo "    then re-run with:"
+  echo "      ASC_KEY_ID=XXXXXXXXXX ASC_ISSUER_ID=<uuid> $0"
+  echo
+  echo "    The .ipa above is complete and correctly signed either way."
+  exit 0
+fi
+
 echo "==> Validating against App Store Connect"
-echo "    (needs an app-specific password or an API key; see REL-14)"
-xcrun altool --validate-app -f "$IPA" -t ios --apiKey "${ASC_KEY_ID:?set ASC_KEY_ID}" \
-  --apiIssuer "${ASC_ISSUER_ID:?set ASC_ISSUER_ID}"
+xcrun altool --validate-app -f "$IPA" -t ios \
+  --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
