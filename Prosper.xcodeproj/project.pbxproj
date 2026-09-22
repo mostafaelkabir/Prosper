@@ -10,6 +10,8 @@
 		00117D31DAD5B1C060F12C55 /* ProsperShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		029D3510A9C4CE28D3C2372E /* WarningEscalation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4785AFA626F9A90CBD3D6BC /* WarningEscalation.swift */; };
 		03AF6B431ACE56BF0BD3A7D2 /* ProsperShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */; };
+		067CF341E649C71A4F150FCC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4AF67A965E96E1E1DF05935A /* PrivacyInfo.xcprivacy */; };
+		079C061CEB172DF50D1A3968 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E7B7D57E404A015531D5E173 /* PrivacyInfo.xcprivacy */; };
 		12A4F7B9CCF7D96FF1E8DAE4 /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
 		17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */; };
 		1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
@@ -21,6 +23,7 @@
 		32F0D559291DD554337BAAD9 /* InsightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071EA35FC7FB8558AEFC887C /* InsightEngine.swift */; };
 		32F7CF502ECEFE5B265CE1E6 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD81363CEE9AFA44997EAE05 /* NotificationService.swift */; };
+		361B952FC1B2C2BF95C33AA7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FB8BB816C2BB41E121A5550C /* PrivacyInfo.xcprivacy */; };
 		365525317D3068C6437BA124 /* UsageIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912B1621B5ECD8CF9E64759D /* UsageIcon.swift */; };
 		3AF1F2A254EBD1DE5AED807B /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		3DDDF02502063707F3B8B5C6 /* InsightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071EA35FC7FB8558AEFC887C /* InsightEngine.swift */; };
@@ -55,6 +58,7 @@
 		8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */; };
 		87D9ACCAE9A3CBF70D76E6E2 /* ProsperShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
+		8BD30D6A449A732781E6BCF6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */; };
 		8DC829A6B7DAA35A4FB0003D /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
 		97727BBE97137F3C9E209F77 /* ProsperMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		97AF62DF1D6FC69958544869 /* InterventionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA48729E878E058C7A790F7 /* InterventionView.swift */; };
@@ -75,6 +79,7 @@
 		C38694944BB561C81CFD2ACB /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		C5A8D26E2373DCF8C7DF16B2 /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA0E27E5CD977B8750BB3FC /* PlatformCatalog.swift */; };
 		C8FDD09917FE7507FE2DABDB /* HourlyUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */; };
+		C9B921E02F7670AED35E7057 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8207DF2CE8C728636D9D11BC /* PrivacyInfo.xcprivacy */; };
 		D5AA7F344A9ADA7B6F1544C6 /* WasteListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B4ABC1CFA6F0C70DAC220D /* WasteListEditor.swift */; };
 		D680F5699C97E44818731489 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A5392C1BFA98EA99B7C63B /* StatsView.swift */; };
 		D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72AD9387F5DEB57CF802404 /* MainTabView.swift */; };
@@ -164,7 +169,9 @@
 		4036DF70562D624D5EE1072F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		49565334CAB253E5F9C6CAA9 /* TodayHeroReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayHeroReportView.swift; sourceTree = "<group>"; };
 		4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedBlockState.swift; sourceTree = "<group>"; };
+		4AF67A965E96E1E1DF05935A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyUsage.swift; sourceTree = "<group>"; };
+		6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		643BD5F882BBCEBFC2911F9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		68D2F2EB4ABB65B26F5BC408 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6AE69637163805466D518E49 /* UsageStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStat.swift; sourceTree = "<group>"; };
@@ -175,6 +182,7 @@
 		7647CA969CEE0A3F6F293AA3 /* Prosper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Prosper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		787F80B30CAB4A7432226247 /* ProsperReport.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = ProsperReport.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		78EC67B48BC3EEEC96B70271 /* InsightSpotlightHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightSpotlightHost.swift; sourceTree = "<group>"; };
+		8207DF2CE8C728636D9D11BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
 		8E408975B92219D4F495551F /* ProsperType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperType.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
@@ -200,13 +208,16 @@
 		C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageReportFilter.swift; sourceTree = "<group>"; };
 		CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyHeatmapView.swift; sourceTree = "<group>"; };
 		DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldActionExtension.swift; sourceTree = "<group>"; };
+		DBFC27FB7E78B2F0FA5FFCA9 /* ProsperShieldAction.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperShieldAction.entitlements; sourceTree = "<group>"; };
 		DC1A493EE7C83D337D809A21 /* InsightsScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsScene.swift; sourceTree = "<group>"; };
 		DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7B7D57E404A015531D5E173 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickBlockPresets.swift; sourceTree = "<group>"; };
 		EBA48729E878E058C7A790F7 /* InterventionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterventionView.swift; sourceTree = "<group>"; };
 		F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummary.swift; sourceTree = "<group>"; };
 		F4785AFA626F9A90CBD3D6BC /* WarningEscalation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEscalation.swift; sourceTree = "<group>"; };
 		F9307A48CDD179678D104993 /* ProsperReport.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperReport.entitlements; sourceTree = "<group>"; };
+		FB8BB816C2BB41E121A5550C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FCE86A244991500CE0C12F76 /* SelectionChips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionChips.swift; sourceTree = "<group>"; };
 		FD81363CEE9AFA44997EAE05 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,9 +234,30 @@
 			path = ProsperMonitor;
 			sourceTree = "<group>";
 		};
+		03698B5D8253909DDF54D204 /* ProsperMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				8207DF2CE8C728636D9D11BC /* PrivacyInfo.xcprivacy */,
+			);
+			path = ProsperMonitor;
+			sourceTree = "<group>";
+		};
+		09B03B202AC715556808D33D /* PrivacyManifests */ = {
+			isa = PBXGroup;
+			children = (
+				D4D71F9144193DABF4F0F775 /* Prosper */,
+				03698B5D8253909DDF54D204 /* ProsperMonitor */,
+				938E34B426A1097A4033CC15 /* ProsperReport */,
+				A865246CF3DC6319D51E81B9 /* ProsperShield */,
+				CCB9AE6ECF60F4923499370C /* ProsperShieldAction */,
+			);
+			path = PrivacyManifests;
+			sourceTree = "<group>";
+		};
 		09D0D221DD3F5D46CBF23DB4 = {
 			isa = PBXGroup;
 			children = (
+				09B03B202AC715556808D33D /* PrivacyManifests */,
 				17A8D1F8DEB5EAF9C6C7A46C /* Prosper */,
 				00DDE7E27190EF4AD329DD1F /* ProsperMonitor */,
 				4E3B08F25788129C60C6955C /* ProsperReport */,
@@ -286,6 +318,7 @@
 			isa = PBXGroup;
 			children = (
 				68D2F2EB4ABB65B26F5BC408 /* Info.plist */,
+				DBFC27FB7E78B2F0FA5FFCA9 /* ProsperShieldAction.entitlements */,
 				DB757601A375B301E912825A /* ProsperShieldActionExtension.swift */,
 			);
 			path = ProsperShieldAction;
@@ -367,12 +400,28 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		938E34B426A1097A4033CC15 /* ProsperReport */ = {
+			isa = PBXGroup;
+			children = (
+				6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */,
+			);
+			path = ProsperReport;
+			sourceTree = "<group>";
+		};
 		A5C391FE50F4110CDE5939F9 /* ProsperShield */ = {
 			isa = PBXGroup;
 			children = (
 				A3678B823AB6BEC5CE18E98B /* Info.plist */,
 				7462F6347B40E67D3D02E878 /* ProsperShield.entitlements */,
 				8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */,
+			);
+			path = ProsperShield;
+			sourceTree = "<group>";
+		};
+		A865246CF3DC6319D51E81B9 /* ProsperShield */ = {
+			isa = PBXGroup;
+			children = (
+				E7B7D57E404A015531D5E173 /* PrivacyInfo.xcprivacy */,
 			);
 			path = ProsperShield;
 			sourceTree = "<group>";
@@ -419,6 +468,22 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		CCB9AE6ECF60F4923499370C /* ProsperShieldAction */ = {
+			isa = PBXGroup;
+			children = (
+				4AF67A965E96E1E1DF05935A /* PrivacyInfo.xcprivacy */,
+			);
+			path = ProsperShieldAction;
+			sourceTree = "<group>";
+		};
+		D4D71F9144193DABF4F0F775 /* Prosper */ = {
+			isa = PBXGroup;
+			children = (
+				FB8BB816C2BB41E121A5550C /* PrivacyInfo.xcprivacy */,
+			);
+			path = Prosper;
+			sourceTree = "<group>";
+		};
 		D51E73D23315E413F5EEB520 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -443,6 +508,7 @@
 			buildConfigurationList = 18C8EFAA24434D073D219072 /* Build configuration list for PBXNativeTarget "ProsperShieldAction" */;
 			buildPhases = (
 				6B611F90C70512E9974B5E47 /* Sources */,
+				F941EA1ADE18E2D079C0D2E7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -484,6 +550,7 @@
 			buildConfigurationList = E7CFF53D665A8B54BF99BE56 /* Build configuration list for PBXNativeTarget "ProsperReport" */;
 			buildPhases = (
 				9681D39ED04D3FE6D0A23C60 /* Sources */,
+				9C674641ACC2A33A41B6EF71 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -501,6 +568,7 @@
 			buildConfigurationList = A04DB176E4108F218F703481 /* Build configuration list for PBXNativeTarget "ProsperMonitor" */;
 			buildPhases = (
 				40C4D507879B98B8511AD261 /* Sources */,
+				A4CE89872C1F095A8147AD7D /* Resources */,
 			);
 			buildRules = (
 			);
@@ -518,6 +586,7 @@
 			buildConfigurationList = 4D6EED9856B703B54F1023B5 /* Build configuration list for PBXNativeTarget "ProsperShield" */;
 			buildPhases = (
 				218E983138A0D10FC01C2D45 /* Sources */,
+				7CA52325A78F8784FBA7CA2A /* Resources */,
 			);
 			buildRules = (
 			);
@@ -580,11 +649,44 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7CA52325A78F8784FBA7CA2A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				079C061CEB172DF50D1A3968 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C674641ACC2A33A41B6EF71 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BD30D6A449A732781E6BCF6 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A4CE89872C1F095A8147AD7D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9B921E02F7670AED35E7057 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EC58D957874AEB47C04AD1BC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */,
+				361B952FC1B2C2BF95C33AA7 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F941EA1ADE18E2D079C0D2E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				067CF341E649C71A4F150FCC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -728,6 +830,7 @@
 		2E23290F29DABB2AC2641E08 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProsperShieldAction/ProsperShieldAction.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProsperShieldAction/Info.plist;
@@ -884,6 +987,7 @@
 		950007306DCA6473ABA69505 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ProsperShieldAction/ProsperShieldAction.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProsperShieldAction/Info.plist;
