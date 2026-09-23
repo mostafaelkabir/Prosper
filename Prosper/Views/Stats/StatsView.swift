@@ -28,10 +28,10 @@ struct StatsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("Range", selection: $range) {
-                    ForEach(Range.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
+                AuroraSegmented(
+                    options: Range.allCases.map { ($0, $0.rawValue) },
+                    selection: $range
+                )
                 .padding(.horizontal)
                 .padding(.top, 6)
 

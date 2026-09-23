@@ -127,22 +127,32 @@ struct StackedBar: View {
 struct SectionIndex: View {
     let sections: [String]
     @Binding var selection: Int
+    /// Slides the underline between sections instead of hard-cutting, so moving
+    /// between Overview / When / What / Patterns feels quick (PERF-1).
+    @Namespace private var underline
 
     var body: some View {
         HStack(spacing: 20) {
             ForEach(Array(sections.enumerated()), id: \.offset) { index, title in
                 let selected = index == selection
                 Button {
-                    selection = index
+                    withAnimation(.snappy(duration: 0.26)) { selection = index }
                 } label: {
                     VStack(spacing: 6) {
                         Text(title)
                             .font(.subheadline.weight(selected ? .semibold : .regular))
                             .foregroundStyle(selected ? ProsperColor.ink : ProsperColor.ink3)
-                        Rectangle()
-                            .fill(selected ? ProsperColor.slate : .clear)
-                            .frame(height: 2)
+                        ZStack {
+                            Rectangle().fill(.clear).frame(height: 2)
+                            if selected {
+                                Rectangle()
+                                    .fill(ProsperColor.slate)
+                                    .frame(height: 2)
+                                    .matchedGeometryEffect(id: "sectionUnderline", in: underline)
+                            }
+                        }
                     }
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
