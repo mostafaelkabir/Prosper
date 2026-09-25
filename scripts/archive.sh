@@ -36,12 +36,19 @@ fi
 echo "==> Regenerating the Xcode project"
 xcodegen generate
 
-echo "==> Archiving"
+# Every upload needs a build number App Store Connect has not seen, and testers
+# need to tell builds apart in Settings ("1.0 (143)"). project.yml pins 1 for
+# every target; overriding it here reaches the app and all four extensions at
+# once, which must match. The commit count only ever grows; set BUILD_NUMBER to
+# override (QA-9).
+BUILD_NUMBER="${BUILD_NUMBER:-$(git rev-list --count HEAD)}"
+echo "==> Archiving build $BUILD_NUMBER"
 rm -rf "$ARCHIVE"
 mkdir -p "$OUT"
 xcodebuild -project Prosper.xcodeproj -scheme Prosper \
   -configuration Release -destination 'generic/platform=iOS' \
-  -archivePath "$ARCHIVE" -allowProvisioningUpdates archive
+  -archivePath "$ARCHIVE" -allowProvisioningUpdates \
+  CURRENT_PROJECT_VERSION="$BUILD_NUMBER" archive
 
 # The archive is signed with the development identity; the DISTRIBUTION identity
 # is applied during export, so this line is informational only.
