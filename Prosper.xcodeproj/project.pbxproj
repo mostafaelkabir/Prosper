@@ -224,6 +224,7 @@
 		9314AE9A9C3D53B04778361F /* ProsperComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperComponents.swift; sourceTree = "<group>"; };
 		935508F248C2264EECC3FF3C /* DataReset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataReset.swift; sourceTree = "<group>"; };
 		943E53DA14521BE1FDA1AACE /* WarningEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEvent.swift; sourceTree = "<group>"; };
+		94B1FC755C5BA9DFBB966C24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		95C798094F2F921F57D4E9DA /* CreateBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateBlockView.swift; sourceTree = "<group>"; };
 		9A3D80F3BB1484E35E5AA7C9 /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
 		9DE8A4C6525B1024CC685F3B /* ReportContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportContext.swift; sourceTree = "<group>"; };
@@ -326,6 +327,7 @@
 				AAB6DC317D5ABB3CE7BA8595 /* Services */,
 				C72DCEC429DB36C4CDFCB49D /* Views */,
 				B8F0966BDF79094A611FF59E /* Assets.xcassets */,
+				94B1FC755C5BA9DFBB966C24 /* Info.plist */,
 				363E1B2D164246C5150D6D51 /* Prosper.entitlements */,
 			);
 			path = Prosper;
@@ -1234,12 +1236,11 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prosper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1260,12 +1261,11 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prosper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
