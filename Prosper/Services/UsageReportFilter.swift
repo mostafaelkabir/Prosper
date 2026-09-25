@@ -25,7 +25,7 @@ enum UsageReportFilter {
         )
     }
 
-    /// The last 30 days, one segment per day (Insights "Month" range).
+    /// The last 30 days, one segment per day (Insights "30 days" range).
     static func lastThirtyDays() -> DeviceActivityFilter {
         let calendar = Calendar.current
         let todayStart = calendar.startOfDay(for: .now)

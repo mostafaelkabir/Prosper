@@ -3,10 +3,12 @@ import SwiftData
 import DeviceActivity
 
 struct StatsView: View {
+    /// Labels say exactly what the filters cover: today, and the rolling last
+    /// 7 and 30 days — not a calendar "Week" or "Month" (QA-9).
     enum Range: String, CaseIterable, Identifiable {
-        case day = "Day"
-        case week = "Week"
-        case month = "Month"
+        case day = "Today"
+        case week = "7 days"
+        case month = "30 days"
         var id: String { rawValue }
     }
 

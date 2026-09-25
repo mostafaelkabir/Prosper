@@ -129,7 +129,10 @@ struct DashboardView: View {
                     headline
 
                     AuroraSegmented(
-                        options: [(.day, "Today"), (.week, "This week")],
+                        // "Last 7 days", not "This week": the filter is a rolling
+                        // seven days, while the streak strip below shows the
+                        // calendar week — one label must not mean two spans (QA-9).
+                        options: [(.day, "Today"), (.week, "Last 7 days")],
                         selection: $range
                     )
 
@@ -219,12 +222,13 @@ struct DashboardView: View {
         }
     }
 
-    /// Today's ranked insight(s) (E7.0). The ProsperReport extension computes them
+    /// The selected range's ranked insight(s) (E7.0). The ProsperReport extension computes them
     /// from raw usage and renders the cards; we reserve a fixed height because the
     /// hosted report does not report its own size (same constraint as the hero).
     private var insightSpotlight: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Today's insight").labelCaps()
+            // Names the range the card is actually built from (QA-9).
+            Text(range == .day ? "Today's insight" : "Insight · last 7 days").labelCaps()
             InsightSpotlightHost(filter: balanceFilter)
                 .id("insights-\(range)-\(dayKey)")
                 // Sized for a three-line headline and two-line evidence at the

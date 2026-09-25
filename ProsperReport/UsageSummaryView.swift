@@ -89,11 +89,12 @@ struct UsageSummaryView: View {
         .padding(.top, 8)
     }
 
-    /// "2h 5m a day · 63 pickups" over a range, "63 pickups" for a single day.
+    /// "2h 5m a day · 63 pickups total" over a range, "63 pickups" for a single
+    /// day. The time is a daily average but the pickups are the range total, so
+    /// the line says which is which (QA-9).
     private var headerDetail: String {
-        let pickups = "\(summary.totalPickups) pickups"
-        guard summary.dayCount > 1 else { return pickups }
-        return "\(summary.perDay.usageFormatted) a day · \(pickups)"
+        guard summary.dayCount > 1 else { return "\(summary.totalPickups) pickups" }
+        return "\(summary.perDay.usageFormatted) a day · \(summary.totalPickups) pickups total"
     }
 
     private var dailyChart: some View {
