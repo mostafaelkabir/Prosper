@@ -132,12 +132,18 @@ struct HourlyHeatmapView: View {
             ForEach(0..<24, id: \.self) { hour in
                 Group {
                     if hour % 6 == 0 {
-                        Text(hourLabel(hour)).font(.system(size: 8))
+                        // A column is ~12pt wide, narrower than "12a" — let the
+                        // label run into the empty columns beside it instead of
+                        // wrapping to "12 / a" (QA-9).
+                        Text(hourLabel(hour))
+                            .font(.system(size: 8))
+                            .lineLimit(1)
+                            .fixedSize()
                     } else {
                         Color.clear
                     }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .foregroundStyle(.secondary)
