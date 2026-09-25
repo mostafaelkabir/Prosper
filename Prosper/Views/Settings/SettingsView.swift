@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import FamilyControls
+import UserNotifications
 
 struct SettingsView: View {
     /// Reopens the post-authorization setup flow ("Set up again").
@@ -17,12 +18,17 @@ struct SettingsView: View {
     @State private var thresholdMinutes: Double = 30
     @State private var requirePhrase = false
 
-    @State private var loaded = false
-    @State private var didRequestNotifications = false
+    /// Read, never assumed: a user who tapped "Not now" in setup or switched
+    /// notifications off in iOS Settings gets told warnings can't reach them,
+    /// instead of a static line and a surprise prompt (QA-9).
+    @State private var notificationStatus: UNAuthorizationStatus?
+    /// Why the waste monitor is not running, if iOS refused it (QA-9).
+    @State private var scheduleFailure: String?
     @State private var showDeleteConfirmation = false
     @State private var deleteResult: DeleteResult?
 
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
 
     /// What the wipe actually did, so the confirmation is specific rather than
     /// a generic "done".
@@ -44,10 +50,10 @@ struct SettingsView: View {
                         selection: $selection,
                         typedDomains: $typedDomains,
                         thresholdMinutes: $thresholdMinutes,
-                        onChange: persist
+                        onChange: persistWasteList
                     )
                     escalationSection
-                    infoSection
+                    notificationsSection
                 }
                 classificationSection
                 setupSection
@@ -56,9 +62,23 @@ struct SettingsView: View {
                 dataSection
             }
             .navigationTitle("Settings")
-            .onAppear(perform: loadIfNeeded)
-            .onChange(of: warningsEnabled) { _, _ in persist() }
-            .onChange(of: requirePhrase) { _, _ in persist() }
+            // Reloaded on every appearance, not once per view lifetime: the
+            // waste list is also edited in Classify your time and setup, and
+            // a stale copy here used to overwrite it on the next toggle (QA-9).
+            .onAppear(perform: load)
+            .task { await refreshNotificationStatus() }
+            .onChange(of: scenePhase) { _, phase in
+                // Coming back from iOS Settings is when the answer changes.
+                if phase == .active { Task { await refreshNotificationStatus() } }
+            }
+            // Each toggle writes only its own field, so it can never carry an
+            // old waste list back into the store (QA-9).
+            .onChange(of: warningsEnabled) { _, value in
+                save { $0.warningsEnabled = value }
+            }
+            .onChange(of: requirePhrase) { _, value in
+                save { $0.level3PhraseRequired = value }
+            }
             .confirmationDialog(
                 "Delete everything StolenEyes has stored?",
                 isPresented: $showDeleteConfirmation,
@@ -86,8 +106,13 @@ struct SettingsView: View {
     private var warningsToggleSection: some View {
         Section {
             Toggle("Warn me about waste time", isOn: $warningsEnabled)
+            if warningsEnabled, let scheduleFailure {
+                Label(scheduleFailure, systemImage: "exclamationmark.triangle.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+            }
         } footer: {
-            Text("StolenEyes watches the apps and sites you list here and pings you when today's total goes past the threshold.")
+            Text("StolenEyes watches the apps and categories you pick below and pings you when today's total goes past the threshold.")
         }
     }
 
@@ -101,12 +126,37 @@ struct SettingsView: View {
         }
     }
 
-    private var infoSection: some View {
+    @ViewBuilder
+    private var notificationsSection: some View {
         Section {
-            Label("Warnings arrive as a local notification. Turn them on in iOS Settings if you did not accept the prompt.",
-                  systemImage: "bell.badge")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            switch notificationStatus {
+            case .denied:
+                Label("Notifications are off — warnings can't reach you", systemImage: "bell.slash.fill")
+                    .foregroundStyle(.orange)
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                        openURL(url)
+                    }
+                }
+            case .notDetermined:
+                Label("Warnings arrive as notifications, which aren't on yet.", systemImage: "bell")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Button("Turn on notifications") {
+                    Task {
+                        _ = await NotificationService.shared.requestPermission()
+                        await refreshNotificationStatus()
+                    }
+                }
+            case nil:
+                EmptyView()
+            default:
+                Label("Warnings arrive as notifications.", systemImage: "bell.badge")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Notifications")
         }
     }
 
@@ -187,45 +237,53 @@ struct SettingsView: View {
         let outcome = DataReset.deleteEverything(context: modelContext)
         // Re-read the freshly created defaults so the form is not showing
         // values that no longer exist.
-        loaded = false
-        loadIfNeeded()
+        load()
         deleteResult = DeleteResult(keptActiveBlock: outcome.keptActiveBlock)
     }
 
     // MARK: - Persistence
 
-    private func loadIfNeeded() {
-        guard !loaded else { return }
-        loaded = true
+    /// No notification prompt here any more: opening a tab is not consent, and
+    /// it re-prompted users who had already said "Not now" (QA-9).
+    private func load() {
         let s = settings
         warningsEnabled = s.warningsEnabled
         selection = WasteSelectionCodec.decode(s.wasteAppSelectionData)
         typedDomains = s.wasteDomains
         thresholdMinutes = Double(max(5, s.wasteWarningThresholdMinutes))
         requirePhrase = s.level3PhraseRequired
+        scheduleFailure = WarningService.shared.lastFailure
+    }
 
-        if !didRequestNotifications && warningsEnabled {
-            didRequestNotifications = true
-            Task { _ = await NotificationService.shared.requestPermission() }
+    /// Called by the waste list editor: the list and threshold are the only
+    /// fields it edits, so they are the only ones written.
+    private func persistWasteList() {
+        save { s in
+            s.wasteAppSelectionData = WasteSelectionCodec.encode(selection)
+            s.wasteAppCount = selection.applicationTokens.count + selection.categoryTokens.count
+            s.wasteDomains = typedDomains
+            s.wasteWarningThresholdMinutes = Int(thresholdMinutes)
         }
     }
 
-    private func persist() {
+    /// Applies one change to the stored settings, then reschedules warnings
+    /// from what is stored — never from this view's copies of other fields.
+    private func save(_ change: (UserSettings) -> Void) {
         let s = settings
-        s.warningsEnabled = warningsEnabled
-        s.wasteAppSelectionData = WasteSelectionCodec.encode(selection)
-        s.wasteAppCount = selection.applicationTokens.count + selection.categoryTokens.count
-        s.wasteDomains = typedDomains
-        s.wasteWarningThresholdMinutes = Int(thresholdMinutes)
-        s.level3PhraseRequired = requirePhrase
+        change(s)
         try? modelContext.save()
         s.syncClassificationSnapshot()
 
         WarningService.shared.refreshSchedule(
-            enabled: warningsEnabled,
-            selection: selection,
-            typedDomains: typedDomains,
-            thresholdMinutes: Int(thresholdMinutes)
+            enabled: s.warningsEnabled,
+            selection: WasteSelectionCodec.decode(s.wasteAppSelectionData),
+            typedDomains: s.wasteDomains,
+            thresholdMinutes: s.wasteWarningThresholdMinutes
         )
+        scheduleFailure = WarningService.shared.lastFailure
+    }
+
+    private func refreshNotificationStatus() async {
+        notificationStatus = await NotificationService.shared.authorizationStatus()
     }
 }

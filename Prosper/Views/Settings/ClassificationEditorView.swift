@@ -16,6 +16,11 @@ import DeviceActivity
 /// "Distracting" is the existing waste list, so warnings and quick-block presets
 /// keep working. Anything unlisted stays Unclassified (UX-9). Every change syncs
 /// to the App Group so Today's balance updates.
+///
+/// Platform tags and typed sites are plain domain strings: they feed the balance
+/// and the block list, but iOS can only count time for picker tokens, so they
+/// never count toward warnings. The copy says so rather than implying otherwise
+/// (QA-9).
 struct ClassificationEditorView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -77,7 +82,7 @@ struct ClassificationEditorView: View {
         card {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Platforms").labelCaps()
-                Text("One tap classifies every way you reach it — the app and all its websites. Tap again to clear.")
+                Text("One tap classifies every way you reach it — the app and all its websites. Tap again to clear. Distracting platforms join your block list; warnings only count apps and categories you pick under Apps below.")
                     .font(.system(size: 12))
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)

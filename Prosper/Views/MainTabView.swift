@@ -12,6 +12,9 @@ struct MainTabView: View {
     @State private var didCheckSetup = false
     /// The level-3 intervention ProsperMonitor recorded while the app was away.
     @State private var intervention: WarningInterventionState.Pending?
+    /// What the store lost on this launch, if anything. Shown once, before
+    /// setup or an intervention can cover it (QA-9).
+    @State private var storageNotice: String?
 
     var body: some View {
         tabs
@@ -30,6 +33,17 @@ struct MainTabView: View {
                 // The warning usually fires while Prosper is in the background,
                 // so coming back to the foreground is when we owe the screen.
                 if phase == .active { refreshIntervention() }
+            }
+            .alert(
+                "Some history was lost",
+                isPresented: Binding(
+                    get: { storageNotice != nil },
+                    set: { if !$0 { acknowledgeStorageNotice() } }
+                )
+            ) {
+                Button("OK") { acknowledgeStorageNotice() }
+            } message: {
+                Text(storageNotice ?? "")
             }
     }
 
@@ -60,29 +74,51 @@ struct MainTabView: View {
                 .tag(Tab.settings)
         }
         .tint(ProsperColor.slate)
-        .fullScreenCover(isPresented: $showSetup) {
+        // An intervention that fired while setup was open is owed the moment
+        // setup closes, not at the next foreground (QA-9).
+        .fullScreenCover(isPresented: $showSetup, onDismiss: refreshIntervention) {
             SetupFlowView()
         }
         .onAppear {
+            // PersistenceConfig records a store it had to recover or replace;
+            // until now nothing read it, so lost history went unexplained
+            // (QA-9). The notice goes first; setup follows once it is read.
+            let health = PersistenceConfig.health
+            if health.needsExplaining, let message = health.message {
+                storageNotice = message
+                return
+            }
             presentSetupIfNeeded()
             refreshIntervention()
         }
     }
 
-    /// Show the setup flow once per launch until the user finishes or skips it.
+    private func acknowledgeStorageNotice() {
+        guard storageNotice != nil else { return }
+        storageNotice = nil
+        PersistenceConfig.acknowledgeHealth()
+        presentSetupIfNeeded()
+        refreshIntervention()
+    }
+
+    /// Show the setup flow automatically only until the user finishes or
+    /// skips it. Skipping used to last one launch, so setup ambushed the user
+    /// on every cold start; now it is remembered and the Dashboard banner is
+    /// the way back (QA-9).
     private func presentSetupIfNeeded() {
         guard !didCheckSetup else { return }
         didCheckSetup = true
         let settings = UserSettings.current(context: modelContext)
-        if !settings.hasCompletedSetup {
+        if !settings.hasCompletedSetup && !SetupSkip.isSkipped {
             showSetup = true
         }
     }
 
-    /// Pick up a pending intervention, unless onboarding is already in front —
-    /// a first-run user has nothing to be confronted with yet.
+    /// Pick up a pending intervention, unless onboarding or the storage notice
+    /// is already in front — a first-run user has nothing to be confronted
+    /// with yet.
     private func refreshIntervention() {
-        guard !showSetup, intervention == nil else { return }
+        guard !showSetup, storageNotice == nil, intervention == nil else { return }
         intervention = WarningInterventionState.pending
     }
 }

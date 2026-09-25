@@ -40,6 +40,7 @@
 		55EF66B110B9B1FD26B456C3 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		5608EF8E891C496698D984A1 /* UsageIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912B1621B5ECD8CF9E64759D /* UsageIcon.swift */; };
 		5B3E77F66242484182855F8C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70907B88A840AC6A25FAA3B6 /* SettingsView.swift */; };
+		5CD04B48EC6C1217891DB315 /* WarningDeliveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */; };
 		5E7986F77B9B7FDACBDA6B6C /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E408975B92219D4F495551F /* ProsperType.swift */; };
 		5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */; };
 		624F93588AEBAAD3E66A9CD8 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116B0813EFA3770DC1D51C37 /* AppInfo.swift */; };
@@ -223,6 +224,7 @@
 		A632709C4CC649D29F82481B /* BlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockView.swift; sourceTree = "<group>"; };
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
 		AB3332376609E00896D14B23 /* InsightsReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsReportView.swift; sourceTree = "<group>"; };
+		AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningDeliveryTests.swift; sourceTree = "<group>"; };
 		B8F0966BDF79094A611FF59E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9571C24CF734505B0A04A5F /* ProsperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperApp.swift; sourceTree = "<group>"; };
 		BAAAE34D997A74ECD4C5CC2B /* ConfirmBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmBlockView.swift; sourceTree = "<group>"; };
@@ -437,6 +439,7 @@
 			children = (
 				CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */,
 				FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */,
+				AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */,
 				8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */,
 			);
 			path = ProsperTests;
@@ -885,6 +888,7 @@
 			files = (
 				C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */,
 				A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */,
+				5CD04B48EC6C1217891DB315 /* WarningDeliveryTests.swift in Sources */,
 				9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -77,9 +77,13 @@ final class AuthorizationManager: ObservableObject {
         #endif
     }
 
+    /// iOS 26.4 added `.approvedWithDataAccess`, a stronger approval; naming
+    /// it keeps the switch exhaustive on the current SDK (QA-9). A future
+    /// status is read as "not yet asked", which offers the request again
+    /// rather than claiming access Prosper may not have.
     private static func readStatus() -> State {
         switch AuthorizationCenter.shared.authorizationStatus {
-        case .approved: .authorized
+        case .approved, .approvedWithDataAccess: .authorized
         case .denied: .denied
         case .notDetermined: .notDetermined
         @unknown default: .notDetermined
@@ -101,7 +105,16 @@ final class AuthorizationManager: ObservableObject {
             // the parent's to set, not Prosper's.
             return .restricted
         case .authorizationCanceled:
-            return .notDetermined
+            // iOS reports a refusal it already remembers as "canceled" too, so
+            // the status is re-read: a user who said no must see the Settings
+            // route, not a request button that can never work (QA-9).
+            return readStatus()
+        case .unauthorized:
+            // iOS 26.4+: the call needed access this app does not hold. If the
+            // status says refused, the fix is in Settings; otherwise say so
+            // plainly rather than guess (QA-9).
+            let status = readStatus()
+            return status == .denied ? .denied : .unavailable(reason: familyError.localizedDescription)
         case .authorizationConflict:
             // Another app already holds Screen Time authorization for this
             // device. Only one can, so this is not something Prosper can win.

@@ -50,7 +50,7 @@ struct SetupFlowView: View {
         VStack(spacing: 0) {
             Form {
                 Section {
-                    Text("Pick the apps and sites that eat your time. StolenEyes watches these to warn you when today's total crosses your threshold — and they become your one-tap Focus block.")
+                    Text("Pick the apps that eat your time and StolenEyes warns you when today's total crosses your threshold. Add sites too — they join your one-tap Focus block, though iOS can't time them for warnings.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -83,7 +83,7 @@ struct SetupFlowView: View {
                 .foregroundStyle(.tint)
             Text("Let a warning reach you")
                 .font(.title2.bold())
-            Text("So a warning can reach you inside Instagram or Safari the moment you cross your limit — not buried on a screen you never open.")
+            Text("Notifications arrive inside Instagram or Safari the moment you cross your limit — not buried on a screen you never open.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 32)
@@ -179,8 +179,11 @@ struct SetupFlowView: View {
 
     /// Bail out early: keep whatever waste list was entered, but leave setup
     /// marked incomplete so the Dashboard banner keeps offering to resume.
+    /// The skip itself is remembered so setup stops opening on every launch
+    /// (QA-9).
     private func skip() {
         persist()
+        SetupSkip.markSkipped()
         dismiss()
     }
 
@@ -191,5 +194,27 @@ struct SetupFlowView: View {
         s.hasCompletedSetup = true
         try? modelContext.save()
         dismiss()
+    }
+}
+
+/// Whether the user chose "Skip" in setup (QA-9).
+///
+/// Kept in standard defaults rather than on `UserSettings` so no schema
+/// migration is needed, and because only the app ever asks. Setup opens by
+/// itself only when it is neither finished nor skipped; the Dashboard banner
+/// and "Set up again" still reach it.
+enum SetupSkip {
+    private static let key = "setup.skipped"
+
+    static var isSkipped: Bool {
+        UserDefaults.standard.bool(forKey: key)
+    }
+
+    static func markSkipped() {
+        UserDefaults.standard.set(true, forKey: key)
+    }
+
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: key)
     }
 }
