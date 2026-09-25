@@ -2,7 +2,7 @@ import Foundation
 import DeviceActivity
 import SwiftUI // DeviceActivityResults lives in the _DeviceActivity_SwiftUI overlay
 
-/// One ranked insight — a plain-English observation about today's usage with the
+/// One ranked insight — a plain-English observation about the selected range's usage with the
 /// evidence behind it. Computed inside the ProsperReport extension (only it sees
 /// raw usage) and rendered by `InsightsReportView`; the app never sees the
 /// numbers, just the finished card.
@@ -37,6 +37,15 @@ enum InsightEngine {
     /// Below this much tracked time we don't pretend to have insight yet — the
     /// view shows an honest "still learning" state instead (DS-8).
     static let minMeaningfulTime: TimeInterval = 5 * 60
+
+    /// "X was 60% of your phone time" means nothing after ten minutes of use, so
+    /// the concentration card needs a real day behind it: at least 30 minutes
+    /// tracked in total and 10 minutes in the app itself (QA-9).
+    static let minConcentrationTotal: TimeInterval = 30 * 60
+    static let minConcentrationApp: TimeInterval = 10 * 60
+
+    /// A checking reflex needs enough pickups to be a habit, not a coincidence.
+    static let minReflexPickups = 10
 
     static func build(from data: DeviceActivityResults<DeviceActivityData>) async -> [InsightCard] {
         var total: TimeInterval = 0
@@ -85,7 +94,7 @@ enum InsightEngine {
     /// (QA-9).
     private static func checkingReflex(_ s: InsightSignals) -> InsightCard? {
         // Needs enough pickups to be a habit, and real (non-zero) time to divide by.
-        let candidates = s.apps.filter { $0.pickups >= 10 && $0.duration >= 60 }
+        let candidates = s.apps.filter { $0.pickups >= minReflexPickups && $0.duration >= 60 }
         guard let app = candidates.max(by: { pickupsPerMinute($0) < pickupsPerMinute($1) }) else { return nil }
         let ppm = pickupsPerMinute(app)
         // Only a reflex when pickups clearly outrun minutes.
@@ -102,8 +111,17 @@ enum InsightEngine {
 
     /// The single app that ate the biggest share of the day — where a block would
     /// buy back the most time.
+    ///
+    /// Browsers are never the subject: their time is every site visited in
+    /// them, work included, so "the biggest single win for a block" about Safari
+    /// would be advice to block the web, not a distraction (QA-9).
     private static func concentration(_ s: InsightSignals) -> InsightCard? {
-        guard let app = s.apps.max(by: { $0.duration < $1.duration }), s.totalDuration > 0 else { return nil }
+        guard s.totalDuration >= minConcentrationTotal else { return nil }
+        guard let app = s.apps
+            .filter({ !PlatformCatalog.isBrowser($0.name) })
+            .max(by: { $0.duration < $1.duration }),
+              app.duration >= minConcentrationApp
+        else { return nil }
         let share = app.duration / s.totalDuration
         guard share >= 0.30 else { return nil }
         let pct = Int((share * 100).rounded())
