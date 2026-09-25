@@ -33,9 +33,13 @@ struct UsageItem: Identifiable, Hashable, @unchecked Sendable {
 }
 
 /// How the app list is ranked. Websites and categories always rank by time.
+///
+/// `.pickups` ranks by `numberOfPickups`, which counts only the times an app
+/// was the *first* one used after the phone was picked up — not every launch.
+/// Hence "pickups", never "opens" (QA-9).
 enum AppSort: Sendable {
     case time
-    case opens
+    case pickups
 }
 
 struct DailyUsage: Identifiable, Hashable, Sendable {
@@ -55,6 +59,8 @@ struct UsageSummary: Sendable {
     var apps: [UsageItem] = []
     var sites: [UsageItem] = []
     var categories: [UsageItem] = []
+    /// How `apps` is ranked, so the list can say so honestly.
+    var appSort: AppSort = .time
 
     var isEmpty: Bool { totalDuration == 0 && apps.isEmpty && sites.isEmpty }
 
@@ -126,10 +132,11 @@ struct UsageSummary: Sendable {
         for (id, byDay) in siteDays { sites[id]?.days = byDay.asDailyUsage }
 
         summary.days = days.asDailyUsage
+        summary.appSort = sortApps
         let rankedApps = apps.values.filter { $0.duration > 0 || $0.pickups > 0 }.sorted { lhs, rhs in
             switch sortApps {
             case .time: return lhs.duration > rhs.duration
-            case .opens: return lhs.pickups > rhs.pickups
+            case .pickups: return lhs.pickups > rhs.pickups
             }
         }
         summary.products = rankedProducts(apps: Array(apps.values), sites: Array(sites.values))

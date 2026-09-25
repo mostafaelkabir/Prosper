@@ -37,7 +37,7 @@ struct UsageSummaryView: View {
                             )
                         }
                         if !summary.apps.isEmpty {
-                            usageList(title: "Apps", subtitle: "Time in the app itself.", items: summary.apps, showDetails: true)
+                            usageList(title: "Apps", subtitle: appsSubtitle, items: summary.apps, showDetails: true)
                         }
                         if !summary.sites.isEmpty {
                             usageList(title: "Websites", subtitle: "Already counted inside the browser above.", items: summary.sites)
@@ -54,6 +54,16 @@ struct UsageSummaryView: View {
                 // Clears the floating tab bar, which overlays the report.
                 .padding(.bottom, 96)
             }
+        }
+    }
+
+    /// Ranked by pickups, the list says what a pickup is: iOS counts the first
+    /// app used after the phone is picked up, not every time an app is opened,
+    /// so "opens" would overstate it (QA-9).
+    private var appsSubtitle: String {
+        switch summary.appSort {
+        case .time: "Time in the app itself."
+        case .pickups: "Ranked by pickups: how often each app was the first one you used after picking up your phone."
         }
     }
 
@@ -212,7 +222,9 @@ struct UsageRow: View {
         .accessibilityLabel(accessibleSummary)
     }
 
-    /// "12m a day · 18 opens · 32 notifications" — only the parts that apply.
+    /// "12m a day · 18 pickups · 32 notifications" — only the parts that apply.
+    /// The pickup count is times this app was first after a pickup, not every
+    /// launch (QA-9).
     @ViewBuilder
     private var detailLine: some View {
         let parts = detailParts
@@ -238,7 +250,7 @@ struct UsageRow: View {
     private var detailParts: [String] {
         var parts: [String] = []
         if dayCount > 1 { parts.append("day") }
-        if showDetails && item.pickups > 0 { parts.append("opens") }
+        if showDetails && item.pickups > 0 { parts.append("pickups") }
         if showDetails && item.notifications > 0 { parts.append("notifications") }
         return parts
     }
@@ -287,7 +299,7 @@ struct UsageRow: View {
     private var accessibleSummary: String {
         var text = "\(item.name), \(item.duration.usageFormatted)"
         if dayCount > 1 { text += ", \(item.perDay(over: dayCount).usageFormatted) a day" }
-        if showDetails && item.pickups > 0 { text += ", \(item.pickups) opens" }
+        if showDetails && item.pickups > 0 { text += ", first app after \(item.pickups) pickups" }
         if showDetails && item.notifications > 0 { text += ", \(item.notifications) notifications" }
         return text
     }

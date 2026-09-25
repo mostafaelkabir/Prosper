@@ -71,13 +71,13 @@ struct StatsView: View {
                     Spacer()
                     Picker("Sort apps by", selection: $appSort) {
                         Label("Most time", systemImage: "clock").tag(AppSort.time)
-                        Label("Most opens", systemImage: "hand.tap").tag(AppSort.opens)
+                        Label("Most pickups", systemImage: "hand.tap").tag(AppSort.pickups)
                     }
                     .pickerStyle(.menu)
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByOpens)
+                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByPickups)
             }
         case .patterns:
             patternsPlaceholder
@@ -156,8 +156,9 @@ struct UsageReportView: View {
     /// Sample usage for the simulator, re-ranked to match the selected sort.
     private var sampleSummary: UsageSummary {
         var summary = UsageSummary.sample(days: sampleDayCount)
-        if context == .usageByOpens {
+        if context == .usageByPickups {
             summary.apps.sort { $0.pickups > $1.pickups }
+            summary.appSort = .pickups
         }
         return summary
     }
