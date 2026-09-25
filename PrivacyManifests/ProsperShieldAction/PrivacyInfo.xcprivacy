@@ -10,8 +10,8 @@
 	<array/>
 	<!-- This extension only answers ShieldAction taps with .close. When E7.7
 	     starts counting block attempts in the shared App Group, add the
-	     NSPrivacyAccessedAPICategoryUserDefaults / CA92.1 entry the other four
-	     targets carry. -->
+	     NSPrivacyAccessedAPICategoryUserDefaults entry with reason 1C8F.1
+	     (App Group–shared defaults), as the other extensions carry (QA-9). -->
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array/>
 </dict>

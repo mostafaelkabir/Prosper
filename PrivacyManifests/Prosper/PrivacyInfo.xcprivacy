@@ -18,13 +18,15 @@
 			<!-- UserDefaults(suiteName: "group.com.mostafa.prosper"): the active
 			     block snapshot, the pending intervention flag, the classification
 			     snapshot and the store-health flag are shared between the app and
-			     its own extensions. CA92.1 = access is limited to the app group
-			     the app is a member of. -->
+			     its own extensions: 1C8F.1 (App Group–shared defaults). The app
+			     also keeps app-only flags in UserDefaults.standard (setup flow
+			     progress): CA92.1. Both uses, both reasons (QA-9). -->
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>
 			<array>
 				<string>CA92.1</string>
+				<string>1C8F.1</string>
 			</array>
 		</dict>
 	</array>
