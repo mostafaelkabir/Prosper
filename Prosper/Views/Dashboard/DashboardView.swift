@@ -227,7 +227,10 @@ struct DashboardView: View {
             Text("Today's insight").labelCaps()
             InsightSpotlightHost(filter: balanceFilter)
                 .id("insights-\(range)-\(dayKey)")
-                .frame(minHeight: 140, alignment: .top)
+                // Sized for a three-line headline and two-line evidence at the
+                // card's Dynamic Type cap (InsightsReportView.maxTypeSize,
+                // xLarge); 140pt clipped long app names at large text (QA-9).
+                .frame(minHeight: 170, alignment: .top)
         }
     }
 

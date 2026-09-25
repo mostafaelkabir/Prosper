@@ -104,7 +104,7 @@ enum InsightEngine {
             kind: .checkingReflex,
             score: ppm,
             headline: "\(app.name) was the first app after \(app.pickups) pickups.",
-            evidence: "\(app.duration.usageFormatted) in it all told — reaching for it far more often than you stay looks like a checking reflex.",
+            evidence: "\(app.duration.usageFormatted) in it all told — you reach for it far more than you stay.",
             systemImage: "hand.tap.fill"
         )
     }
@@ -159,7 +159,7 @@ extension InsightCard {
             InsightCard(
                 id: "reflex-Instagram", kind: .checkingReflex, score: 3.4,
                 headline: "Instagram was the first app after 18 pickups.",
-                evidence: "20m in it all told — reaching for it far more often than you stay looks like a checking reflex.",
+                evidence: "20m in it all told — you reach for it far more than you stay.",
                 systemImage: "hand.tap.fill"
             ),
         ]
