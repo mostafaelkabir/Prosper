@@ -1,8 +1,9 @@
 import SwiftUI
 import Charts
 
-/// Renders `HourlyUsage` as either a single day's 24-hour bar chart or a 7×24
-/// week grid heatmap, with a peak-hour callout.
+/// Renders `HourlyUsage` as either a single day's 24-hour bar chart or a
+/// day×hour grid heatmap (one row per day: 7 for Week, 30 for Month), with a
+/// peak-hour callout.
 struct HourlyHeatmapView: View {
     let usage: HourlyUsage
 
@@ -21,7 +22,9 @@ struct HourlyHeatmapView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 28)
-                .padding(.bottom, 12)
+                // Clears the floating tab bar, which overlays the report — a
+                // 30-row Month grid scrolls all the way under it (QA-9).
+                .padding(.bottom, 96)
             }
         }
     }
@@ -31,15 +34,21 @@ struct HourlyHeatmapView: View {
             Text("When you use your phone")
                 .font(.headline)
             if let peak = usage.peakHour {
-                Text("Most active around \(hourLabel(peak)) · \(usage.totalDuration.usageFormatted) total")
+                Text("Most active around \(hourLabel(peak)) · \(totalText)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                Text(usage.totalDuration.usageFormatted + " total")
+                Text(totalText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// Names the span the total covers, which is exactly the rows drawn below.
+    private var totalText: String {
+        let total = usage.totalDuration.usageFormatted + " total"
+        return usage.isSingleDay ? total : total + " over \(gridRows.count) days"
     }
 
     // MARK: - Single day
@@ -78,26 +87,38 @@ struct HourlyHeatmapView: View {
 
     // MARK: - Week grid
 
-    private var weekRows: [Date] {
-        let calendar = Calendar.current
-        let end = usage.latestDay
-        return (0..<7)
-            .compactMap { calendar.date(byAdding: .day, value: -$0, to: end) }
-            .reversed()
-    }
+    /// One row per day of the range — all thirty for Month — so the grid shows
+    /// every hour the header's total, peak hour and colour scale are built from
+    /// (QA-9). See `HourlyUsage.gridDays`.
+    private var gridRows: [Date] { usage.gridDays }
+
+    /// A week reads by weekday; a month by date, since seven "M"s in one column
+    /// would say nothing about which Monday.
+    private var isLongRange: Bool { gridRows.count > 7 }
+
+    private var rowLabelWidth: CGFloat { isLongRange ? 18 : 16 }
 
     private var weekGrid: some View {
         let maxCell = usage.maxCellDuration
-        return VStack(alignment: .leading, spacing: 6) {
+        let rows = gridRows
+        // 30 rows × 24 hours: look cells up by id rather than scanning per cell.
+        let byID = Dictionary(usage.cells.map { ($0.id, $0.duration) }, uniquingKeysWith: +)
+        return VStack(alignment: .leading, spacing: isLongRange ? 3 : 6) {
+            Text("One row per day, last \(rows.count) days, oldest at the top.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 4)
             hourAxis
-            ForEach(weekRows, id: \.self) { day in
+            ForEach(rows, id: \.self) { day in
                 HStack(spacing: 3) {
-                    Text(day.formatted(.dateTime.weekday(.narrow)))
-                        .font(.caption2)
+                    Text(day.formatted(isLongRange ? .dateTime.day() : .dateTime.weekday(.narrow)))
+                        .font(isLongRange ? .system(size: 9) : .caption2)
+                        .monospacedDigit()
                         .foregroundStyle(.secondary)
-                        .frame(width: 16, alignment: .leading)
+                        .frame(width: rowLabelWidth, alignment: .leading)
                     ForEach(0..<24, id: \.self) { hour in
-                        cell(intensity: maxCell > 0 ? usage.duration(day: day, hour: hour) / maxCell : 0)
+                        let seconds = byID[HourlyUsage.Cell(day: day, hour: hour, duration: 0).id] ?? 0
+                        cell(intensity: maxCell > 0 ? seconds / maxCell : 0)
                     }
                 }
             }
@@ -107,7 +128,7 @@ struct HourlyHeatmapView: View {
 
     private var hourAxis: some View {
         HStack(spacing: 3) {
-            Spacer().frame(width: 16)
+            Spacer().frame(width: rowLabelWidth)
             ForEach(0..<24, id: \.self) { hour in
                 Group {
                     if hour % 6 == 0 {
