@@ -42,6 +42,16 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         let context = ModelContext(container)
         let settings = UserSettings.current(context: context)
         let minutes = level.thresholdMinutes(base: settings.wasteWarningThresholdMinutes)
+
+        // 0. A reinstalled monitor that counts the whole day can reach a rung
+        // the user was already given this morning. Deliver each rung once per
+        // day per threshold — no duplicate row, no second notification (QA-9).
+        if let ledger = WarningDeliveryLedger.appGroup,
+           !ledger.claim(level, thresholdMinutes: minutes) {
+            logger.info("Level \(level.rawValue) at \(minutes)m already delivered today; skipping")
+            return
+        }
+
         let warning = WarningEvent(
             level: level.rawValue,
             triggerReason: level.triggerReason(minutes: minutes),
