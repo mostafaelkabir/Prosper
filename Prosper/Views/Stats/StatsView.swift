@@ -20,6 +20,8 @@ struct StatsView: View {
     @State private var range: Range = .day
     @State private var sectionIndex = 0
     @State private var appSort: AppSort = .time
+    /// Start of the day the filters were built for; see `ReportDayTracker`.
+    @State private var reportDay = Calendar.current.startOfDay(for: .now)
     @Query private var allSettings: [UserSettings]
 
     private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
@@ -51,11 +53,22 @@ struct StatsView: View {
                 Divider().overlay(ProsperColor.line)
 
                 sectionContent
+                    // A fresh identity per (range, section, sort, day). The hosted
+                    // report is cached by iOS on (context, filter) and, at the same
+                    // identity, a range switch was not reliably re-rendered (PERF-1)
+                    // — the Dashboard keys its embeds the same way. The day keeps a
+                    // tab left open overnight from showing yesterday (QA-9).
+                    .id(reportID)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(ProsperColor.ground)
             .navigationTitle("Insights")
+            .tracksReportDay($reportDay)
         }
+    }
+
+    private var reportID: String {
+        "\(range)-\(section)-\(appSort)-\(Int(reportDay.timeIntervalSince1970))"
     }
 
     @ViewBuilder

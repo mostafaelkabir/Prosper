@@ -18,6 +18,8 @@ struct DashboardView: View {
     @State private var showCreateBlock = false
     @State private var showClassify = false
     @State private var pendingPrefill: BlockPrefill?
+    /// Start of the day the report filters were built for; see `ReportDayTracker`.
+    @State private var reportDay = Calendar.current.startOfDay(for: .now)
 
     private var settings: UserSettings? { allSettings.first }
     private var activeSession: BlockSession? { sessions.first { $0.isActive } }
@@ -62,6 +64,9 @@ struct DashboardView: View {
         hasher.combine(s.restDomains)
         return hasher.finalize()
     }
+
+    /// The report day as an id component.
+    private var dayKey: Int { Int(reportDay.timeIntervalSince1970) }
 
     // MARK: - Real focus streak (UX-13)
 
@@ -160,6 +165,7 @@ struct DashboardView: View {
             }
             .background(ProsperColor.background)
             .toolbar(.hidden, for: .navigationBar)
+            .tracksReportDay($reportDay)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(isPresented: $showClassify) { NavigationStack { ClassificationEditorView() } }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
@@ -197,10 +203,11 @@ struct DashboardView: View {
     private var heroCard: some View {
         AuroraHeroCard {
             UsageReportView(filter: balanceFilter, context: .todayBalance)
-                // Re-embed on a range change *or* any classification edit, so the
-                // extension re-runs makeConfiguration instead of serving iOS's
-                // cached (context, filter) result. See `classificationSignature`.
-                .id("\(range)-\(classificationSignature)")
+                // Re-embed on a range change, any classification edit, or a new
+                // day, so the extension re-runs makeConfiguration instead of
+                // serving iOS's cached (context, filter) result. See
+                // `classificationSignature` and `ReportDayTracker` (QA-9).
+                .id("\(range)-\(classificationSignature)-\(dayKey)")
                 // DeviceActivityReport renders in a separate process and does not
                 // report its content height back to us; inside this ScrollView the
                 // frame is the only thing reserving space. 300pt clipped the full
@@ -217,7 +224,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Today's insight").labelCaps()
             InsightSpotlightHost(filter: balanceFilter)
-                .id("insights-\(range)")
+                .id("insights-\(range)-\(dayKey)")
                 .frame(minHeight: 140, alignment: .top)
         }
     }
