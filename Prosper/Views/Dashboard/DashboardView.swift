@@ -176,7 +176,9 @@ struct DashboardView: View {
 
     private var brandRow: some View {
         HStack {
-            Text("PROSPER")
+            // The shipping name, as on the home screen and in the store.
+            // "Prosper" is only the project/repo name (QA-9, REL-14).
+            Text("STOLENEYES")
                 .font(.system(size: 12, weight: .semibold))
                 .tracking(2)
                 .foregroundStyle(ProsperColor.ink)
