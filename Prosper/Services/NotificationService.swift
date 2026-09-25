@@ -16,8 +16,9 @@ final class NotificationService: @unchecked Sendable {
         }
     }
 
-    func isAuthorized() async -> Bool {
-        let settings = await center.notificationSettings()
-        return settings.authorizationStatus == .authorized
+    /// The current permission, read fresh each time: it can be switched off
+    /// in iOS Settings at any point, and Settings must say so (QA-9).
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        await center.notificationSettings().authorizationStatus
     }
 }
