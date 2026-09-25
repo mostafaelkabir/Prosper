@@ -20,6 +20,17 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
 
         if activity == PersistenceConfig.unblockActivityName
             || activity == PersistenceConfig.unblockSafetyActivityName {
+            // The schedule is wall-clock date parts, so a time-zone change or a
+            // daylight-saving fall-back can end the interval before the block's
+            // real end. The snapshot holds the absolute end time; if it is still
+            // well in the future, this is not the timer running out — re-arm
+            // instead of lifting, or changing zones becomes a way out (QA-9).
+            if let block = SharedBlockState.stored,
+               block.endsAt.timeIntervalSinceNow > UnblockSchedule.earlyEndTolerance {
+                let installed = UnblockSchedule.install(from: .now, to: block.endsAt)
+                logger.info("Unblock interval \(activity.rawValue) ended \(Int(block.endsAt.timeIntervalSinceNow))s early; re-armed: \(installed)")
+                return
+            }
             clearBlock(reason: "interval \(activity.rawValue) ended")
         } else {
             sweepExpiredBlockIfNeeded()
@@ -103,6 +114,8 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
     /// callback ran or not.
     private func clearBlock(reason: String) {
         store.shield.applications = nil
+        store.shield.applicationCategories = nil
+        store.shield.webDomainCategories = nil
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
         SharedBlockState.clear()

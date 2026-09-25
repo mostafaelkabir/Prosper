@@ -71,10 +71,13 @@
 		9A3564894D135C232E22F704 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
 		9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */; };
 		9A8DB93EE8E27B05A6E2A252 /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
+		9BD78A31EBDD41C4CDDD200B /* UnblockSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */; };
 		9C156748E46C031230501B97 /* InsightSpotlightHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EC67B48BC3EEEC96B70271 /* InsightSpotlightHost.swift */; };
 		A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF1BA9DD8B110676DBE404 /* DashboardView.swift */; };
+		A502CD33B796140AD47DB9AC /* UnblockSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */; };
 		A5EAFF3CA15B28677E0A7F8F /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
 		A6996DD6B8D595F40A67B814 /* BlockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037BAC3E9EC0431009ABE06C /* BlockSession.swift */; };
+		A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */; };
 		AC680BAF6B9777A21662243A /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
 		ADA8D5C1795A3AD563170B84 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		AE39E426B90306EB201322B4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380FF60661EA74BC8735A26D /* BlockingService.swift */; };
@@ -197,6 +200,7 @@
 		6AE69637163805466D518E49 /* UsageStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStat.swift; sourceTree = "<group>"; };
 		7015B2CA7828E7240B16C087 /* AuthorizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationView.swift; sourceTree = "<group>"; };
 		70907B88A840AC6A25FAA3B6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnblockSchedule.swift; sourceTree = "<group>"; };
 		7462F6347B40E67D3D02E878 /* ProsperShield.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperShield.entitlements; sourceTree = "<group>"; };
 		74EF1BA9DD8B110676DBE404 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		7647CA969CEE0A3F6F293AA3 /* Prosper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Prosper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -241,6 +245,7 @@
 		F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummary.swift; sourceTree = "<group>"; };
 		F4785AFA626F9A90CBD3D6BC /* WarningEscalation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEscalation.swift; sourceTree = "<group>"; };
 		F9307A48CDD179678D104993 /* ProsperReport.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperReport.entitlements; sourceTree = "<group>"; };
+		FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockScheduleTests.swift; sourceTree = "<group>"; };
 		FB8BB816C2BB41E121A5550C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FCE86A244991500CE0C12F76 /* SelectionChips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionChips.swift; sourceTree = "<group>"; };
 		FD81363CEE9AFA44997EAE05 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -431,6 +436,7 @@
 			isa = PBXGroup;
 			children = (
 				CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */,
+				FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */,
 				8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */,
 			);
 			path = ProsperTests;
@@ -475,6 +481,7 @@
 				3BA0E27E5CD977B8750BB3FC /* PlatformCatalog.swift */,
 				4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */,
 				C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */,
+				73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */,
 				C97D93ABC992D39AEB46F046 /* UsageReportFilter.swift */,
 				2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */,
 				2C648096F2236C1D2415DB68 /* UserSettingsClassification.swift */,
@@ -796,6 +803,7 @@
 				C38694944BB561C81CFD2ACB /* SharedClassification.swift in Sources */,
 				D680F5699C97E44818731489 /* StatsView.swift in Sources */,
 				8624A6A143E83A5A56D2E881 /* TodayHeroReportView.swift in Sources */,
+				9BD78A31EBDD41C4CDDD200B /* UnblockSchedule.swift in Sources */,
 				5608EF8E891C496698D984A1 /* UsageIcon.swift in Sources */,
 				17092F72D2D71E84975D205B /* UsageReportFilter.swift in Sources */,
 				671A44D232DB05062646B6B0 /* UsageStat.swift in Sources */,
@@ -829,6 +837,7 @@
 				43C54EF4DE40026B1F26D20B /* PersistenceConfig.swift in Sources */,
 				E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */,
 				FA331E3D4B6A2C91716BD81B /* SharedBlockState.swift in Sources */,
+				A502CD33B796140AD47DB9AC /* UnblockSchedule.swift in Sources */,
 				1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */,
 				483703E5A19843B96AFDE43C /* UserSettings.swift in Sources */,
 				793E6B1F0F13A28B6115AFF2 /* WarningEscalation.swift in Sources */,
@@ -875,6 +884,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */,
+				A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */,
 				9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

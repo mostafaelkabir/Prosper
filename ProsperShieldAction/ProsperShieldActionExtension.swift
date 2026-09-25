@@ -13,6 +13,16 @@ class ProsperShieldActionExtension: ShieldActionDelegate {
         completionHandler(.close)
     }
 
+    /// Apps and sites locked through a Screen Time category arrive here, not
+    /// through the application handler (QA-9).
+    override func handle(
+        action: ShieldAction,
+        for category: ActivityCategoryToken,
+        completionHandler: @escaping (ShieldActionResponse) -> Void
+    ) {
+        completionHandler(.close)
+    }
+
     override func handle(
         action: ShieldAction,
         for webDomain: WebDomainToken,
