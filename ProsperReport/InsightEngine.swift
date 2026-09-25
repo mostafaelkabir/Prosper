@@ -2,7 +2,7 @@ import Foundation
 import DeviceActivity
 import SwiftUI // DeviceActivityResults lives in the _DeviceActivity_SwiftUI overlay
 
-/// One ranked insight — a plain-English observation about today's usage with the
+/// One ranked insight — a plain-English observation about the selected range's usage with the
 /// evidence behind it. Computed inside the ProsperReport extension (only it sees
 /// raw usage) and rendered by `InsightsReportView`; the app never sees the
 /// numbers, just the finished card.
@@ -37,6 +37,15 @@ enum InsightEngine {
     /// Below this much tracked time we don't pretend to have insight yet — the
     /// view shows an honest "still learning" state instead (DS-8).
     static let minMeaningfulTime: TimeInterval = 5 * 60
+
+    /// "X was 60% of your phone time" means nothing after ten minutes of use, so
+    /// the concentration card needs a real day behind it: at least 30 minutes
+    /// tracked in total and 10 minutes in the app itself (QA-9).
+    static let minConcentrationTotal: TimeInterval = 30 * 60
+    static let minConcentrationApp: TimeInterval = 10 * 60
+
+    /// A checking reflex needs enough pickups to be a habit, not a coincidence.
+    static let minReflexPickups = 10
 
     static func build(from data: DeviceActivityResults<DeviceActivityData>) async -> [InsightCard] {
         var total: TimeInterval = 0
@@ -75,30 +84,44 @@ enum InsightEngine {
 
     // MARK: - Detectors
 
-    /// The app you open far more often than the time spent justifies — the
+    /// The app you reach for far more often than the time spent justifies — the
     /// signature of a checking reflex rather than a deliberate visit.
+    ///
+    /// iOS's `numberOfPickups` counts only the pickups after which this app was
+    /// the *first* one used, not every launch, so the card says exactly that.
+    /// Duration ÷ pickups is not a visit length (time also accrues on launches
+    /// that were not first after a pickup), so no per-visit figure is quoted
+    /// (QA-9).
     private static func checkingReflex(_ s: InsightSignals) -> InsightCard? {
-        // Needs enough opens to be a habit, and real (non-zero) time to divide by.
-        let candidates = s.apps.filter { $0.pickups >= 10 && $0.duration >= 60 }
-        guard let app = candidates.max(by: { opensPerMinute($0) < opensPerMinute($1) }) else { return nil }
-        let opm = opensPerMinute(app)
-        // Only a reflex when opens clearly outrun minutes.
-        guard opm >= 2 else { return nil }
-        let secondsEach = app.duration / Double(app.pickups)
+        // Needs enough pickups to be a habit, and real (non-zero) time to divide by.
+        let candidates = s.apps.filter { $0.pickups >= minReflexPickups && $0.duration >= 60 }
+        guard let app = candidates.max(by: { pickupsPerMinute($0) < pickupsPerMinute($1) }) else { return nil }
+        let ppm = pickupsPerMinute(app)
+        // Only a reflex when pickups clearly outrun minutes.
+        guard ppm >= 2 else { return nil }
         return InsightCard(
             id: "reflex-\(app.name)",
             kind: .checkingReflex,
-            score: opm,
-            headline: "You opened \(app.name) \(app.pickups) times to spend \(app.duration.usageFormatted).",
-            evidence: "About \(Int(secondsEach.rounded()))s each visit — a reflex check, not a reason.",
+            score: ppm,
+            headline: "\(app.name) was the first app after \(app.pickups) pickups.",
+            evidence: "\(app.duration.usageFormatted) in it all told — you reach for it far more than you stay.",
             systemImage: "hand.tap.fill"
         )
     }
 
     /// The single app that ate the biggest share of the day — where a block would
     /// buy back the most time.
+    ///
+    /// Browsers are never the subject: their time is every site visited in
+    /// them, work included, so "the biggest single win for a block" about Safari
+    /// would be advice to block the web, not a distraction (QA-9).
     private static func concentration(_ s: InsightSignals) -> InsightCard? {
-        guard let app = s.apps.max(by: { $0.duration < $1.duration }), s.totalDuration > 0 else { return nil }
+        guard s.totalDuration >= minConcentrationTotal else { return nil }
+        guard let app = s.apps
+            .filter({ !PlatformCatalog.isBrowser($0.name) })
+            .max(by: { $0.duration < $1.duration }),
+              app.duration >= minConcentrationApp
+        else { return nil }
         let share = app.duration / s.totalDuration
         guard share >= 0.30 else { return nil }
         let pct = Int((share * 100).rounded())
@@ -112,7 +135,7 @@ enum InsightEngine {
         )
     }
 
-    private static func opensPerMinute(_ app: InsightSignals.App) -> Double {
+    private static func pickupsPerMinute(_ app: InsightSignals.App) -> Double {
         app.duration > 0 ? Double(app.pickups) / (app.duration / 60) : 0
     }
 }
@@ -135,8 +158,8 @@ extension InsightCard {
         [
             InsightCard(
                 id: "reflex-Instagram", kind: .checkingReflex, score: 3.4,
-                headline: "You opened Instagram 18 times to spend 20m.",
-                evidence: "About 67s each visit — a reflex check, not a reason.",
+                headline: "Instagram was the first app after 18 pickups.",
+                evidence: "20m in it all told — you reach for it far more than you stay.",
                 systemImage: "hand.tap.fill"
             ),
         ]

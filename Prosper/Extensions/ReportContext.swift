@@ -7,8 +7,10 @@ import SwiftUI
 extension DeviceActivityReport.Context {
     /// Full breakdown: total time, per-day chart, top apps, top websites, categories.
     static let usageSummary = Self("Usage Summary")
-    /// Same breakdown, but the app list is ranked by opens (pickups) instead of time.
-    static let usageByOpens = Self("Usage By Opens")
+    /// Same breakdown, but the app list is ranked by pickups instead of time —
+    /// how often each app was the first one used after picking up the phone.
+    /// Not "opens": iOS does not count app launches, only pickups (QA-9).
+    static let usageByPickups = Self("Usage By Pickups")
     /// Overview only: total + by-day chart, no lists (Insights "Overview" section).
     static let overview = Self("Overview")
     /// Compact card with total screen time and pickups only.

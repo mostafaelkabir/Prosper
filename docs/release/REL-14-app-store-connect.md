@@ -45,7 +45,8 @@ Answer **"No, we do not collect data from this app."** That is literally true â€
 no backend, no analytics, no SDKs, no network requests â€” and it matches the
 `PrivacyInfo.xcprivacy` files shipped in REL-4, which declare no collected data
 types, no tracking, and `NSPrivacyAccessedAPICategoryUserDefaults` with reason
-`CA92.1` for the App Group. If the answers and the manifests disagree, the
+`1C8F.1` for the App Group (plus `CA92.1` in the app for its own app-only
+defaults; QA-9). If the answers and the manifests disagree, the
 upload is flagged, so do not hand-wave this one.
 
 ## Description

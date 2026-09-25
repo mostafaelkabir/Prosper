@@ -75,10 +75,12 @@
 		9BD78A31EBDD41C4CDDD200B /* UnblockSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */; };
 		9C156748E46C031230501B97 /* InsightSpotlightHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EC67B48BC3EEEC96B70271 /* InsightSpotlightHost.swift */; };
 		A098D783F01FD7E686FFE909 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EF1BA9DD8B110676DBE404 /* DashboardView.swift */; };
+		A324D9560F9D546F013A149C /* InsightAndFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3497187E783594907E0D1987 /* InsightAndFormattingTests.swift */; };
 		A502CD33B796140AD47DB9AC /* UnblockSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */; };
 		A5EAFF3CA15B28677E0A7F8F /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
 		A6996DD6B8D595F40A67B814 /* BlockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037BAC3E9EC0431009ABE06C /* BlockSession.swift */; };
 		A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */; };
+		A8E26A302954CD921C63853C /* ReportDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E3DAB028B8F9167C9AE927 /* ReportDay.swift */; };
 		AC680BAF6B9777A21662243A /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C7C894E4F3AE214D525759 /* ProsperColor.swift */; };
 		ADA8D5C1795A3AD563170B84 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		AE39E426B90306EB201322B4 /* BlockingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380FF60661EA74BC8735A26D /* BlockingService.swift */; };
@@ -101,6 +103,8 @@
 		E1949583E17CCBE8DF4EBCF0 /* InsightsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1A493EE7C83D337D809A21 /* InsightsScene.swift */; };
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
 		ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE86A244991500CE0C12F76 /* SelectionChips.swift */; };
+		F0F321942822C00F91FC2942 /* ClassificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70DBB124A521AFD969B1F4C1 /* ClassificationTests.swift */; };
+		F361E14EE661762C92FB141C /* UsageNumbersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 864785C9A520785BE230D584 /* UsageNumbersTests.swift */; };
 		F51354BDC478A3C6E868C199 /* InsightsReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB3332376609E00896D14B23 /* InsightsReportView.swift */; };
 		FA331E3D4B6A2C91716BD81B /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
 /* End PBXBuildFile section */
@@ -179,12 +183,14 @@
 		1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryScene.swift; sourceTree = "<group>"; };
 		1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D40CCAE0FDE3B059BBCB4F6 /* SetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowView.swift; sourceTree = "<group>"; };
+		22E3DAB028B8F9167C9AE927 /* ReportDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportDay.swift; sourceTree = "<group>"; };
 		24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceConfig.swift; sourceTree = "<group>"; };
 		283C469D74CE36C6247FDE46 /* LockExitCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockExitCopy.swift; sourceTree = "<group>"; };
 		2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTrackingService.swift; sourceTree = "<group>"; };
 		2C648096F2236C1D2415DB68 /* UserSettingsClassification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsClassification.swift; sourceTree = "<group>"; };
 		328D6AEF1BCB5C897D6B23CE /* ProsperTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ProsperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		33C7C894E4F3AE214D525759 /* ProsperColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperColor.swift; sourceTree = "<group>"; };
+		3497187E783594907E0D1987 /* InsightAndFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightAndFormattingTests.swift; sourceTree = "<group>"; };
 		363E1B2D164246C5150D6D51 /* Prosper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Prosper.entitlements; sourceTree = "<group>"; };
 		380FF60661EA74BC8735A26D /* BlockingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingService.swift; sourceTree = "<group>"; };
 		3974BFC7D4583121C9877996 /* UsageSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryView.swift; sourceTree = "<group>"; };
@@ -201,6 +207,7 @@
 		6AE69637163805466D518E49 /* UsageStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageStat.swift; sourceTree = "<group>"; };
 		7015B2CA7828E7240B16C087 /* AuthorizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationView.swift; sourceTree = "<group>"; };
 		70907B88A840AC6A25FAA3B6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		70DBB124A521AFD969B1F4C1 /* ClassificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationTests.swift; sourceTree = "<group>"; };
 		73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnblockSchedule.swift; sourceTree = "<group>"; };
 		7462F6347B40E67D3D02E878 /* ProsperShield.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperShield.entitlements; sourceTree = "<group>"; };
 		74EF1BA9DD8B110676DBE404 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -208,6 +215,7 @@
 		787F80B30CAB4A7432226247 /* ProsperReport.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = ProsperReport.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		78EC67B48BC3EEEC96B70271 /* InsightSpotlightHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightSpotlightHost.swift; sourceTree = "<group>"; };
 		8207DF2CE8C728636D9D11BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		864785C9A520785BE230D584 /* UsageNumbersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageNumbersTests.swift; sourceTree = "<group>"; };
 		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
 		8E408975B92219D4F495551F /* ProsperType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperType.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
@@ -439,6 +447,9 @@
 			children = (
 				CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */,
 				FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */,
+				70DBB124A521AFD969B1F4C1 /* ClassificationTests.swift */,
+				3497187E783594907E0D1987 /* InsightAndFormattingTests.swift */,
+				864785C9A520785BE230D584 /* UsageNumbersTests.swift */,
 				AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */,
 				8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */,
 			);
@@ -538,6 +549,7 @@
 			isa = PBXGroup;
 			children = (
 				9DE8A4C6525B1024CC685F3B /* ReportContext.swift */,
+				22E3DAB028B8F9167C9AE927 /* ReportDay.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -799,6 +811,7 @@
 				E0AF7B38371A2EE5AEE1FDF7 /* ProsperType.swift in Sources */,
 				8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */,
 				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
+				A8E26A302954CD921C63853C /* ReportDay.swift in Sources */,
 				ECFBEE124F69A0D848753447 /* SelectionChips.swift in Sources */,
 				5B3E77F66242484182855F8C /* SettingsView.swift in Sources */,
 				6B0076A9B7912D3E0336326F /* SetupFlowView.swift in Sources */,
@@ -888,6 +901,9 @@
 			files = (
 				C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */,
 				A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */,
+				F0F321942822C00F91FC2942 /* ClassificationTests.swift in Sources */,
+				A324D9560F9D546F013A149C /* InsightAndFormattingTests.swift in Sources */,
+				F361E14EE661762C92FB141C /* UsageNumbersTests.swift in Sources */,
 				5CD04B48EC6C1217891DB315 /* WarningDeliveryTests.swift in Sources */,
 				9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */,
 			);
