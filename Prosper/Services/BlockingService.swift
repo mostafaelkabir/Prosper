@@ -16,51 +16,119 @@ final class BlockingService: @unchecked Sendable {
 
     private init() {}
 
+    /// Why a block did not start. Every case is shown to the user: a block that
+    /// silently fails to start looks exactly like one that is running (QA-9).
+    enum StartError: LocalizedError, Equatable {
+        case alreadyRunning
+        case nothingSelected
+        case tooShort
+        case tooManySites(Int)
+        case couldNotSchedule
+
+        var errorDescription: String? {
+            switch self {
+            case .alreadyRunning:
+                return "A block is already running. A new one can start when it ends."
+            case .nothingSelected:
+                return "Pick at least one app, category or website to lock."
+            case .tooShort:
+                return "The shortest block is 15 minutes. iOS cannot time anything shorter."
+            case .tooManySites(let count):
+                return "iOS can filter at most \(BlockingService.maxDomains) websites at once. Remove \(count - BlockingService.maxDomains) to continue."
+            case .couldNotSchedule:
+                return "iOS refused the timer that ends this block, so nothing was locked. Try again in a minute."
+            }
+        }
+    }
+
+    /// iOS refuses DeviceActivity schedules shorter than this, and a block
+    /// without a working timer is one nothing in the app can end.
+    static let minimumDuration: TimeInterval = UnblockSchedule.minimumSpan
+
+    /// Checks a block before anything is applied, so the confirm screen can say
+    /// what is wrong instead of locking half of what it listed.
+    static func validate(
+        selection: FamilyActivitySelection,
+        domains: [String],
+        duration: TimeInterval
+    ) -> StartError? {
+        if selection.applicationTokens.isEmpty
+            && selection.categoryTokens.isEmpty
+            && selection.webDomainTokens.isEmpty
+            && domains.isEmpty {
+            return .nothingSelected
+        }
+        if domains.count > maxDomains { return .tooManySites(domains.count) }
+        if duration < minimumDuration { return .tooShort }
+        return nil
+    }
+
     /// Starts an unbreakable block.
     /// - Parameters:
-    ///   - apps: App tokens chosen in the FamilyActivityPicker.
-    ///   - webDomains: Website tokens chosen in the FamilyActivityPicker (only sites
-    ///     that already appear in Safari history show up there).
+    ///   - selection: What the FamilyActivityPicker returned: apps, Screen Time
+    ///     categories, and websites that already appear in Safari history.
     ///   - domains: Website domains the user typed in directly, e.g. "reddit.com".
     ///     Enforced by the system web content filter in Safari and other browsers,
     ///     on this device only.
+    ///
+    /// The timers are installed before any restriction is applied: if iOS
+    /// refuses them, nothing is locked and the user is told, rather than being
+    /// left behind a shield that only the next app launch can lift.
     func startBlock(
-        apps: Set<ApplicationToken>,
-        webDomains: Set<WebDomainToken>,
+        selection: FamilyActivitySelection,
         domains: [String],
-        duration: TimeInterval,
-        selection: FamilyActivitySelection
-    ) {
-        guard !hasActiveBlock else { return }
+        duration: TimeInterval
+    ) throws {
+        guard !hasActiveBlock, SharedBlockState.active == nil else { throw StartError.alreadyRunning }
+        if let problem = Self.validate(selection: selection, domains: domains, duration: duration) {
+            throw problem
+        }
 
         // Ask once for notification permission so the block-end message can
         // reach the user. If the user declined earlier we don't re-prompt.
         Task { _ = await NotificationService.shared.requestPermission() }
 
-        let typedDomains = Array(domains.prefix(Self.maxDomains))
-
-        store.shield.applications = apps.isEmpty ? nil : apps
-        store.shield.webDomains = webDomains.isEmpty ? nil : webDomains
-        if typedDomains.isEmpty {
-            store.webContent.blockedByFilter = nil
-        } else {
-            store.webContent.blockedByFilter = .specific(Set(typedDomains.map { WebDomain(domain: $0) }))
+        let startedAt = Date.now
+        // The snapshot goes first: the monitor sweeps on every interval start,
+        // and must find this block, not a stale one it would clear.
+        SharedBlockState.save(startedAt: startedAt, duration: duration)
+        guard UnblockSchedule.install(from: startedAt, to: startedAt.addingTimeInterval(duration), center: activityCenter) else {
+            SharedBlockState.clear()
+            throw StartError.couldNotSchedule
         }
 
-        let startedAt = Date.now
-        scheduleUnblock(from: startedAt, duration: duration)
+        let apps = selection.applicationTokens
+        let categories = selection.categoryTokens
+        let webDomains = selection.webDomainTokens
+        store.shield.applications = apps.isEmpty ? nil : apps
+        // A category is how most people pick "all social media". It has to be
+        // shielded on both the app side and the web side, or a category-only
+        // block saves a countdown and locks nothing at all (QA-9).
+        store.shield.applicationCategories = categories.isEmpty ? nil : .specific(categories)
+        store.shield.webDomainCategories = categories.isEmpty ? nil : .specific(categories)
+        store.shield.webDomains = webDomains.isEmpty ? nil : webDomains
+        if domains.isEmpty {
+            store.webContent.blockedByFilter = nil
+        } else {
+            store.webContent.blockedByFilter = .specific(Set(domains.map { WebDomain(domain: $0) }))
+        }
+
         scheduleEndNotification(duration: duration)
         persistBlockSession(
             selection: selection,
-            appCount: apps.count,
-            domainCount: webDomains.count + typedDomains.count,
-            domains: typedDomains,
+            startedAt: startedAt,
+            // Categories count here so the Lock screen shows their chips.
+            appCount: apps.count + categories.count,
+            domainCount: webDomains.count + domains.count,
+            domains: domains,
             duration: duration
         )
     }
 
     func clearBlock() {
         store.shield.applications = nil
+        store.shield.applicationCategories = nil
+        store.shield.webDomainCategories = nil
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
         activityCenter.stopMonitoring([
@@ -106,64 +174,25 @@ final class BlockingService: @unchecked Sendable {
     func reassertScheduleIfNeeded() {
         guard let snapshot = SharedBlockState.active else { return }
         let running = Set(activityCenter.activities)
-        guard !running.contains(PersistenceConfig.unblockActivityName)
-                || !running.contains(PersistenceConfig.unblockSafetyActivityName) else { return }
+        // Under fifteen minutes left there is deliberately no primary timer
+        // (iOS would refuse it), so only a missing safety timer counts as lost.
+        let primaryExpected = snapshot.remaining >= UnblockSchedule.minimumSpan
+        let primaryLost = primaryExpected && !running.contains(PersistenceConfig.unblockActivityName)
+        guard primaryLost || !running.contains(PersistenceConfig.unblockSafetyActivityName) else { return }
 
-        scheduleUnblock(from: snapshot.startedAt, duration: snapshot.duration)
+        UnblockSchedule.install(from: .now, to: snapshot.endsAt, center: activityCenter)
         scheduleEndNotification(duration: snapshot.remaining, identifier: Self.endNotificationID)
     }
 
     var hasActiveBlock: Bool {
         store.shield.applications != nil
+            || store.shield.applicationCategories != nil
+            || store.shield.webDomainCategories != nil
             || store.shield.webDomains != nil
             || store.webContent.blockedByFilter != nil
     }
 
-    /// iOS refuses a `DeviceActivitySchedule` whose interval is shorter than
-    /// about fifteen minutes, which is why a short block cannot rely on the
-    /// primary schedule alone.
-    private static let minimumScheduleSpan: TimeInterval = 16 * 60
-    /// How long after the block ends the safety interval closes.
-    private static let safetyGrace: TimeInterval = 5 * 60
     static let endNotificationID = "prosper.block.end"
-
-    /// Installs both unblock timers: the exact one, and a second that closes a
-    /// few minutes later. They are independent activities, so losing one still
-    /// leaves a path that lifts the block without the user's help (REL-7).
-    private func scheduleUnblock(from startedAt: Date, duration: TimeInterval) {
-        let endDate = startedAt.addingTimeInterval(duration)
-
-        start(PersistenceConfig.unblockActivityName, from: startedAt, to: endDate)
-
-        // The safety interval is kept to a short window ending after the block
-        // so its span is always a legal length without ever spanning a whole
-        // day: for a five-minute block it starts with the block, for a long one
-        // it opens shortly before the end.
-        let safetyEnd = max(
-            endDate.addingTimeInterval(Self.safetyGrace),
-            startedAt.addingTimeInterval(Self.minimumScheduleSpan)
-        )
-        let safetyStart = max(startedAt, safetyEnd.addingTimeInterval(-Self.minimumScheduleSpan))
-        start(PersistenceConfig.unblockSafetyActivityName, from: safetyStart, to: safetyEnd)
-    }
-
-    private func start(_ activity: DeviceActivityName, from start: Date, to end: Date) {
-        let fields: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
-        let schedule = DeviceActivitySchedule(
-            intervalStart: Calendar.current.dateComponents(fields, from: start),
-            intervalEnd: Calendar.current.dateComponents(fields, from: end),
-            repeats: false
-        )
-
-        do {
-            try activityCenter.startMonitoring(activity, during: schedule)
-        } catch {
-            // A refused schedule is survivable — the other timer, the monitor's
-            // sweep and the foreground sweep all still end the block — but it is
-            // the reason a block can overstay, so it is worth the log line.
-            print("Failed to schedule \(activity.rawValue): \(error)")
-        }
-    }
 
     /// A local notification timed to the end of the block.
     ///
@@ -192,6 +221,7 @@ final class BlockingService: @unchecked Sendable {
 
     private func persistBlockSession(
         selection: FamilyActivitySelection,
+        startedAt: Date,
         appCount: Int,
         domainCount: Int,
         domains: [String],
@@ -205,14 +235,12 @@ final class BlockingService: @unchecked Sendable {
             domainCount: domainCount,
             domains: domains,
             selectionData: selectionData,
-            duration: duration
+            duration: duration,
+            // One start time everywhere: the snapshot, the timers and the session.
+            startedAt: startedAt
         )
         context.insert(session)
         try? context.save()
-
-        // Mirror the essentials to the App Group so the Shield extension can
-        // describe this block (remaining time, when it was set).
-        SharedBlockState.save(startedAt: session.startedAt, duration: duration)
     }
 }
 

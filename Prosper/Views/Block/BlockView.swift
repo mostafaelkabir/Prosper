@@ -8,8 +8,43 @@ struct BlockView: View {
     @State private var pendingPrefill: BlockPrefill?
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
 
-    private var activeSession: BlockSession? {
-        sessions.first { $0.isActive }
+    /// What the Lock screen shows while a block runs.
+    ///
+    /// SwiftData is the rich source, but it is not the only record: if the
+    /// store was lost or reset mid-block, the App Group snapshot still knows the
+    /// block is running. Reading SwiftData alone showed "Nothing is locked" over
+    /// a live shield, and a new block then failed without a word (QA-9).
+    private struct ActiveBlock {
+        let startedAt: Date
+        let endTime: Date
+        let duration: TimeInterval
+        let selectionData: Data?
+        let appCount: Int
+        let domains: [String]
+    }
+
+    private var activeBlock: ActiveBlock? {
+        if let session = sessions.first(where: { $0.isActive }) {
+            return ActiveBlock(
+                startedAt: session.startedAt,
+                endTime: session.endTime,
+                duration: session.duration,
+                selectionData: session.selectionData,
+                appCount: session.appCount,
+                domains: session.domains
+            )
+        }
+        if let snapshot = SharedBlockState.active {
+            return ActiveBlock(
+                startedAt: snapshot.startedAt,
+                endTime: snapshot.endsAt,
+                duration: snapshot.duration,
+                selectionData: nil,
+                appCount: 0,
+                domains: []
+            )
+        }
+        return nil
     }
 
     var body: some View {
@@ -17,14 +52,14 @@ struct BlockView: View {
             ZStack {
                 ProsperColor.ground.ignoresSafeArea()
 
-                if let session = activeSession {
-                    activeVault(session)
+                if let block = activeBlock {
+                    activeVault(block)
                 } else {
                     idleContent
                 }
             }
             .navigationTitle("Lock")
-            .navigationBarTitleDisplayMode(activeSession == nil ? .large : .inline)
+            .navigationBarTitleDisplayMode(activeBlock == nil ? .large : .inline)
             .sensoryFeedback(.selection, trigger: pendingPrefill)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
@@ -33,7 +68,7 @@ struct BlockView: View {
 
     // MARK: - Active vault
 
-    private func activeVault(_ session: BlockSession) -> some View {
+    private func activeVault(_ session: ActiveBlock) -> some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = max(0, session.endTime.timeIntervalSince(context.date))
             let progress = session.duration > 0 ? remaining / session.duration : 0
@@ -47,7 +82,7 @@ struct BlockView: View {
                     emphasize: remaining <= 60
                 )
 
-                Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(session.endTime.formatted(date: .omitted, time: .shortened))")
+                Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(untilText(session.endTime))")
                     .font(.footnote)
                     .foregroundStyle(ProsperColor.ink3)
 
@@ -159,6 +194,13 @@ struct BlockView: View {
                     .padding(.horizontal, 20)
             }
         }
+    }
+
+    /// The end time, with the day when it is not today (QA-9).
+    private func untilText(_ end: Date) -> String {
+        Calendar.current.isDateInToday(end)
+            ? end.formatted(date: .omitted, time: .shortened)
+            : end.formatted(date: .abbreviated, time: .shortened)
     }
 
     private func formatTime(_ interval: TimeInterval) -> String {

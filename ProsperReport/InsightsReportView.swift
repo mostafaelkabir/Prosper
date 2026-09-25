@@ -21,12 +21,22 @@ struct InsightsReportView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // The host reserves a fixed height (DeviceActivityReport does not size
+        // itself, QA-7), and the serif headline scales with Dynamic Type — at
+        // accessibility sizes it ran out of the frame and was clipped. Capping
+        // here keeps a worst-case card inside the reserved height (QA-9).
+        .dynamicTypeSize(...Self.maxTypeSize)
     }
+
+    /// The largest text size the card is laid out for; the Today host's
+    /// reserved height is sized against this.
+    static let maxTypeSize = DynamicTypeSize.xLarge
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Still learning your day").labelCaps()
-            Text("Insights appear once StolenEyes has enough of today's usage to say something true.")
+            // Range-neutral: the same view serves Today and the 7-day range (QA-9).
+            Text("Still learning").labelCaps()
+            Text("Insights appear once StolenEyes has enough usage in this range to say something true.")
                 .font(.system(size: 13))
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)

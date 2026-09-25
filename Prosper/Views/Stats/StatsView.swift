@@ -3,10 +3,12 @@ import SwiftData
 import DeviceActivity
 
 struct StatsView: View {
+    /// Labels say exactly what the filters cover: today, and the rolling last
+    /// 7 and 30 days — not a calendar "Week" or "Month" (QA-9).
     enum Range: String, CaseIterable, Identifiable {
-        case day = "Day"
-        case week = "Week"
-        case month = "Month"
+        case day = "Today"
+        case week = "7 days"
+        case month = "30 days"
         var id: String { rawValue }
     }
 
@@ -20,6 +22,8 @@ struct StatsView: View {
     @State private var range: Range = .day
     @State private var sectionIndex = 0
     @State private var appSort: AppSort = .time
+    /// Start of the day the filters were built for; see `ReportDayTracker`.
+    @State private var reportDay = Calendar.current.startOfDay(for: .now)
     @Query private var allSettings: [UserSettings]
 
     private var isFirstDay: Bool { allSettings.first?.isFirstDay ?? false }
@@ -51,11 +55,22 @@ struct StatsView: View {
                 Divider().overlay(ProsperColor.line)
 
                 sectionContent
+                    // A fresh identity per (range, section, sort, day). The hosted
+                    // report is cached by iOS on (context, filter) and, at the same
+                    // identity, a range switch was not reliably re-rendered (PERF-1)
+                    // — the Dashboard keys its embeds the same way. The day keeps a
+                    // tab left open overnight from showing yesterday (QA-9).
+                    .id(reportID)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(ProsperColor.ground)
             .navigationTitle("Insights")
+            .tracksReportDay($reportDay)
         }
+    }
+
+    private var reportID: String {
+        "\(range)-\(section)-\(appSort)-\(Int(reportDay.timeIntervalSince1970))"
     }
 
     @ViewBuilder
@@ -71,13 +86,13 @@ struct StatsView: View {
                     Spacer()
                     Picker("Sort apps by", selection: $appSort) {
                         Label("Most time", systemImage: "clock").tag(AppSort.time)
-                        Label("Most opens", systemImage: "hand.tap").tag(AppSort.opens)
+                        Label("Most pickups", systemImage: "hand.tap").tag(AppSort.pickups)
                     }
                     .pickerStyle(.menu)
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByOpens)
+                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByPickups)
             }
         case .patterns:
             patternsPlaceholder
@@ -156,8 +171,9 @@ struct UsageReportView: View {
     /// Sample usage for the simulator, re-ranked to match the selected sort.
     private var sampleSummary: UsageSummary {
         var summary = UsageSummary.sample(days: sampleDayCount)
-        if context == .usageByOpens {
+        if context == .usageByPickups {
             summary.apps.sort { $0.pickups > $1.pickups }
+            summary.appSort = .pickups
         }
         return summary
     }

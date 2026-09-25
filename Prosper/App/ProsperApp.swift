@@ -43,8 +43,10 @@ struct ProsperApp: App {
         }
     }
 
-    /// Re-installs the waste-time DeviceActivity monitor on launch so a device
-    /// reboot or app reinstall does not silently drop it.
+    /// Makes sure the waste-time DeviceActivity monitor is installed on launch
+    /// so a device reboot or app reinstall does not silently drop it. A monitor
+    /// that is already running with the same settings is left alone rather than
+    /// restarted, which used to reset the day's count on every cold launch (QA-9).
     private func refreshWarningSchedule() {
         let context = ModelContext(PersistenceConfig.sharedModelContainer)
         let settings = UserSettings.current(context: context)

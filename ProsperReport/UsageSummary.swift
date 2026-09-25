@@ -33,9 +33,13 @@ struct UsageItem: Identifiable, Hashable, @unchecked Sendable {
 }
 
 /// How the app list is ranked. Websites and categories always rank by time.
+///
+/// `.pickups` ranks by `numberOfPickups`, which counts only the times an app
+/// was the *first* one used after the phone was picked up — not every launch.
+/// Hence "pickups", never "opens" (QA-9).
 enum AppSort: Sendable {
     case time
-    case opens
+    case pickups
 }
 
 struct DailyUsage: Identifiable, Hashable, Sendable {
@@ -55,6 +59,8 @@ struct UsageSummary: Sendable {
     var apps: [UsageItem] = []
     var sites: [UsageItem] = []
     var categories: [UsageItem] = []
+    /// How `apps` is ranked, so the list can say so honestly.
+    var appSort: AppSort = .time
 
     var isEmpty: Bool { totalDuration == 0 && apps.isEmpty && sites.isEmpty }
 
@@ -126,10 +132,11 @@ struct UsageSummary: Sendable {
         for (id, byDay) in siteDays { sites[id]?.days = byDay.asDailyUsage }
 
         summary.days = days.asDailyUsage
+        summary.appSort = sortApps
         let rankedApps = apps.values.filter { $0.duration > 0 || $0.pickups > 0 }.sorted { lhs, rhs in
             switch sortApps {
             case .time: return lhs.duration > rhs.duration
-            case .opens: return lhs.pickups > rhs.pickups
+            case .pickups: return lhs.pickups > rhs.pickups
             }
         }
         summary.products = rankedProducts(apps: Array(apps.values), sites: Array(sites.values))
@@ -218,29 +225,44 @@ struct TodaySnapshot: Sendable {
     var totalNotifications: Int = 0
     /// Distracting apps and sites, largest first — answers "wasted where?".
     var topWaste: [UsageItem] = []
+    /// Every waste row, of which `topWaste` is the first three. Always sums to
+    /// `balance.distracting`, so the headline and the rows agree (QA-9).
+    var allWaste: [UsageItem] = []
     /// True when the user has classified nothing, so we show a "label your apps"
     /// nudge instead of a ring that is 100% unclassified.
     var hasClassification: Bool = false
 
     var isEmpty: Bool { balance.total == 0 }
 
+    /// One app or website's time, already given its class. The walk over the
+    /// system result tree produces these (it alone holds the tokens and the
+    /// user's labels); `assemble` turns them into the balance. Split so the
+    /// arithmetic — which is where double-counting hides — is testable without
+    /// Screen Time (QA-9).
+    struct ClassifiedUsage {
+        /// Stable identity for the "Where it went" row when it belongs to no
+        /// catalog platform: the bundle ID for an app, the host for a site.
+        let id: String
+        /// Display name (app) or host (site); also what platform clustering reads.
+        let name: String?
+        let duration: TimeInterval
+        var pickups: Int = 0
+        let timeClass: SharedClassification.ClassKind?
+        var appToken: ApplicationToken? = nil
+        var webToken: WebDomainToken? = nil
+    }
+
     /// Walks the system result tree once, assigning each app (by token) and each
-    /// website (by domain) to a time class. Unclassified is derived by
-    /// subtraction so the ring always sums to the real tracked total — nothing is
-    /// assumed productive (UX-9). Web-domain time is a subset of the browser
-    /// app's time, so if labels overlap we scale the labelled parts down to fit
-    /// the total rather than double-count.
+    /// website (by domain) to a time class, then hands the pieces to `assemble`.
     static func build(
         from data: DeviceActivityResults<DeviceActivityData>,
         classification: SharedClassification.Snapshot
     ) async -> TodaySnapshot {
         var total: TimeInterval = 0
-        var productive: TimeInterval = 0
-        var distracting: TimeInterval = 0
-        var rest: TimeInterval = 0
         var pickups = 0
         var notifications = 0
-        var waste: [String: UsageItem] = [:]
+        var apps: [ClassifiedUsage] = []
+        var sites: [ClassifiedUsage] = []
 
         for await activity in data {
             for await segment in activity.activitySegments {
@@ -251,57 +273,112 @@ struct TodaySnapshot: Sendable {
                     let categoryToken = category.category.token
 
                     for await app in category.applications {
-                        let duration = app.totalActivityDuration
                         pickups += app.numberOfPickups
                         notifications += app.numberOfNotifications
                         let appName = app.application.localizedDisplayName
-
-                        switch classification.timeClass(appToken: app.application.token, categoryToken: categoryToken, appName: appName) {
-                        case .productive: productive += duration
-                        case .distracting:
-                            distracting += duration
-                            // Cluster the waste line under the platform when the app
-                            // belongs to one, so "YouTube" is one row (app + sites).
-                            let fallbackID = app.application.bundleIdentifier ?? appName ?? "app"
-                            let bucket = Self.wasteBucket(for: appName, fallbackID: fallbackID, fallbackName: appName ?? fallbackID)
-                            var item = waste[bucket.key] ?? UsageItem(id: bucket.key, name: bucket.name, duration: 0, pickups: 0)
-                            item.duration += duration
-                            item.pickups += app.numberOfPickups
-                            item.appToken = item.appToken ?? app.application.token
-                            item.platformID = item.platformID ?? bucket.platformID
-                            waste[bucket.key] = item
-                        case .rest: rest += duration
-                        case nil: break // unclassified — absorbed by subtraction
-                        }
+                        apps.append(ClassifiedUsage(
+                            id: app.application.bundleIdentifier ?? appName ?? "app",
+                            name: appName,
+                            duration: app.totalActivityDuration,
+                            pickups: app.numberOfPickups,
+                            timeClass: classification.timeClass(appToken: app.application.token, categoryToken: categoryToken, appName: appName),
+                            appToken: app.application.token
+                        ))
                     }
 
                     for await site in category.webDomains {
-                        let duration = site.totalActivityDuration
                         let host = site.webDomain.domain
-                        switch classification.timeClass(domain: host) {
-                        case .productive: productive += duration
-                        case .distracting:
-                            distracting += duration
-                            let bucket = Self.wasteBucket(for: host, fallbackID: host ?? "site", fallbackName: host ?? "site")
-                            var item = waste[bucket.key] ?? UsageItem(id: bucket.key, name: bucket.name, duration: 0, pickups: 0)
-                            item.duration += duration
-                            item.webToken = item.webToken ?? site.webDomain.token
-                            item.platformID = item.platformID ?? bucket.platformID
-                            waste[bucket.key] = item
-                        case .rest: rest += duration
-                        case nil: break
-                        }
+                        sites.append(ClassifiedUsage(
+                            id: host ?? "site",
+                            name: host,
+                            duration: site.totalActivityDuration,
+                            timeClass: classification.timeClass(domain: host),
+                            webToken: site.webDomain.token
+                        ))
                     }
                 }
             }
         }
 
-        // Guard against app+domain overlap pushing labelled time past the real
-        // total: scale the three labelled classes to fit, leaving unclassified ≥ 0.
+        return assemble(
+            total: total,
+            pickups: pickups,
+            notifications: notifications,
+            apps: apps,
+            sites: sites,
+            userHasLabels: !classification.isEmpty
+        )
+    }
+
+    /// Builds the balance and the "Where it went" rows from classified pieces.
+    ///
+    /// Unclassified is derived by subtraction so the ring always sums to the
+    /// real tracked total — nothing is assumed productive (UX-9).
+    ///
+    /// Browsers need care: iOS reports website time *and* the browser's own app
+    /// time, and the website time is already inside the browser's. So when a
+    /// site has a class of its own, that time is taken out of the browser before
+    /// the browser's class is applied — exactly as `rankedProducts` does for the
+    /// product list. Chrome labelled productive with 60m, 20m of it on
+    /// instagram.com, is 40m productive and 20m distracting, not 60 + 20.
+    /// Browsing on sites with no class stays with the browser's class, because
+    /// nothing better is known about it (QA-9).
+    ///
+    /// Headline and rows are built from the same numbers, so "Wasted" always
+    /// equals the sum of every waste row (the view shows the top three).
+    static func assemble(
+        total: TimeInterval,
+        pickups: Int,
+        notifications: Int,
+        apps: [ClassifiedUsage],
+        sites: [ClassifiedUsage],
+        userHasLabels: Bool
+    ) -> TodaySnapshot {
+        var byClass: [SharedClassification.ClassKind: TimeInterval] = [:]
+        var waste: [String: UsageItem] = [:]
+
+        func add(_ usage: ClassifiedUsage, duration: TimeInterval) {
+            guard let timeClass = usage.timeClass, duration > 0 else { return } // unclassified — absorbed by subtraction
+            byClass[timeClass, default: 0] += duration
+            guard timeClass == .distracting else { return }
+            // Cluster the waste line under the platform when it belongs to one,
+            // so "YouTube" is one row (app + sites).
+            let bucket = wasteBucket(for: usage.name, fallbackID: usage.id, fallbackName: usage.name ?? usage.id)
+            var item = waste[bucket.key] ?? UsageItem(id: bucket.key, name: bucket.name, duration: 0, pickups: 0)
+            item.duration += duration
+            item.pickups += usage.pickups
+            item.appToken = item.appToken ?? usage.appToken
+            item.webToken = item.webToken ?? usage.webToken
+            item.platformID = item.platformID ?? bucket.platformID
+            waste[bucket.key] = item
+        }
+
+        // Sites keep their own class. Only classified site time is carved out of
+        // the browsers: unclassified browsing is still browser time.
+        for site in sites { add(site, duration: site.duration) }
+        let classifiedSiteTime = sites.filter { $0.timeClass != nil }.reduce(0) { $0 + $1.duration }
+
+        // Screen Time does not say which browser a site was visited in, so the
+        // carve-out is shared across browsers in proportion to their time.
+        let browsers = apps.filter { PlatformCatalog.isBrowser($0.name) }
+        let browserTime = browsers.reduce(0) { $0 + $1.duration }
+        let browserScale = browserTime > 0 ? (browserTime - min(classifiedSiteTime, browserTime)) / browserTime : 1
+        for app in apps {
+            add(app, duration: PlatformCatalog.isBrowser(app.name) ? app.duration * browserScale : app.duration)
+        }
+
+        var productive = byClass[.productive] ?? 0
+        var distracting = byClass[.distracting] ?? 0
+        var rest = byClass[.rest] ?? 0
+
+        // Safety net for data that still overlaps (site time with no browser to
+        // take it from, say): scale every labelled number — rows included — to
+        // fit the real total, leaving unclassified ≥ 0.
         let labelled = productive + distracting + rest
         if labelled > total, labelled > 0 {
             let k = total / labelled
             productive *= k; distracting *= k; rest *= k
+            for key in waste.keys { waste[key]?.duration *= k }
         }
         let unclassified = max(0, total - (productive + distracting + rest))
 
@@ -312,11 +389,12 @@ struct TodaySnapshot: Sendable {
         // Top 3 only: the hero is a glance, and the full ranked list lives in
         // Insights → What. Keeping it short also bounds the hero's height so the
         // (non-self-sizing) report fits the host frame without clipping.
-        snapshot.topWaste = Array(waste.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }.prefix(3))
+        snapshot.allWaste = waste.values.filter { $0.duration > 0 }.sorted { $0.duration > $1.duration }
+        snapshot.topWaste = Array(snapshot.allWaste.prefix(3))
         // "Classified" if the user labelled anything OR the catalog's built-in
         // defaults placed real time into a class (UX-20) — so the "everything is
         // unclassified" nudge doesn't show once known apps are auto-classified.
-        snapshot.hasClassification = !classification.isEmpty || (productive + distracting + rest) > 0
+        snapshot.hasClassification = userHasLabels || (productive + distracting + rest) > 0
         return snapshot
     }
 
@@ -433,6 +511,7 @@ extension TodaySnapshot {
             UsageItem(id: "youtube", name: "YouTube", duration: 12 * 60, pickups: 0, platformID: "youtube"),
             UsageItem(id: "reddit", name: "Reddit", duration: 8 * 60, pickups: 9, platformID: "reddit"),
         ]
+        s.allWaste = s.topWaste
         s.hasClassification = true
         return s
     }

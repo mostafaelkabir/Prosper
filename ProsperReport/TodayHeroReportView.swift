@@ -37,7 +37,7 @@ struct TodayHeroReportView: View {
     private var heroRow: some View {
         HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("Wasted").labelCaps() // range (Today / This week) is set by the segmented control above
+                Text("Wasted").labelCaps() // range (Today / Last 7 days) is set by the segmented control above
                 Text(balance.distracting.usageFormatted)
                     .font(.system(size: 38, weight: .semibold))
                     .monospacedDigit()

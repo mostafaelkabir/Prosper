@@ -16,6 +16,9 @@ struct CreateBlockView: View {
     @State private var customHours = 1
     @State private var customMinutes = 0
     @State private var showConfirmation = false
+    /// Why the last hold-to-lock did not start a block. Shown as an alert:
+    /// a silent failure reads exactly like success (QA-9).
+    @State private var startError: String?
 
     /// Every block ever started, used only to tell a first-timer from someone
     /// who knows what a block feels like.
@@ -27,11 +30,14 @@ struct CreateBlockView: View {
     init(prefill: BlockPrefill? = nil) {
         _selection = State(initialValue: prefill?.selection ?? FamilyActivitySelection())
         _domains = State(initialValue: prefill?.domains ?? [])
-        _duration = State(initialValue: prefill?.duration ?? 3600)
+        _duration = State(initialValue: max(prefill?.duration ?? 3600, BlockingService.minimumDuration))
     }
 
     private var endTimeText: String {
-        Date.now.addingTimeInterval(duration).formatted(date: .omitted, time: .shortened)
+        let end = Date.now.addingTimeInterval(duration)
+        return Calendar.current.isDateInToday(end)
+            ? end.formatted(date: .omitted, time: .shortened)
+            : end.formatted(date: .abbreviated, time: .shortened)
     }
 
     private let allPresets: [(label: String, seconds: TimeInterval)] = [
@@ -76,6 +82,11 @@ struct CreateBlockView: View {
         selection.webDomainTokens.count + domains.count
     }
 
+    /// A waste list or saved list can hold more sites than iOS will filter.
+    /// Blocking only the first 50 while the confirm screen lists them all
+    /// would lock less than it promised, so the review step waits (QA-9).
+    private var tooManySites: Bool { domains.count > BlockingService.maxDomains }
+
     private var hasSelection: Bool {
         !selection.applicationTokens.isEmpty
             // A category-only pick is a real selection — and the one REL-9 cares
@@ -106,6 +117,14 @@ struct CreateBlockView: View {
             }
             .navigationTitle("New Block")
             .navigationBarTitleDisplayMode(.inline)
+            .alert(
+                "Nothing was locked",
+                isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })
+            ) {
+                Button("OK", role: .cancel) { startError = nil }
+            } message: {
+                Text(startError ?? "")
+            }
             .safeAreaInset(edge: .bottom) {
                 if hasSelection {
                     confirmBar
@@ -274,7 +293,7 @@ struct CreateBlockView: View {
                     .frame(width: 100)
 
                     Picker("Minutes", selection: $customMinutes) {
-                        ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) {
+                        ForEach(minuteOptions, id: \.self) {
                             Text("\($0)m").tag($0)
                         }
                     }
@@ -282,7 +301,10 @@ struct CreateBlockView: View {
                     .frame(width: 100)
                 }
                 .frame(maxWidth: .infinity)
-                .onChange(of: customHours) { _, _ in updateCustomDuration() }
+                .onChange(of: customHours) { _, hours in
+                    if hours == 0 && customMinutes < Self.minimumMinutes { customMinutes = Self.minimumMinutes }
+                    updateCustomDuration()
+                }
                 .onChange(of: customMinutes) { _, _ in updateCustomDuration() }
             }
         } header: {
@@ -291,6 +313,7 @@ struct CreateBlockView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Block for \(durationText)")
                     .font(.subheadline.weight(.semibold))
+                Text("The shortest block is 15 minutes; iOS cannot time anything shorter.")
                 if isFirstBlock {
                     Text("Your first block is capped at 4 hours. There is no undo, so it is worth finding out what one feels like before committing a day to it. The cap lifts after this one.")
                 }
@@ -307,6 +330,12 @@ struct CreateBlockView: View {
                 .font(ProsperFont.insight)
                 .foregroundStyle(ProsperColor.ink)
                 .fixedSize(horizontal: false, vertical: true)
+            if tooManySites {
+                Text(BlockingService.StartError.tooManySites(domains.count).errorDescription ?? "")
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button {
                 showConfirmation = true
             } label: {
@@ -316,15 +345,23 @@ struct CreateBlockView: View {
                     .padding(.vertical, 14)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(tooManySites)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.bar)
     }
 
+    private static let minimumMinutes = Int(BlockingService.minimumDuration) / 60
+
+    /// Minutes offered by the wheel. With zero hours it starts at the iOS
+    /// minimum, so the wheel can never show a length the block will not have.
+    private var minuteOptions: [Int] {
+        Array(stride(from: customHours == 0 ? Self.minimumMinutes : 0, to: 60, by: 5))
+    }
+
     private func updateCustomDuration() {
-        duration = TimeInterval(customHours * 3600 + customMinutes * 60)
-        if duration == 0 { duration = 300 }
+        duration = max(TimeInterval(customHours * 3600 + customMinutes * 60), BlockingService.minimumDuration)
         clampDuration()
     }
 
@@ -363,19 +400,20 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
-        guard !BlockingService.shared.hasActiveBlock else { return }
-
         let settings = UserSettings.current(context: modelContext)
         settings.savedBlockDomains = domains
         try? modelContext.save()
 
-        BlockingService.shared.startBlock(
-            apps: selection.applicationTokens,
-            webDomains: selection.webDomainTokens,
-            domains: domains,
-            duration: duration,
-            selection: selection
-        )
-        dismiss()
+        do {
+            try BlockingService.shared.startBlock(
+                selection: selection,
+                domains: domains,
+                duration: duration
+            )
+            dismiss()
+        } catch {
+            showConfirmation = false
+            startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        }
     }
 }

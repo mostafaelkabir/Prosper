@@ -35,10 +35,13 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
         # Launch screen paints the app background (dynamic light/dark) instead of
-        # system white, killing the cold-launch flash (QA-3).
-        INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
+        # system white, killing the cold-launch flash (QA-3). It lives in a
+        # partial Info.plist merged with the generated one: the build setting
+        # used before (INFOPLIST_KEY_UILaunchScreen_BackgroundColor) does not
+        # exist, so the shipped UILaunchScreen was empty and every cold launch
+        # still flashed white (QA-9).
+        INFOPLIST_FILE: Prosper/Info.plist
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
         # iPhone only. Without this the bundle ships UIDeviceFamily [1,2] and
         # App Store validation demands the full iPad orientation set (90474) —
@@ -101,6 +104,9 @@ targets:
       # The active-block snapshot, so the monitor can sweep a block that has
       # outlived its timer without opening SwiftData (REL-7).
       - path: Prosper/Services/SharedBlockState.swift
+      # The unblock timers, so an interval that ends early (time-zone change,
+      # DST) is re-armed from here instead of lifting the block (QA-9).
+      - path: Prosper/Services/UnblockSchedule.swift
       - path: PrivacyManifests/ProsperMonitor/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:

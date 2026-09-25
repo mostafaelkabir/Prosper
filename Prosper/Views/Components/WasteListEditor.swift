@@ -14,6 +14,10 @@ struct WasteListEditor: View {
     @State private var domainInput = ""
     @State private var domainError: String?
     @State private var isPickerPresented = false
+    /// True while a finger is on the threshold slider. Each 5-minute step used
+    /// to persist and reinstall the waste monitor, restarting iOS's count for
+    /// the day several times per drag; now only where it lands counts (QA-9).
+    @State private var isDraggingThreshold = false
     @FocusState private var domainFieldFocused: Bool
 
     private var selectedCount: Int {
@@ -28,7 +32,11 @@ struct WasteListEditor: View {
         }
         .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
         .onChange(of: selection) { _, _ in onChange() }
-        .onChange(of: thresholdMinutes) { _, _ in onChange() }
+        .onChange(of: thresholdMinutes) { _, _ in
+            // Keyboard and VoiceOver adjustments have no drag to end, so they
+            // still persist straight away.
+            if !isDraggingThreshold { onChange() }
+        }
     }
 
     private var appsSection: some View {
@@ -55,7 +63,7 @@ struct WasteListEditor: View {
         } header: {
             Text("Waste apps")
         } footer: {
-            Text("Apps or Screen Time categories that count as waste on this device.")
+            Text("Apps or Screen Time categories that count as waste on this device. Warnings count time in what you pick here.")
         }
     }
 
@@ -87,7 +95,7 @@ struct WasteListEditor: View {
         } header: {
             Text("Waste websites")
         } footer: {
-            Text("Used both for warnings and as the default list when you open the New Block sheet.")
+            Text("Used for blocking: these become the default list when you open the New Block sheet. iOS can't measure time on a typed site, so they don't count toward warnings — pick apps and categories above for that.")
         }
     }
 
@@ -101,12 +109,15 @@ struct WasteListEditor: View {
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
                 }
-                Slider(value: $thresholdMinutes, in: 5...240, step: 5)
+                Slider(value: $thresholdMinutes, in: 5...240, step: 5) { editing in
+                    isDraggingThreshold = editing
+                    if !editing { onChange() }
+                }
             }
         } header: {
             Text("Threshold")
         } footer: {
-            Text("Combined time across your waste apps and sites in a single day before StolenEyes warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
+            Text("Combined time across the apps and categories you picked in a single day before StolenEyes warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
         }
     }
 

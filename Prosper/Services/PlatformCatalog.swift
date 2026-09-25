@@ -99,10 +99,17 @@ enum PlatformCatalog {
     /// reports separately. Anything ranked as a product subtracts the attributed
     /// website time from these rows, so browsing Instagram in Safari is not
     /// counted once as "Instagram" and again as "Safari" in the same list.
-    static let browserKeywords = ["safari", "chrome", "firefox", "edge", "brave", "opera", "duckduckgo", "arc "]
+    ///
+    /// Matched as whole words of the app's display name, never substrings: a
+    /// substring "edge" claimed "Ledger Live" and "Knowledge", and "opera"
+    /// claimed "Operator" — scaling their time away as if it were browsing and
+    /// keeping them out of the concentration insight (QA-9). Whole words still
+    /// catch "Microsoft Edge", "Opera GX", "Firefox Focus" and "Arc Search".
+    static let browserKeywords: Set<String> = ["safari", "chrome", "firefox", "edge", "brave", "opera", "duckduckgo", "arc"]
 
     static func isBrowser(_ name: String?) -> Bool {
         guard let name = name?.lowercased() else { return false }
-        return browserKeywords.contains { name.contains($0) } || name == "arc"
+        let words = name.split { !$0.isLetter && !$0.isNumber }
+        return words.contains { browserKeywords.contains(String($0)) }
     }
 }

@@ -18,6 +18,8 @@ struct DashboardView: View {
     @State private var showCreateBlock = false
     @State private var showClassify = false
     @State private var pendingPrefill: BlockPrefill?
+    /// Start of the day the report filters were built for; see `ReportDayTracker`.
+    @State private var reportDay = Calendar.current.startOfDay(for: .now)
 
     private var settings: UserSettings? { allSettings.first }
     private var activeSession: BlockSession? { sessions.first { $0.isActive } }
@@ -62,6 +64,9 @@ struct DashboardView: View {
         hasher.combine(s.restDomains)
         return hasher.finalize()
     }
+
+    /// The report day as an id component.
+    private var dayKey: Int { Int(reportDay.timeIntervalSince1970) }
 
     // MARK: - Real focus streak (UX-13)
 
@@ -124,7 +129,10 @@ struct DashboardView: View {
                     headline
 
                     AuroraSegmented(
-                        options: [(.day, "Today"), (.week, "This week")],
+                        // "Last 7 days", not "This week": the filter is a rolling
+                        // seven days, while the streak strip below shows the
+                        // calendar week — one label must not mean two spans (QA-9).
+                        options: [(.day, "Today"), (.week, "Last 7 days")],
                         selection: $range
                     )
 
@@ -160,6 +168,7 @@ struct DashboardView: View {
             }
             .background(ProsperColor.background)
             .toolbar(.hidden, for: .navigationBar)
+            .tracksReportDay($reportDay)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(isPresented: $showClassify) { NavigationStack { ClassificationEditorView() } }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
@@ -170,7 +179,9 @@ struct DashboardView: View {
 
     private var brandRow: some View {
         HStack {
-            Text("PROSPER")
+            // The shipping name, as on the home screen and in the store.
+            // "Prosper" is only the project/repo name (QA-9, REL-14).
+            Text("STOLENEYES")
                 .font(.system(size: 12, weight: .semibold))
                 .tracking(2)
                 .foregroundStyle(ProsperColor.ink)
@@ -197,10 +208,11 @@ struct DashboardView: View {
     private var heroCard: some View {
         AuroraHeroCard {
             UsageReportView(filter: balanceFilter, context: .todayBalance)
-                // Re-embed on a range change *or* any classification edit, so the
-                // extension re-runs makeConfiguration instead of serving iOS's
-                // cached (context, filter) result. See `classificationSignature`.
-                .id("\(range)-\(classificationSignature)")
+                // Re-embed on a range change, any classification edit, or a new
+                // day, so the extension re-runs makeConfiguration instead of
+                // serving iOS's cached (context, filter) result. See
+                // `classificationSignature` and `ReportDayTracker` (QA-9).
+                .id("\(range)-\(classificationSignature)-\(dayKey)")
                 // DeviceActivityReport renders in a separate process and does not
                 // report its content height back to us; inside this ScrollView the
                 // frame is the only thing reserving space. 300pt clipped the full
@@ -210,15 +222,19 @@ struct DashboardView: View {
         }
     }
 
-    /// Today's ranked insight(s) (E7.0). The ProsperReport extension computes them
+    /// The selected range's ranked insight(s) (E7.0). The ProsperReport extension computes them
     /// from raw usage and renders the cards; we reserve a fixed height because the
     /// hosted report does not report its own size (same constraint as the hero).
     private var insightSpotlight: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Today's insight").labelCaps()
+            // Names the range the card is actually built from (QA-9).
+            Text(range == .day ? "Today's insight" : "Insight · last 7 days").labelCaps()
             InsightSpotlightHost(filter: balanceFilter)
-                .id("insights-\(range)")
-                .frame(minHeight: 140, alignment: .top)
+                .id("insights-\(range)-\(dayKey)")
+                // Sized for a three-line headline and two-line evidence at the
+                // card's Dynamic Type cap (InsightsReportView.maxTypeSize,
+                // xLarge); 140pt clipped long app names at large text (QA-9).
+                .frame(minHeight: 170, alignment: .top)
         }
     }
 

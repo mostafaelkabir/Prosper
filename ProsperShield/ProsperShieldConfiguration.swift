@@ -15,6 +15,17 @@ class ProsperShieldConfiguration: ShieldConfigurationDataSource {
         makeConfiguration(targetName: webDomain.domain)
     }
 
+    // Apps and sites locked through a Screen Time category ask through these
+    // overloads. Without them iOS falls back to its own generic screen, which
+    // says nothing about the block or the way out (QA-9).
+    override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
+        makeConfiguration(targetName: application.localizedDisplayName)
+    }
+
+    override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
+        makeConfiguration(targetName: webDomain.domain)
+    }
+
     // MARK: - Composition
 
     private func makeConfiguration(targetName: String?) -> ShieldConfiguration {
@@ -22,7 +33,11 @@ class ProsperShieldConfiguration: ShieldConfigurationDataSource {
             return fallback()
         }
 
-        let until = block.endsAt.formatted(date: .omitted, time: .shortened)
+        // A block ending tomorrow must say so: "until 7:00 PM" read at 9 PM
+        // would claim it ends in the past (QA-9).
+        let until = Calendar.current.isDateInToday(block.endsAt)
+            ? block.endsAt.formatted(date: .omitted, time: .shortened)
+            : block.endsAt.formatted(.dateTime.weekday(.abbreviated).hour().minute())
         let setAt = block.startedAt.formatted(date: .omitted, time: .shortened)
 
         var lines = [affirmation()]

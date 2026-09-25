@@ -18,6 +18,9 @@ struct HourlyUsage: Sendable {
     var cells: [Cell] = []
     /// Distinct days that had any activity, ascending.
     var days: [Date] = []
+    /// Every day the report's segments covered, ascending, *including* days with
+    /// no activity — so a 30-day grid still draws the quiet days as rows.
+    var coveredDays: [Date] = []
 
     var totalDuration: TimeInterval { cells.reduce(0) { $0 + $1.duration } }
     var isEmpty: Bool { totalDuration == 0 }
@@ -26,6 +29,20 @@ struct HourlyUsage: Sendable {
     /// The most recent day with data (or today), used as the anchor for the
     /// week grid's rows.
     var latestDay: Date { days.last ?? Calendar.current.startOfDay(for: .now) }
+
+    /// The rows the multi-day grid draws: every calendar day from the first day
+    /// covered to `latestDay`, and never fewer than seven. The Month grid used to
+    /// draw only the last seven of thirty days while the header total, peak hour
+    /// and colour scale counted all thirty; now every day that feeds those
+    /// numbers is on screen (QA-9).
+    var gridDays: [Date] {
+        let calendar = Calendar.current
+        let end = latestDay
+        let weekStart = calendar.date(byAdding: .day, value: -6, to: end) ?? end
+        let start = min(coveredDays.first ?? weekStart, days.first ?? weekStart, weekStart)
+        let span = (calendar.dateComponents([.day], from: start, to: end).day ?? 6) + 1
+        return (0..<max(1, span)).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+    }
 
     /// Duration summed per hour across every day (0...23).
     var durationByHour: [TimeInterval] {
@@ -52,12 +69,14 @@ struct HourlyUsage: Sendable {
     static func build(from data: DeviceActivityResults<DeviceActivityData>) async -> HourlyUsage {
         let calendar = Calendar.current
         var buckets: [Date: [Int: TimeInterval]] = [:]
+        var covered: Set<Date> = []
 
         for await activity in data {
             for await segment in activity.activitySegments {
                 let start = segment.dateInterval.start
                 let day = calendar.startOfDay(for: start)
                 let hour = calendar.component(.hour, from: start)
+                covered.insert(day)
                 buckets[day, default: [:]][hour, default: 0] += segment.totalActivityDuration
             }
         }
@@ -72,6 +91,7 @@ struct HourlyUsage: Sendable {
         var usage = HourlyUsage()
         usage.cells = cells.sorted { ($0.day, $0.hour) < ($1.day, $1.hour) }
         usage.days = Set(cells.map(\.day)).sorted()
+        usage.coveredDays = covered.sorted()
         return usage
     }
 }
@@ -97,11 +117,12 @@ func hourLabel(_ hour: Int) -> String {
 #if targetEnvironment(simulator)
 
 extension HourlyUsage {
-    /// - Parameter dayCount: 1 = a single day's 24-hour bars, >1 = week grid.
+    /// - Parameter dayCount: 1 = a single day's 24-hour bars, >1 = a grid with
+    ///   one row per day (7 for Week, 30 for Month).
     static func sample(days dayCount: Int) -> HourlyUsage {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        let count = max(1, min(dayCount, 7))
+        let count = max(1, min(dayCount, 30))
 
         // A believable waking-hours curve (minutes per hour, index = hour).
         let base: [Double] = [
@@ -133,6 +154,7 @@ extension HourlyUsage {
         var usage = HourlyUsage()
         usage.cells = cells
         usage.days = days
+        usage.coveredDays = days
         return usage
     }
 }
