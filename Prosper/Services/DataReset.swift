@@ -39,6 +39,8 @@ enum DataReset {
         // 2. Shared snapshots, minus the active block's.
         SharedClassification.clear()
         WarningInterventionState.clear()
+        WarningDeliveryLedger.appGroup?.clear()
+        SetupSkip.clear()
         PersistenceConfig.acknowledgeHealth()
         if activeBlock == nil {
             SharedBlockState.clear()
