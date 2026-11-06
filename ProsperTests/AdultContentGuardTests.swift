@@ -30,9 +30,10 @@ struct AdultContentGuardTests {
         #expect(Set(AdultDomainList.builtIn).count == AdultDomainList.builtIn.count)
     }
 
-    @Test("The built-in list fits the filter and leaves the user room")
+    @Test("The built-in list plus the user's slots stays well inside the filter's real limit")
     func builtInLeavesRoom() {
-        #expect(AdultDomainList.builtIn.count <= AdultDomainList.filterCapacity)
+        #expect(AdultDomainList.builtIn.count + AdultDomainList.userSlots <= 20)
+        #expect(AdultDomainList.builtIn.count + AdultDomainList.userSlots <= AdultDomainList.filterCapacity)
         #expect(AdultDomainList.userSlots >= 5)
     }
 
@@ -43,7 +44,7 @@ struct AdultContentGuardTests {
 
         let many = (0..<60).map { "site\($0).com" }
         let full = AdultDomainList.domains(adding: many)
-        #expect(full.count == AdultDomainList.filterCapacity)
+        #expect(full.count == AdultDomainList.builtIn.count + AdultDomainList.userSlots)
         #expect(Array(full.prefix(AdultDomainList.builtIn.count)) == AdultDomainList.builtIn)
     }
 
@@ -60,13 +61,11 @@ struct AdultContentGuardTests {
         #expect(blocked.contains(WebDomain(domain: "example.com")))
     }
 
-    @Test("A block session keeps using .specific until the guard is on, then carries the adult filter")
+    @Test("A block session or schedule writes only its own names, never .auto")
     func sessionPolicy() {
         let reddit: Set<WebDomain> = [WebDomain(domain: "reddit.com")]
-        #expect(AdultDomainList.sessionPolicy(domains: [], guardOn: false) == nil)
-        #expect(AdultDomainList.sessionPolicy(domains: [], guardOn: true) == nil)
-        #expect(AdultDomainList.sessionPolicy(domains: ["reddit.com"], guardOn: false) == .specific(reddit))
-        #expect(AdultDomainList.sessionPolicy(domains: ["reddit.com"], guardOn: true) == .auto(reddit, except: []))
+        #expect(AdultDomainList.sessionPolicy(domains: []) == nil)
+        #expect(AdultDomainList.sessionPolicy(domains: ["reddit.com"]) == .specific(reddit))
     }
 
     // MARK: - The record

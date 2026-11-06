@@ -75,7 +75,6 @@
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
 		8BD30D6A449A732781E6BCF6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */; };
 		8DC829A6B7DAA35A4FB0003D /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
-		91E626018EA3D28913EA9D9F /* SharedGuardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958B2E2262200B2D52204B0 /* SharedGuardState.swift */; };
 		97727BBE97137F3C9E209F77 /* ProsperMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		97AF62DF1D6FC69958544869 /* InterventionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA48729E878E058C7A790F7 /* InterventionView.swift */; };
 		99076840B8674B3BCCA2ACC1 /* ClassificationEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8DF145EC7642551AACA4BBB /* ClassificationEditorView.swift */; };
@@ -915,7 +914,6 @@
 				E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */,
 				54A76A6EC60664D6A176362A /* ScheduledLock.swift in Sources */,
 				FA331E3D4B6A2C91716BD81B /* SharedBlockState.swift in Sources */,
-				91E626018EA3D28913EA9D9F /* SharedGuardState.swift in Sources */,
 				A502CD33B796140AD47DB9AC /* UnblockSchedule.swift in Sources */,
 				1B3813D0B95CAD2555165152 /* UsageStat.swift in Sources */,
 				483703E5A19843B96AFDE43C /* UserSettings.swift in Sources */,
