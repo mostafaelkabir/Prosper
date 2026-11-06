@@ -81,6 +81,24 @@ Compare at the end of a normal day against Settings → Screen Time.
 | 5.5 | Insights: switch Day → Week → Month. | Numbers change with the range every time (PERF-1). |
 | 5.6 | Leave Today open overnight; open the app in the morning. | Shows the new day, not yesterday. |
 
+## 6. Adult Content Guard (E9)
+
+The guard is permanent by design, so run this section **last**, on a device you
+are willing to leave guarded, or finish with 6.9 (delete the app). Everything
+here depends on iOS behaviour the simulator cannot show.
+
+| # | Do | Expect |
+|---|---|---|
+| 6.1 | Settings → Adult Content Guard. Hold to guard with no apps picked. | Row says **On**; screen shows "On since <today>". No control anywhere switches it off. |
+| 6.2 | Safari: open **pornhub.com**, then **onlyfans.com**, then a lesser-known adult site. | All three show Safari's restricted page. The third proves Apple's `.auto` filter is live, not just the by-name list. |
+| 6.3 | Same three in **Chrome** (or any other browser). | Blocked there too. |
+| 6.4 | Safari tab switcher. | **Private** is unavailable while the guard is on. |
+| 6.5 ⏱ | Start a 15-min block on reddit.com. Let it end. Re-test 6.2. | Still blocked after the block ends: the session's store was cleared, the guard's was not. |
+| 6.6 | Settings → Delete my data. Re-test 6.2 and reopen the guard screen. | Still blocked; still "On". Deleting data is not an off switch. |
+| 6.7 | Reboot. Re-test 6.2 without opening StolenEyes. | Still blocked (the store persists on its own; launch only re-asserts it). |
+| 6.8 | Add **Reddit** to the guard, then open Reddit. | StolenEyes shield titled **Guarded**, the date you chose it, "no off switch", the urge line, the delete-the-app line. Only **Close**. Re-open the guard screen: Reddit is listed and cannot be removed. |
+| 6.9 | Add a site by name (e.g. a mirror you found), then open it. | Blocked. Then **delete StolenEyes**: Safari opens all of 6.2 again. This is the documented exit (REL-8) — it must work, and it must be the only thing that does. |
+
 ## Reporting
 
 Record results on the DEV-1 ticket in Basira as one dated note: build number,

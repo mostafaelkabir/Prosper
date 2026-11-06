@@ -118,9 +118,14 @@ enum ScheduledLockShield {
         store.shield.applicationCategories = categories.isEmpty ? nil : .specific(categories)
         store.shield.webDomainCategories = categories.isEmpty ? nil : .specific(categories)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
-        store.webContent.blockedByFilter = lock.domains.isEmpty
-            ? nil
-            : .specific(Set(lock.domains.map { WebDomain(domain: $0) }))
+        // Same rule as a hand-started block: while the Adult Content Guard is
+        // on, the schedule's filter carries the adult filter as well (E9). The
+        // monitor extension applies this too, so the guard's record is read
+        // from the App Group rather than through the app-only service.
+        store.webContent.blockedByFilter = AdultDomainList.sessionPolicy(
+            domains: lock.domains,
+            guardOn: SharedGuardState.appGroup?.isEnabled ?? false
+        )
     }
 
     static func clear(_ lock: ScheduledLock) {

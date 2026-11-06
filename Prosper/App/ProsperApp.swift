@@ -30,6 +30,9 @@ struct ProsperApp: App {
                                 // A running block whose timers were lost gets
                                 // them back, so it can still end on its own.
                                 BlockingService.shared.reassertScheduleIfNeeded()
+                                // The guard is permanent; rewriting it on launch
+                                // heals a restore or update that dropped it (E9).
+                                AdultContentGuard.shared.reassertIfEnabled()
                             }
                     } else {
                         AuthorizationView(authManager: authManager)

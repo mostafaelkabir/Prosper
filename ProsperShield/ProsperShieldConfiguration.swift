@@ -8,22 +8,66 @@ import UIKit
 /// rotates so it does not go blind after repeated attempts, and never shames.
 class ProsperShieldConfiguration: ShieldConfigurationDataSource {
     override func configuration(shielding application: Application) -> ShieldConfiguration {
-        makeConfiguration(targetName: application.localizedDisplayName)
+        if guardState?.covers(application: application.token) == true {
+            return guardConfiguration(targetName: application.localizedDisplayName)
+        }
+        return makeConfiguration(targetName: application.localizedDisplayName)
     }
 
     override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
-        makeConfiguration(targetName: webDomain.domain)
+        if guardState?.covers(webDomain: webDomain.token) == true {
+            return guardConfiguration(targetName: webDomain.domain)
+        }
+        return makeConfiguration(targetName: webDomain.domain)
     }
 
     // Apps and sites locked through a Screen Time category ask through these
     // overloads. Without them iOS falls back to its own generic screen, which
     // says nothing about the block or the way out (QA-9).
     override func configuration(shielding application: Application, in category: ActivityCategory) -> ShieldConfiguration {
-        makeConfiguration(targetName: application.localizedDisplayName)
+        if guardState?.covers(category: category.token) == true {
+            return guardConfiguration(targetName: application.localizedDisplayName)
+        }
+        return makeConfiguration(targetName: application.localizedDisplayName)
     }
 
     override func configuration(shielding webDomain: WebDomain, in category: ActivityCategory) -> ShieldConfiguration {
-        makeConfiguration(targetName: webDomain.domain)
+        if guardState?.covers(category: category.token) == true {
+            return guardConfiguration(targetName: webDomain.domain)
+        }
+        return makeConfiguration(targetName: webDomain.domain)
+    }
+
+    // MARK: - Adult Content Guard (E9)
+
+    /// The guard's record, read fresh on every shield: it only ever grows.
+    private var guardState: SharedGuardState? { SharedGuardState.appGroup }
+
+    /// Something behind the guard, whether or not a block is also running. The
+    /// guard is permanent, so nothing about a countdown applies; what does is
+    /// the day it was chosen, that there is no switch, and that the urge is
+    /// shorter than it feels from inside it. Same rule as every shield: never
+    /// shame — shame is what the loop runs on.
+    private func guardConfiguration(targetName: String?) -> ShieldConfiguration {
+        var lines: [String] = []
+        if let targetName, !targetName.isEmpty {
+            lines.append("\(targetName) is behind your Adult Content Guard.")
+        }
+        if let since = guardState?.enabledAt {
+            lines.append("You chose this on \(since.formatted(date: .abbreviated, time: .omitted)), with a clear head. There is no off switch.")
+        } else {
+            lines.append("You chose this with a clear head. There is no off switch.")
+        }
+        lines.append("Close this. The urge passes in minutes; the decision doesn't.")
+        lines.append(LockExitCopy.guardShield)
+
+        return ShieldConfiguration(
+            backgroundBlurStyle: .systemThickMaterial,
+            title: ShieldConfiguration.Label(text: "Guarded", color: .label),
+            subtitle: ShieldConfiguration.Label(text: lines.joined(separator: "\n"), color: .secondaryLabel),
+            primaryButtonLabel: ShieldConfiguration.Label(text: "Close", color: .white),
+            primaryButtonBackgroundColor: .systemBlue
+        )
     }
 
     // MARK: - Composition
