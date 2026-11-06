@@ -26,6 +26,9 @@ struct SettingsView: View {
     @State private var scheduleFailure: String?
     @State private var showDeleteConfirmation = false
     @State private var deleteResult: DeleteResult?
+    /// Whether the Adult Content Guard is on. Read, never cached: it can only
+    /// ever go from off to on (E9).
+    @State private var guardOn = false
 
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -44,6 +47,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                guardSection
                 warningsToggleSection
                 if warningsEnabled {
                     WasteListEditor(
@@ -102,6 +106,27 @@ struct SettingsView: View {
     }
 
     // MARK: - Sections
+
+    /// E9. First in Settings on purpose: it is the one decision here that is
+    /// made once, and the row says which side of it the user is on.
+    private var guardSection: some View {
+        Section {
+            NavigationLink {
+                AdultContentGuardView()
+            } label: {
+                HStack {
+                    Label("Adult Content Guard", systemImage: guardOn ? "checkmark.shield.fill" : "shield")
+                    Spacer()
+                    Text(guardOn ? "On" : "Off")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } footer: {
+            Text(guardOn
+                ? "Adult websites are blocked for good on this iPhone. There is no off switch."
+                : "Block adult websites on this iPhone, for good. Decided once, with a clear head.")
+        }
+    }
 
     private var warningsToggleSection: some View {
         Section {
@@ -253,6 +278,7 @@ struct SettingsView: View {
         thresholdMinutes = Double(max(5, s.wasteWarningThresholdMinutes))
         requirePhrase = s.level3PhraseRequired
         scheduleFailure = WarningService.shared.lastFailure
+        guardOn = AdultContentGuard.shared.isEnabled
     }
 
     /// Called by the waste list editor: the list and threshold are the only

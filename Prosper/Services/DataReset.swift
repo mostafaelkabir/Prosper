@@ -13,6 +13,10 @@ import SwiftData
 /// snapshot and the stored sessions, so wiping both would read as "nothing is
 /// running" and take the shield down. The block's own record survives; the user
 /// keeps the commitment they made and loses only the history around it.
+///
+/// The Adult Content Guard (E9) survives for the same reason. Its record is
+/// `SharedGuardState`, which this never reads, and its restrictions live in a
+/// store this never opens. Deleting data is not an off switch for it either.
 enum DataReset {
 
     struct Outcome {

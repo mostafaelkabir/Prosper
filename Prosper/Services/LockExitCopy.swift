@@ -36,6 +36,21 @@ enum LockExitCopy {
     /// it reads as the closed door it is rather than as a suggestion.
     static let shield = "Deleting StolenEyes would end this block. Nothing else will."
 
+    /// The Adult Content Guard (E9) has no timer either. Same exit, said for
+    /// something that is meant to last.
+    static let guardFull = """
+    The guard has no off switch. Not in Settings, not by deleting your data, \
+    not by setting StolenEyes up again. That is the whole point: it was decided \
+    once, with a clear head, and it stays decided.
+
+    One way out, said plainly: deleting StolenEyes removes the guard, because \
+    iOS applies it on the app's behalf. That also throws away your history and \
+    your streak, which is the price.
+    """
+
+    /// The shield for something behind the guard.
+    static let guardShield = "Deleting StolenEyes would remove this guard. Nothing else will."
+
     /// For the App Store / TestFlight description.
     static let storeDescription = """
     StolenEyes blocks cannot be cancelled. There is no override, no "just five \

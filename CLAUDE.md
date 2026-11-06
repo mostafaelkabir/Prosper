@@ -53,13 +53,15 @@ Four extension targets embedded in the main app:
 
 **BlockingService has NO cancel method.** Once a block is started, the only way it ends is when the timer expires. This is the core product promise — genuinely unbreakable blocks. Do not add any mechanism to end a block early.
 
+**The Adult Content Guard has NO off switch.** `AdultContentGuard` (`Prosper/Services/AdultContentGuard.swift`) is permanent and one-way: no disable, no clear, no remove, and coverage is append-only. It lives in its own named store (`ManagedSettingsStore(named: "adultContentGuard")`), never the default store, so a block session starting or ending (in the app or in ProsperMonitor) cannot touch it. iOS combines stores with the most restrictive setting winning. Do not add any way to switch it off or shrink it; the documented exit is deleting the app.
+
 ## Build
 
 `project.yml` is the source of truth for targets; run `xcodegen generate` after changing it, then open `Prosper.xcodeproj`. Build for iOS Simulator or a personal device. The FamilyControls entitlement requires `.individual` authorization on a real device. The simulator cannot enforce blocks or show Screen Time data; report views fall back to sample data there.
 
 ## Website Blocking
 
-Typed domains are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. Do not use `.auto`, which also enables Apple's adult-content filter.
+Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard (`AdultDomainList.policy`); a session uses it only while the guard is on (`AdultDomainList.sessionPolicy`). Never use `.auto` for an ordinary block.
 
 ## Data Models
 

@@ -127,6 +127,15 @@ Pillar 1 done properly. Plain-language cards computed inside the ProsperReport e
 - **UX-7** Visual system pass: card component, semantic colors, dark mode, Dynamic Type
 - **E2.5b** Exact waste-time metric from a waste-only report context (replaces the threshold estimate)
 
+### Epic 9: Adult Content Guard
+A permanent, one-way block of adult content, requested 2026-11-06. Behaviourally distinct from a timed block: a porn urge is short and cue-driven and wins against in-the-moment willpower, so the guard removes the moment of decision altogether. Switched on once with a hold-to-lock, then on for good. No off switch anywhere in the app; the documented exit is deleting the app.
+
+- **9.1** `AdultContentGuard` in its own named `ManagedSettingsStore`; web filter `.auto` (Apple's adult classifier) plus a curated by-name list of the biggest adult, cam, creator, leak and directory sites; re-asserted on launch; untouched by block sessions and by Delete my data
+- **9.2** Append-only coverage: apps/categories via `FamilyActivityPicker`, extra sites by name (within the 50-domain filter cap); nothing can be removed
+- **9.3** Guard-aware shield copy (date chosen, no switch, urge-passes line, the exit), never shaming
+- **9.4** Settings screen: honest "what it blocks / what it can't", and the two iOS settings the app cannot flip (Sensitive Content Warning for on-device blur; Screen Time passcode + Deleting Apps off to close the delete-the-app exit)
+- **9.5** DNS layer (follow-up): `NEDNSSettingsManager` → CleanBrowsing Adult Filter DoH, which blocks adult domains in every app and forces SafeSearch on Google/Bing/DuckDuckGo. Needs the `dns-settings` Network Extension entitlement and a one-time user step in iOS Settings; cannot be made unbreakable, so it is a guardrail, not a wall
+
 ---
 
 ## Technical Approach

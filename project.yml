@@ -140,6 +140,9 @@ targets:
       - path: Prosper/Services/SharedBlockState.swift
       # One source for the "deleting Prosper ends a block" line (REL-8).
       - path: Prosper/Services/LockExitCopy.swift
+      # The Adult Content Guard's record, so a guarded app gets the guard's
+      # words instead of a block's countdown (E9).
+      - path: Prosper/Services/SharedGuardState.swift
       - path: PrivacyManifests/ProsperShield/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:
