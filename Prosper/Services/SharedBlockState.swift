@@ -14,7 +14,7 @@ enum SharedBlockState {
     private static let endKey = "activeBlock.endsAt"
     private static let durationKey = "activeBlock.duration"
 
-    struct Snapshot {
+    struct Snapshot: Sendable {
         let startedAt: Date
         let endsAt: Date
         let duration: TimeInterval

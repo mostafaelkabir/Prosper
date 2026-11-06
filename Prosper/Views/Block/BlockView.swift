@@ -6,6 +6,8 @@ struct BlockView: View {
     @State private var showCreateBlock = false
     /// Non-nil = New Block sheet opened with a Quick Preset already applied.
     @State private var pendingPrefill: BlockPrefill?
+    @State private var showSchedules = false
+    @State private var showAddToBlock = false
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
 
     /// What the Lock screen shows while a block runs.
@@ -21,6 +23,9 @@ struct BlockView: View {
         let selectionData: Data?
         let appCount: Int
         let domains: [String]
+        /// Only a block with its full SwiftData record can be added to: the
+        /// shields are rewritten whole, so the current list must be known.
+        var canAdd = false
     }
 
     private var activeBlock: ActiveBlock? {
@@ -31,7 +36,8 @@ struct BlockView: View {
                 duration: session.duration,
                 selectionData: session.selectionData,
                 appCount: session.appCount,
-                domains: session.domains
+                domains: session.domains,
+                canAdd: true
             )
         }
         if let snapshot = SharedBlockState.active {
@@ -63,6 +69,16 @@ struct BlockView: View {
             .sensoryFeedback(.selection, trigger: pendingPrefill)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
+            .sheet(isPresented: $showSchedules) { ScheduleListView() }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showSchedules = true
+                    } label: {
+                        Label("Schedules", systemImage: "calendar.badge.clock")
+                    }
+                }
+            }
         }
     }
 
@@ -86,19 +102,33 @@ struct BlockView: View {
                     .font(.footnote)
                     .foregroundStyle(ProsperColor.ink3)
 
-                if session.appCount > 0 {
+                if session.appCount > 0 || !session.domains.isEmpty {
                     SelectionChips(
                         selection: WasteSelectionCodec.decode(session.selectionData),
-                        placeholderCount: session.appCount
+                        typedDomains: session.domains,
+                        placeholderCount: session.appCount,
+                        cap: 12
                     )
                     .padding(.horizontal, 32)
                 }
-                if !session.domains.isEmpty {
-                    Text(session.domains.joined(separator: "  ·  "))
-                        .font(.caption)
-                        .foregroundStyle(ProsperColor.ink3)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+
+                if session.canAdd {
+                    Button {
+                        showAddToBlock = true
+                    } label: {
+                        Label("Add apps or sites", systemImage: "plus.circle")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .sheet(isPresented: $showAddToBlock) {
+                        AddToLockView(
+                            lockedSelection: WasteSelectionCodec.decode(session.selectionData),
+                            lockedDomains: session.domains,
+                            until: session.endTime
+                        ) { additions, domains in
+                            try BlockingService.shared.addToBlock(selection: additions, domains: domains)
+                        }
+                    }
                 }
 
                 Spacer()
@@ -126,18 +156,8 @@ struct BlockView: View {
     private var idleContent: some View {
         VStack(spacing: 24) {
             Spacer()
-            VStack(spacing: 14) {
-                Image(systemName: "lock.open")
-                    .font(.system(size: 44))
-                    .foregroundStyle(ProsperColor.ink3)
-                Text("Nothing is locked")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(ProsperColor.ink)
-                Text("Lock distracting apps and sites for a set time — with no way to undo.")
-                    .font(.subheadline)
-                    .foregroundStyle(ProsperColor.ink3)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+            TimelineView(.periodic(from: .now, by: 30)) { context in
+                idleHeader(now: context.date)
             }
             Spacer()
 
@@ -154,6 +174,38 @@ struct BlockView: View {
             .buttonStyle(.borderedProminent)
             .padding(.horizontal, 20)
             .padding(.bottom, 16)
+        }
+    }
+
+    /// "Nothing is locked", unless a schedule is locking right now (E3.6).
+    private func idleHeader(now: Date) -> some View {
+        let running = ScheduledLockStore.load().compactMap { lock in
+            lock.window(containing: now).map { (lock, $0.end) }
+        }
+        return VStack(spacing: 14) {
+            Image(systemName: running.isEmpty ? "lock.open" : "lock.fill")
+                .font(.system(size: 44))
+                .foregroundStyle(running.isEmpty ? ProsperColor.ink3 : ProsperColor.slate)
+            if let first = running.first {
+                let (lock, end) = first
+                Text("\(lock.name) is locking")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(ProsperColor.ink)
+                Text("Until \(end.formatted(date: .omitted, time: .shortened)). A schedule can't be changed while it runs.")
+                    .font(.subheadline)
+                    .foregroundStyle(ProsperColor.ink3)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            } else {
+                Text("Nothing is locked")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(ProsperColor.ink)
+                Text("Lock distracting apps and sites for a set time — with no way to undo.")
+                    .font(.subheadline)
+                    .foregroundStyle(ProsperColor.ink3)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
         }
     }
 

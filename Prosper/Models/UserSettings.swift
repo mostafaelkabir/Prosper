@@ -28,6 +28,10 @@ final class UserSettings {
     /// Websites the user last typed into the block creator, so the list is
     /// remembered between blocks (e.g. ["reddit.com", "youtube.com"]).
     var savedBlockDomains: [String] = []
+    /// The newest batch of starter waste sites this install has been offered
+    /// (UX-21). Each batch is offered once, so a site the user removes stays
+    /// removed.
+    var wasteSeedVersion: Int = 0
     /// True once the user has finished (or explicitly skipped through) the
     /// post-authorization setup flow. Drives the "resume setup" banner.
     var hasCompletedSetup: Bool = false

@@ -19,6 +19,9 @@ struct CreateBlockView: View {
     /// Why the last hold-to-lock did not start a block. Shown as an alert:
     /// a silent failure reads exactly like success (QA-9).
     @State private var startError: String?
+    /// True while the block's timers are being installed, which can take
+    /// seconds when iOS is waiting on ProsperMonitor (QA-10).
+    @State private var isLocking = false
 
     /// Every block ever started, used only to tell a first-timer from someone
     /// who knows what a block feels like.
@@ -146,6 +149,7 @@ struct CreateBlockView: View {
                     selection: selection,
                     typedDomains: domains,
                     duration: duration,
+                    isLocking: isLocking,
                     onConfirm: startBlock
                 )
             }
@@ -203,7 +207,7 @@ struct CreateBlockView: View {
             }
 
             ForEach(domains, id: \.self) { domain in
-                Label(domain, systemImage: "globe")
+                SiteLabel(domain: domain)
             }
             .onDelete { offsets in
                 domains.remove(atOffsets: offsets)
@@ -400,20 +404,25 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
+        guard !isLocking else { return }
         let settings = UserSettings.current(context: modelContext)
         settings.savedBlockDomains = domains
         try? modelContext.save()
 
-        do {
-            try BlockingService.shared.startBlock(
-                selection: selection,
-                domains: domains,
-                duration: duration
-            )
-            dismiss()
-        } catch {
-            showConfirmation = false
-            startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        isLocking = true
+        Task {
+            defer { isLocking = false }
+            do {
+                try await BlockingService.shared.startBlock(
+                    selection: selection,
+                    domains: domains,
+                    duration: duration
+                )
+                dismiss()
+            } catch {
+                showConfirmation = false
+                startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
     }
 }

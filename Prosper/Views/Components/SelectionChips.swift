@@ -69,7 +69,7 @@ struct SelectionChips: View {
         case .web(let token):
             Chip { Label(token).labelStyle(.titleAndIcon) }
         case .domain(let domain):
-            Chip { Label(domain, systemImage: "globe") }
+            Chip { SiteLabel(domain: domain, iconSize: 18) }
         }
     }
 }
@@ -119,6 +119,42 @@ struct FlowLayout: Layout {
             subview.place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: ProposedViewSize(size))
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
+/// A typed website with its icon: the platform's brand tile when the catalog
+/// knows the site (reddit.com, youtu.be…), a globe tile otherwise. iOS gives
+/// typed domains no icon of their own, unlike app and web tokens (UX-22).
+struct SiteLabel: View {
+    let domain: String
+    var iconSize: CGFloat = 22
+
+    var body: some View {
+        Label {
+            Text(domain)
+        } icon: {
+            SiteIcon(domain: domain, size: iconSize)
+        }
+    }
+}
+
+struct SiteIcon: View {
+    let domain: String
+    var size: CGFloat = 22
+
+    var body: some View {
+        if let platform = PlatformCatalog.match(domain) {
+            BrandMark(platform: platform, size: size)
+        } else {
+            RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
+                .fill(ProsperColor.card2)
+                .overlay(
+                    Image(systemName: "globe")
+                        .font(.system(size: size * 0.5, weight: .semibold))
+                        .foregroundStyle(ProsperColor.ink2)
+                )
+                .frame(width: size, height: size)
         }
     }
 }

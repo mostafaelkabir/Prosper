@@ -93,4 +93,20 @@ struct BlockScheduleTests {
         let error = BlockingService.validate(selection: FamilyActivitySelection(), domains: fifty + ["one-more.com"], duration: 3600)
         #expect(error == .tooManySites(51))
     }
+
+    // MARK: - UnblockSchedule.wasSuperseded
+
+    @Test("An interval whose registered schedule still runs was replaced, not run out")
+    func supersededByNewerSchedule() {
+        #expect(UnblockSchedule.wasSuperseded(registeredEnd: now.addingTimeInterval(4 * 3600), now: now))
+    }
+
+    @Test("A schedule at or past its end, or none at all, is a real end")
+    func realEndIsNotSuperseded() {
+        #expect(!UnblockSchedule.wasSuperseded(registeredEnd: nil, now: now))
+        #expect(!UnblockSchedule.wasSuperseded(registeredEnd: now, now: now))
+        #expect(!UnblockSchedule.wasSuperseded(registeredEnd: now.addingTimeInterval(-60), now: now))
+        // iOS fires to the minute; an end within the tolerance is on time.
+        #expect(!UnblockSchedule.wasSuperseded(registeredEnd: now.addingTimeInterval(UnblockSchedule.earlyEndTolerance), now: now))
+    }
 }
