@@ -15,6 +15,8 @@ final class WarningService: @unchecked Sendable {
     static let shared = WarningService()
 
     private let center = DeviceActivityCenter()
+    /// Serial, so a quick change in Settings cannot overtake the one before it.
+    private let queue = DispatchQueue(label: "com.mostafa.prosper.warnings", qos: .utility)
 
     private init() {}
 
@@ -26,7 +28,31 @@ final class WarningService: @unchecked Sendable {
     /// tags are for blocking; a waste list with nothing else stops the monitor
     /// rather than scheduling events with empty token sets (QA-9). Passing
     /// `enabled: false` stops it too.
+    ///
+    /// The work runs on a background queue: installing the monitor waits on
+    /// ProsperMonitor, and on the main thread a stalled monitor froze the app
+    /// until iOS killed it (QA-10). The selection crosses as encoded data
+    /// because it is not Sendable.
     func refreshSchedule(
+        enabled: Bool,
+        selection: FamilyActivitySelection,
+        typedDomains: [String],
+        thresholdMinutes: Int,
+        then completion: @escaping @MainActor @Sendable () -> Void = {}
+    ) {
+        let selectionData = WasteSelectionCodec.encode(selection)
+        queue.async { [self] in
+            apply(
+                enabled: enabled,
+                selection: WasteSelectionCodec.decode(selectionData),
+                typedDomains: typedDomains,
+                thresholdMinutes: thresholdMinutes
+            )
+            Task { @MainActor in completion() }
+        }
+    }
+
+    private func apply(
         enabled: Bool,
         selection: FamilyActivitySelection,
         typedDomains: [String],

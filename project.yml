@@ -107,6 +107,12 @@ targets:
       # The unblock timers, so an interval that ends early (time-zone change,
       # DST) is re-armed from here instead of lifting the block (QA-9).
       - path: Prosper/Services/UnblockSchedule.swift
+      # Scheduled locks are switched on and off from here (E3.6).
+      - path: Prosper/Services/ScheduledLock.swift
+      # A schedule's web filter carries the adult filter while the Adult
+      # Content Guard is on, so the monitor needs the policy and the record (E9).
+      - path: Prosper/Services/AdultDomainList.swift
+      - path: Prosper/Services/SharedGuardState.swift
       - path: PrivacyManifests/ProsperMonitor/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:

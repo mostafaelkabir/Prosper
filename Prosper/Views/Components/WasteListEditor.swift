@@ -86,7 +86,7 @@ struct WasteListEditor: View {
                     .foregroundStyle(.red)
             }
             ForEach(typedDomains, id: \.self) { domain in
-                Label(domain, systemImage: "globe")
+                SiteLabel(domain: domain)
             }
             .onDelete { offsets in
                 typedDomains.remove(atOffsets: offsets)

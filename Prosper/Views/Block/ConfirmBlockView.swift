@@ -16,6 +16,8 @@ struct ConfirmBlockView: View {
     /// token set, so they are not part of `selection`.
     let typedDomains: [String]
     let duration: TimeInterval
+    /// The hold has completed and the block is being set up.
+    var isLocking = false
     let onConfirm: () -> Void
 
     private var endDate: Date { Date.now.addingTimeInterval(duration) }
@@ -52,13 +54,23 @@ struct ConfirmBlockView: View {
         }
         .navigationTitle("Lock this?")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(isLocking)
         .safeAreaInset(edge: .bottom) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Nothing in StolenEyes can end this before \(endText).")
                     .font(ProsperFont.insight)
                     .foregroundStyle(ProsperColor.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                HoldToLock(title: "Hold to lock", onComplete: onConfirm)
+                if isLocking {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Locking…")
+                    }
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                } else {
+                    HoldToLock(title: "Hold to lock", onComplete: onConfirm)
+                }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,7 +121,7 @@ struct ConfirmBlockView: View {
                 Label(token).labelStyle(.titleAndIcon)
             }
             ForEach(typedDomains, id: \.self) { domain in
-                Label(domain, systemImage: "globe")
+                SiteLabel(domain: domain)
             }
         } header: {
             Text("^[\(webTokens.count + typedDomains.count) website](inflect: true)")

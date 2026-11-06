@@ -70,6 +70,51 @@ enum UnblockSchedule {
         #endif
     }
 
+    /// `install`, run where a slow Screen Time daemon cannot freeze the app.
+    ///
+    /// `startMonitoring` waits synchronously for the daemon, and on device the
+    /// daemon has gone more than ten seconds without answering. On the main
+    /// thread that is a watchdog kill — and because the block snapshot is saved
+    /// first, every relaunch repeated the call and froze again (QA-10). Off the
+    /// main thread it is only a wait; past `timeout` it counts as a refusal.
+    static func installOffMain(
+        from now: Date,
+        to end: Date,
+        timeout: TimeInterval = 15
+    ) async -> Bool {
+        await withCheckedContinuation { continuation in
+            let once = ResumeOnce(continuation)
+            DispatchQueue.global(qos: .userInitiated).async {
+                once.resume(install(from: now, to: end))
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
+                once.resume(false)
+            }
+        }
+    }
+
+    /// True when an unblock interval ended because its schedule was replaced
+    /// or stopped, not because its time ran out.
+    ///
+    /// iOS ends an interval in progress when its schedule is replaced. The
+    /// monitor's re-arm replaces both unblock schedules, so without this check
+    /// each re-arm ended the other one, which re-armed again, and the two kept
+    /// the daemon too busy to answer the app (QA-10). `registeredEnd` is the
+    /// end of the schedule now registered under that name.
+    static func wasSuperseded(registeredEnd: Date?, now: Date = .now) -> Bool {
+        guard let registeredEnd else { return false }
+        return registeredEnd.timeIntervalSince(now) > earlyEndTolerance
+    }
+
+    /// The end of the schedule currently registered for `activity`, if any.
+    static func registeredEnd(
+        of activity: DeviceActivityName,
+        center: DeviceActivityCenter = DeviceActivityCenter()
+    ) -> Date? {
+        guard let schedule = center.schedule(for: activity) else { return nil }
+        return Calendar.current.date(from: schedule.intervalEnd)
+    }
+
     private static func start(
         _ activity: DeviceActivityName,
         _ interval: DateInterval,
@@ -88,5 +133,24 @@ enum UnblockSchedule {
             print("Failed to schedule \(activity.rawValue): \(error)")
             return false
         }
+    }
+}
+
+/// Resumes a continuation exactly once, whichever of the install and its
+/// timeout gets there first.
+private final class ResumeOnce: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Bool, Never>?
+
+    init(_ continuation: CheckedContinuation<Bool, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume(_ value: Bool) {
+        lock.lock()
+        let pending = continuation
+        continuation = nil
+        lock.unlock()
+        pending?.resume(returning: value)
     }
 }

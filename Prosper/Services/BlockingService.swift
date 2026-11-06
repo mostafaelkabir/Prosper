@@ -74,11 +74,17 @@ final class BlockingService: @unchecked Sendable {
     /// The timers are installed before any restriction is applied: if iOS
     /// refuses them, nothing is locked and the user is told, rather than being
     /// left behind a shield that only the next app launch can lift.
+    ///
+    /// Main-actor apart from the timer install, which is awaited off the main
+    /// thread: iOS holds that call until ProsperMonitor answers, and a stalled
+    /// monitor used to freeze the hold-to-lock screen until iOS killed the app
+    /// (QA-10).
+    @MainActor
     func startBlock(
         selection: FamilyActivitySelection,
         domains: [String],
         duration: TimeInterval
-    ) throws {
+    ) async throws {
         guard !hasActiveBlock, SharedBlockState.active == nil else { throw StartError.alreadyRunning }
         if let problem = Self.validate(selection: selection, domains: domains, duration: duration) {
             throw problem
@@ -92,11 +98,25 @@ final class BlockingService: @unchecked Sendable {
         // The snapshot goes first: the monitor sweeps on every interval start,
         // and must find this block, not a stale one it would clear.
         SharedBlockState.save(startedAt: startedAt, duration: duration)
-        guard UnblockSchedule.install(from: startedAt, to: startedAt.addingTimeInterval(duration), center: activityCenter) else {
+        guard await UnblockSchedule.installOffMain(from: startedAt, to: startedAt.addingTimeInterval(duration)) else {
             SharedBlockState.clear()
             throw StartError.couldNotSchedule
         }
 
+        applyShields(selection: selection, domains: domains)
+        scheduleEndNotification(duration: duration)
+        persistBlockSession(
+            selection: selection,
+            startedAt: startedAt,
+            // Categories count here so the Lock screen shows their chips.
+            appCount: selection.applicationTokens.count + selection.categoryTokens.count,
+            domainCount: selection.webDomainTokens.count + domains.count,
+            domains: domains,
+            duration: duration
+        )
+    }
+
+    private func applyShields(selection: FamilyActivitySelection, domains: [String]) {
         let apps = selection.applicationTokens
         let categories = selection.categoryTokens
         let webDomains = selection.webDomainTokens
@@ -115,17 +135,66 @@ final class BlockingService: @unchecked Sendable {
             domains: domains,
             guardOn: AdultContentGuard.shared.isEnabled
         )
+    }
 
-        scheduleEndNotification(duration: duration)
-        persistBlockSession(
-            selection: selection,
-            startedAt: startedAt,
-            // Categories count here so the Lock screen shows their chips.
-            appCount: apps.count + categories.count,
-            domainCount: webDomains.count + domains.count,
-            domains: domains,
-            duration: duration
-        )
+    enum AddError: LocalizedError, Equatable {
+        case noActiveBlock
+        case unreadable
+        case tooManySites(Int)
+
+        var errorDescription: String? {
+            switch self {
+            case .noActiveBlock:
+                return "This block has already ended."
+            case .unreadable:
+                return "This block's list could not be read, so nothing was changed."
+            case .tooManySites(let count):
+                return "iOS can filter at most \(BlockingService.maxDomains) websites at once. This would make \(count)."
+            }
+        }
+    }
+
+    /// Adds apps, categories and websites to the running block (UX-22).
+    ///
+    /// Only ever adds: everything already locked stays locked, so this makes a
+    /// block stricter and can never be used to loosen one. The end time does
+    /// not move.
+    @MainActor
+    func addToBlock(selection additions: FamilyActivitySelection, domains newDomains: [String]) throws {
+        guard SharedBlockState.active != nil else { throw AddError.noActiveBlock }
+        let context = ModelContext(PersistenceConfig.sharedModelContainer)
+        // Shields are rewritten whole, so the current list must be known
+        // exactly: merging into a guess would drop what it missed and loosen
+        // the block.
+        guard let session = ((try? context.fetch(FetchDescriptor<BlockSession>())) ?? []).first(where: { $0.isActive }) else {
+            throw AddError.unreadable
+        }
+        var current = FamilyActivitySelection()
+        if let data = session.selectionData {
+            guard let decoded = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) else {
+                throw AddError.unreadable
+            }
+            current = decoded
+        }
+        let merged = Self.merge(current, additions)
+        let domains = session.domains + newDomains.filter { !session.domains.contains($0) }
+        guard domains.count <= Self.maxDomains else { throw AddError.tooManySites(domains.count) }
+
+        applyShields(selection: merged, domains: domains)
+        session.selectionData = try? JSONEncoder().encode(merged)
+        session.appCount = merged.applicationTokens.count + merged.categoryTokens.count
+        session.domainCount = merged.webDomainTokens.count + domains.count
+        session.domains = domains
+        try? context.save()
+    }
+
+    /// `base` with everything in `additions` added. Nothing is ever removed.
+    static func merge(_ base: FamilyActivitySelection, _ additions: FamilyActivitySelection) -> FamilyActivitySelection {
+        var merged = base
+        merged.applicationTokens.formUnion(additions.applicationTokens)
+        merged.categoryTokens.formUnion(additions.categoryTokens)
+        merged.webDomainTokens.formUnion(additions.webDomainTokens)
+        return merged
     }
 
     func clearBlock() {
@@ -134,10 +203,13 @@ final class BlockingService: @unchecked Sendable {
         store.shield.webDomainCategories = nil
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
-        activityCenter.stopMonitoring([
-            PersistenceConfig.unblockActivityName,
-            PersistenceConfig.unblockSafetyActivityName,
-        ])
+        // Off the main thread, like every DeviceActivity call (QA-10).
+        DispatchQueue.global(qos: .utility).async { [self] in
+            activityCenter.stopMonitoring([
+                PersistenceConfig.unblockActivityName,
+                PersistenceConfig.unblockSafetyActivityName,
+            ])
+        }
         SharedBlockState.clear()
     }
 
@@ -174,17 +246,22 @@ final class BlockingService: @unchecked Sendable {
     /// a long-evicted extension can lose them — at which point the only thing
     /// left to lift the block is the user reopening the app. Called on launch,
     /// this puts the timers back so the block can end on its own again.
+    ///
+    /// Runs in the background: the install waits on ProsperMonitor, and on the
+    /// main thread a stalled monitor froze every launch (QA-10).
     func reassertScheduleIfNeeded() {
         guard let snapshot = SharedBlockState.active else { return }
-        let running = Set(activityCenter.activities)
-        // Under fifteen minutes left there is deliberately no primary timer
-        // (iOS would refuse it), so only a missing safety timer counts as lost.
-        let primaryExpected = snapshot.remaining >= UnblockSchedule.minimumSpan
-        let primaryLost = primaryExpected && !running.contains(PersistenceConfig.unblockActivityName)
-        guard primaryLost || !running.contains(PersistenceConfig.unblockSafetyActivityName) else { return }
+        DispatchQueue.global(qos: .utility).async { [self] in
+            let running = Set(activityCenter.activities)
+            // Under fifteen minutes left there is deliberately no primary timer
+            // (iOS would refuse it), so only a missing safety timer counts as lost.
+            let primaryExpected = snapshot.remaining >= UnblockSchedule.minimumSpan
+            let primaryLost = primaryExpected && !running.contains(PersistenceConfig.unblockActivityName)
+            guard primaryLost || !running.contains(PersistenceConfig.unblockSafetyActivityName) else { return }
 
-        UnblockSchedule.install(from: .now, to: snapshot.endsAt, center: activityCenter)
-        scheduleEndNotification(duration: snapshot.remaining, identifier: Self.endNotificationID)
+            UnblockSchedule.install(from: .now, to: snapshot.endsAt, center: activityCenter)
+            scheduleEndNotification(duration: snapshot.remaining, identifier: Self.endNotificationID)
+        }
     }
 
     var hasActiveBlock: Bool {
