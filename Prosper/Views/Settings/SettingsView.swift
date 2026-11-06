@@ -13,6 +13,8 @@ struct SettingsView: View {
     // Local mirrors of the persisted UserSettings so editing feels responsive
     // and typed domains can be validated before writing back.
     @State private var warningsEnabled = true
+    /// Waste sites just added that some schedule lacks (UX-26).
+    @State private var sitesForSchedules: [String] = []
     @State private var selection = FamilyActivitySelection()
     @State private var typedDomains: [String] = []
     @State private var thresholdMinutes: Double = 30
@@ -42,6 +44,10 @@ struct SettingsView: View {
     }
 
     var body: some View {
+        content.offeringNewSitesToSchedules($sitesForSchedules)
+    }
+
+    private var content: some View {
         NavigationStack {
             Form {
                 warningsToggleSection
@@ -258,6 +264,8 @@ struct SettingsView: View {
     /// Called by the waste list editor: the list and threshold are the only
     /// fields it edits, so they are the only ones written.
     private func persistWasteList() {
+        let offer = ScheduledLockService.shared.sitesWorthOffering(old: settings.wasteDomains, new: typedDomains)
+        if !offer.isEmpty { sitesForSchedules = offer }
         save { s in
             s.wasteAppSelectionData = WasteSelectionCodec.encode(selection)
             s.wasteAppCount = selection.applicationTokens.count + selection.categoryTokens.count

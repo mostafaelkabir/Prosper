@@ -30,8 +30,8 @@ struct Platform: Identifiable, Hashable, Sendable {
     /// A sensible built-in class for platforms whose nature is unambiguous — the
     /// big social feeds are `.distracting`, work tools are `.productive`. Applied
     /// only as a last resort, so a user's own label always wins (UX-20). Genuinely
-    /// ambiguous products (YouTube, WhatsApp, Netflix…) leave this `nil` so the
-    /// user decides.
+    /// ambiguous products (WhatsApp, Netflix…) leave this `nil` so the user
+    /// decides. YouTube counts as distracting by the user's choice (UX-24).
     var defaultClass: SharedClassification.ClassKind? = nil
 
     /// The host shown to represent the platform.
@@ -61,7 +61,7 @@ enum PlatformCatalog {
     static let all: [Platform] = [
         Platform(id: "facebook",  name: "Facebook",    symbol: "f.cursive",        tintHex: 0x1877F2, domains: ["facebook.com", "fb.com", "messenger.com"], keywords: ["facebook", "fbcdn", "fbsbx", "messenger"], defaultClass: .distracting),
         Platform(id: "instagram", name: "Instagram",   symbol: "camera.fill",      tintHex: 0xE1306C, domains: ["instagram.com"],                            keywords: ["instagram", "cdninstagram"], defaultClass: .distracting),
-        Platform(id: "youtube",   name: "YouTube",     symbol: "play.fill",        tintHex: 0xFF0000, domains: ["youtube.com", "youtu.be"],                  keywords: ["youtube", "youtu.be", "ytimg", "googlevideo", "ggpht"]),
+        Platform(id: "youtube",   name: "YouTube",     symbol: "play.fill",        tintHex: 0xFF0000, domains: ["youtube.com", "youtu.be", "m.youtube.com"], keywords: ["youtube", "youtu.be", "ytimg", "googlevideo", "ggpht"], defaultClass: .distracting),
         Platform(id: "tiktok",    name: "TikTok",      symbol: "music.note",       tintHex: 0xFF0050, domains: ["tiktok.com"],                               keywords: ["tiktok", "musical.ly", "tiktokcdn", "tiktokv"], defaultClass: .distracting),
         Platform(id: "x",         name: "X (Twitter)", symbol: "xmark",            tintHex: 0x14171A, domains: ["x.com", "twitter.com", "t.co"],             keywords: ["twitter", "twimg", "t.co", "x.com"], defaultClass: .distracting),
         Platform(id: "reddit",    name: "Reddit",      symbol: "bubble.left.fill", tintHex: 0xFF4500, domains: ["reddit.com", "redd.it"],                    keywords: ["reddit", "redd.it", "redditmedia", "redditstatic"], defaultClass: .distracting),

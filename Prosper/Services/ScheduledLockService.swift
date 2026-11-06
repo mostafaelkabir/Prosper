@@ -106,6 +106,28 @@ final class ScheduledLockService: @unchecked Sendable {
         }
     }
 
+    /// Schedules that lack at least one of `domains`.
+    func locks(missingAnyOf domains: [String]) -> [ScheduledLock] {
+        locks.filter { lock in domains.contains { !lock.domains.contains($0) } }
+    }
+
+    /// The sites in `new` that `old` lacked, when some schedule is missing
+    /// one of them; otherwise nothing worth asking about (UX-26).
+    func sitesWorthOffering(old: [String], new: [String]) -> [String] {
+        let added = new.filter { !old.contains($0) }
+        guard !added.isEmpty, !locks(missingAnyOf: added).isEmpty else { return [] }
+        return added
+    }
+
+    /// Adds `domains` to every schedule that lacks them (UX-26). Add-only, so
+    /// it reaches running schedules too. A schedule already at iOS's site
+    /// limit keeps what it has.
+    func addToAll(domains: [String]) {
+        for lock in locks(missingAnyOf: domains) {
+            try? add(selection: FamilyActivitySelection(), domains: domains, to: lock)
+        }
+    }
+
     func delete(_ lock: ScheduledLock) throws {
         if let until = frozenUntil(lock) { throw EditError.lockedNow(until: until) }
         ScheduledLockStore.save(locks.filter { $0.id != lock.id })

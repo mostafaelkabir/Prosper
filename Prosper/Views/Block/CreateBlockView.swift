@@ -380,7 +380,10 @@ struct CreateBlockView: View {
 
     private func loadSavedDomains() {
         guard domains.isEmpty else { return }
-        domains = UserSettings.current(context: modelContext).savedBlockDomains
+        let settings = UserSettings.current(context: modelContext)
+        // Nothing typed before: start from the waste list, so the usual feeds
+        // (YouTube included) are already there (UX-24).
+        domains = settings.savedBlockDomains.isEmpty ? settings.wasteDomains : settings.savedBlockDomains
     }
 
     private func addTypedDomain() {

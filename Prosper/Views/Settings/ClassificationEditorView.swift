@@ -26,6 +26,8 @@ struct ClassificationEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var productive = FamilyActivitySelection()
+    /// Waste sites just added that some schedule lacks (UX-26).
+    @State private var sitesForSchedules: [String] = []
     @State private var distracting = FamilyActivitySelection()
     @State private var rest = FamilyActivitySelection()
     @State private var productiveDomains: [String] = []
@@ -42,6 +44,10 @@ struct ClassificationEditorView: View {
     /// Today CTA wraps it in a NavigationStack sheet. No inner stack (nesting one
     /// inside a NavigationLink push swallows the push).
     var body: some View {
+        content.offeringNewSitesToSchedules($sitesForSchedules)
+    }
+
+    private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 intro
@@ -400,6 +406,8 @@ struct ClassificationEditorView: View {
 
     private func persist() {
         let s = UserSettings.current(context: modelContext)
+        let offer = ScheduledLockService.shared.sitesWorthOffering(old: s.wasteDomains, new: distractingDomains)
+        if !offer.isEmpty { sitesForSchedules = offer }
         s.productiveSelectionData = WasteSelectionCodec.encode(productive)
         s.productiveDomains = productiveDomains
         s.restSelectionData = WasteSelectionCodec.encode(rest)

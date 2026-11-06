@@ -19,7 +19,7 @@ struct WasteDefaultsTests {
     @Test("Work tools and messaging are never pre-filled")
     func leavesTheRestAlone() {
         let domains = Set(WasteDefaults.domains)
-        for site in ["slack.com", "zoom.us", "mail.google.com", "whatsapp.com"] {
+        for site in ["slack.com", "zoom.us", "mail.google.com", "whatsapp.com", "netflix.com"] {
             #expect(!domains.contains(site))
         }
     }
@@ -43,7 +43,7 @@ struct WasteDefaultsTests {
     @MainActor
     func freshInstall() throws {
         let context = try context()
-        WasteDefaults.seedIfNeeded(context: context)
+        WasteDefaults.seedIfNeeded(context: context, schedules: nil)
         let settings = UserSettings.current(context: context)
         #expect(settings.wasteDomains == WasteDefaults.domains)
         #expect(settings.wasteSeedVersion == WasteDefaults.latestVersion)
@@ -55,18 +55,38 @@ struct WasteDefaultsTests {
         let context = try context()
         let settings = UserSettings.current(context: context)
         settings.wasteDomains = ["reddit.com", "news.ycombinator.com"]
-        WasteDefaults.seedIfNeeded(context: context)
-        #expect(settings.wasteDomains == ["reddit.com", "news.ycombinator.com", "youtube.com", "youtu.be"])
+        WasteDefaults.seedIfNeeded(context: context, schedules: nil)
+        #expect(settings.wasteDomains == ["reddit.com", "news.ycombinator.com", "youtube.com", "youtu.be", "m.youtube.com"])
+    }
+
+    @Test("An install that already had batch 2 gains m.youtube.com, in New Block too")
+    @MainActor
+    func batchThreeReachesNewBlock() throws {
+        let context = try context()
+        let settings = UserSettings.current(context: context)
+        settings.wasteDomains = ["reddit.com", "youtube.com", "youtu.be"]
+        settings.savedBlockDomains = ["x.com"]
+        settings.wasteSeedVersion = 2
+        WasteDefaults.seedIfNeeded(context: context, schedules: nil)
+        #expect(settings.wasteDomains == ["reddit.com", "youtube.com", "youtu.be", "m.youtube.com"])
+        #expect(settings.savedBlockDomains == ["x.com", "youtube.com", "youtu.be", "m.youtube.com"])
+    }
+
+    @Test("Adding never duplicates and never passes the filter limit")
+    func addingRespectsLimit() {
+        let full = (1...BlockingService.maxDomains).map { "site\($0).com" }
+        #expect(WasteDefaults.adding(["youtube.com"], to: full) == full)
+        #expect(WasteDefaults.adding(["a.com", "a.com"], to: ["a.com"]) == ["a.com"])
     }
 
     @Test("A starter site the user removed stays removed")
     @MainActor
     func removalSticks() throws {
         let context = try context()
-        WasteDefaults.seedIfNeeded(context: context)
+        WasteDefaults.seedIfNeeded(context: context, schedules: nil)
         let settings = UserSettings.current(context: context)
         settings.wasteDomains.removeAll { $0 == "youtube.com" }
-        WasteDefaults.seedIfNeeded(context: context)
+        WasteDefaults.seedIfNeeded(context: context, schedules: nil)
         #expect(!settings.wasteDomains.contains("youtube.com"))
     }
 }
