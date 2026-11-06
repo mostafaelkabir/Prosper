@@ -7,19 +7,37 @@ import os.log
 
 private let logger = Logger(subsystem: "com.mostafa.prosper.monitor", category: "activity")
 
+// Logged at notice, not info: iOS drops info from saved logs, and the first
+// device run had no trace of where a callback stopped (QA-10).
 class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
     let store = ManagedSettingsStore()
 
+    override init() {
+        super.init()
+        logger.notice("Monitor created")
+    }
+
     override func intervalDidStart(for activity: DeviceActivityName) {
-        logger.info("Monitoring interval started: \(activity.rawValue)")
+        logger.notice("Monitoring interval started: \(activity.rawValue, privacy: .public)")
+        if let lock = ScheduledLockStore.lock(for: activity) {
+            startScheduledLock(lock)
+        }
         sweepExpiredBlockIfNeeded()
+        logger.notice("intervalDidStart done: \(activity.rawValue, privacy: .public)")
     }
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
-        logger.info("Monitoring interval ended: \(activity.rawValue)")
+        logger.notice("Monitoring interval ended: \(activity.rawValue, privacy: .public)")
 
         if activity == PersistenceConfig.unblockActivityName
             || activity == PersistenceConfig.unblockSafetyActivityName {
+            // Replacing a schedule ends its interval too. A newer schedule under
+            // this name is still running, so nothing ran out: neither lift nor
+            // re-arm, or the re-arm ends the other timer and they loop (QA-10).
+            if UnblockSchedule.wasSuperseded(registeredEnd: UnblockSchedule.registeredEnd(of: activity)) {
+                logger.notice("Unblock interval \(activity.rawValue, privacy: .public) superseded by a newer schedule; ignoring")
+                return
+            }
             // The schedule is wall-clock date parts, so a time-zone change or a
             // daylight-saving fall-back can end the interval before the block's
             // real end. The snapshot holds the absolute end time; if it is still
@@ -28,20 +46,49 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
             if let block = SharedBlockState.stored,
                block.endsAt.timeIntervalSinceNow > UnblockSchedule.earlyEndTolerance {
                 let installed = UnblockSchedule.install(from: .now, to: block.endsAt)
-                logger.info("Unblock interval \(activity.rawValue) ended \(Int(block.endsAt.timeIntervalSinceNow))s early; re-armed: \(installed)")
+                logger.notice("Unblock interval \(activity.rawValue, privacy: .public) ended \(Int(block.endsAt.timeIntervalSinceNow))s early; re-armed: \(installed)")
                 return
             }
             clearBlock(reason: "interval \(activity.rawValue) ended")
+        } else if let lock = ScheduledLockStore.lock(for: activity) {
+            endScheduledLock(lock)
         } else {
             sweepExpiredBlockIfNeeded()
         }
+    }
+
+    // MARK: - Scheduled locks (E3.6)
+
+    /// iOS opens the interval every day; the lock's own weekdays decide
+    /// whether today counts. Asked a minute ahead so an interval delivered a
+    /// few seconds early still finds its window.
+    private func startScheduledLock(_ lock: ScheduledLock) {
+        guard lock.window(containing: Date.now.addingTimeInterval(60)) != nil else {
+            logger.notice("Scheduled lock \(lock.name, privacy: .public) is not set for today; leaving it off")
+            return
+        }
+        ScheduledLockShield.apply(lock)
+        logger.notice("Scheduled lock \(lock.name, privacy: .public) on")
+    }
+
+    /// Lifts the lock unless its window is plainly still open: an interval
+    /// ended by a time-zone or clock change must not become a way out, the
+    /// same rule the manual block follows (QA-9).
+    private func endScheduledLock(_ lock: ScheduledLock) {
+        if let window = lock.window(containing: .now),
+           window.end.timeIntervalSinceNow > UnblockSchedule.earlyEndTolerance {
+            logger.notice("Scheduled lock \(lock.name, privacy: .public) interval ended early; keeping it on")
+            return
+        }
+        ScheduledLockShield.clear(lock)
+        logger.notice("Scheduled lock \(lock.name, privacy: .public) off")
     }
 
     override func eventDidReachThreshold(
         _ event: DeviceActivityEvent.Name,
         activity: DeviceActivityName
     ) {
-        logger.info("Threshold reached — event: \(event.rawValue), activity: \(activity.rawValue)")
+        logger.notice("Threshold reached — event: \(event.rawValue, privacy: .public), activity: \(activity.rawValue, privacy: .public)")
         sweepExpiredBlockIfNeeded()
 
         guard activity == PersistenceConfig.wasteActivityName,
@@ -59,7 +106,7 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         // day per threshold — no duplicate row, no second notification (QA-9).
         if let ledger = WarningDeliveryLedger.appGroup,
            !ledger.claim(level, thresholdMinutes: minutes) {
-            logger.info("Level \(level.rawValue) at \(minutes)m already delivered today; skipping")
+            logger.notice("Level \(level.rawValue) at \(minutes)m already delivered today; skipping")
             return
         }
 
@@ -129,6 +176,6 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         store.shield.webDomains = nil
         store.webContent.blockedByFilter = nil
         SharedBlockState.clear()
-        logger.info("Block cleared — shield and web filter removed (\(reason, privacy: .public))")
+        logger.notice("Block cleared — shield and web filter removed (\(reason, privacy: .public))")
     }
 }

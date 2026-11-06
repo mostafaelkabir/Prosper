@@ -279,8 +279,9 @@ struct SettingsView: View {
             selection: WasteSelectionCodec.decode(s.wasteAppSelectionData),
             typedDomains: s.wasteDomains,
             thresholdMinutes: s.wasteWarningThresholdMinutes
-        )
-        scheduleFailure = WarningService.shared.lastFailure
+        ) {
+            scheduleFailure = WarningService.shared.lastFailure
+        }
     }
 
     private func refreshNotificationStatus() async {
