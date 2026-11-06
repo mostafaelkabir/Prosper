@@ -19,8 +19,11 @@ import ManagedSettings
 ///    index closes the search for a way around, which is where most of the
 ///    willpower would otherwise be spent.
 ///
-/// The list is deliberately short of the filter's 50-domain capacity so the
-/// user can add a site that slipped through, for good, without a new build.
+/// The list is deliberately short. Apple documents 50 named domains per
+/// policy, but on device the filter has been seen to stop blocking anything
+/// once roughly 49 are in play, and every block session and schedule adds its
+/// own names on top. Twelve sites that matter most, plus a few the user can
+/// add, keeps the guard far from that edge; Apple's classifier does the rest.
 enum AdultDomainList {
     /// Apple's web content filter accepts at most this many named domains at
     /// once (same limit as `BlockingService.maxDomains`).
@@ -35,63 +38,34 @@ enum AdultDomainList {
         "xvideos.com",
         "xnxx.com",
         "xhamster.com",
-        "redtube.com",
-        "youporn.com",
         "spankbang.com",
-        "eporner.com",
-        "tube8.com",
-        "porntrex.com",
-        "hqporner.com",
-        "beeg.com",
         "motherless.com",
-        "thisvid.com",
-        "porn.com",
-        "sex.com",
-        // Cam sites
+        // Cam sites and creator platforms: clean landing pages, so classifiers miss them
         "chaturbate.com",
         "stripchat.com",
-        "livejasmin.com",
-        "bongacams.com",
-        "cam4.com",
-        "myfreecams.com",
-        "camsoda.com",
-        // Creator platforms: clean landing pages, so generic filters miss them
         "onlyfans.com",
-        "fansly.com",
-        // Hentai / drawn
-        "nhentai.net",
-        "e-hentai.org",
-        "hanime.tv",
-        "rule34.xxx",
-        // Image and clip hosts
+        // Clip host and drawn content
         "redgifs.com",
-        "imagefap.com",
-        "erome.com",
-        "fapello.com",
-        // Directories and search engines: the way around every other block
+        "nhentai.net",
+        // The directory used to find every other site
         "theporndude.com",
-        "pornmd.com",
-        // Leak archives: new enough that classifiers lag
-        "coomer.su",
-        "kemono.su",
-        "simpcity.su",
-        // Studios
-        "brazzers.com",
-        "bangbros.com",
     ]
 
-    /// How many sites the user can still add by name.
-    static var userSlots: Int { filterCapacity - builtIn.count }
+    /// Sites the user can add by name. Kept small on purpose: a device report
+    /// puts the real, undocumented limit near 49 domains across the filter,
+    /// past which it silently blocks nothing (Apple forums thread 730444), and
+    /// block sessions and schedules need their share of that budget too.
+    static let userSlots = 8
 
     /// The built-in list plus the user's additions: deduplicated, in order,
-    /// and never longer than the filter will accept.
+    /// and never longer than the guard allows itself.
     static func domains(adding typed: [String]) -> [String] {
         var seen = Set<String>()
         var result: [String] = []
         for domain in builtIn + typed where seen.insert(domain).inserted {
             result.append(domain)
         }
-        return Array(result.prefix(filterCapacity))
+        return Array(result.prefix(builtIn.count + userSlots))
     }
 
     /// The guard's own policy: Apple's adult-content filter plus every name
@@ -100,18 +74,18 @@ enum AdultDomainList {
         .auto(Set(domains(adding: typedDomains).map { WebDomain(domain: $0) }), except: [])
     }
 
-    /// The policy a *block session* writes to its own store.
+    /// The policy a block session or a schedule writes to its own store: its
+    /// own names only, exactly as before the guard existed.
     ///
-    /// The guard lives in a separate `ManagedSettingsStore`, so a session
-    /// starting or ending never touches it. But iOS merges the web filter
-    /// across stores by rules Apple does not document in detail, and the one
-    /// outcome that must be impossible is a session's `.specific` list
-    /// replacing the adult filter for the length of the session. So while the
-    /// guard is on, a session carries the adult filter as well: whichever store
-    /// iOS listens to, the filter stays up.
-    static func sessionPolicy(domains: [String], guardOn: Bool) -> WebContentSettings.FilterPolicy? {
+    /// The guard's adult filter lives in the guard's store, and iOS applies the
+    /// most restrictive combination of stores (WWDC22). An earlier version also
+    /// made sessions write `.auto` while the guard was on, as belt and braces;
+    /// with the guard, a session and a schedule each holding `.auto` on an
+    /// iOS 26.5 iPhone, nothing was blocked at all, YouTube included
+    /// (DEV-1, 2026-11-06). Stacking `.auto` across stores is undocumented, so
+    /// a session never writes it.
+    static func sessionPolicy(domains: [String]) -> WebContentSettings.FilterPolicy? {
         guard !domains.isEmpty else { return nil }
-        let set = Set(domains.map { WebDomain(domain: $0) })
-        return guardOn ? .auto(set, except: []) : .specific(set)
+        return .specific(Set(domains.map { WebDomain(domain: $0) }))
     }
 }

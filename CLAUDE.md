@@ -61,7 +61,7 @@ Four extension targets embedded in the main app:
 
 ## Website Blocking
 
-Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard (`AdultDomainList.policy`); a session uses it only while the guard is on (`AdultDomainList.sessionPolicy`). Never use `.auto` for an ordinary block.
+Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard's own store (`AdultDomainList.policy`). Sessions and schedules always write `.specific` (`AdultDomainList.sessionPolicy`): stacking `.auto` across stores left an iOS 26.5 iPhone blocking nothing. Keep the guard's named list short; the filter has been seen to stop blocking once roughly 49 domains are in play across stores.
 
 ## Data Models
 

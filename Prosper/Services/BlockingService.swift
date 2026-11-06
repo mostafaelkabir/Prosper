@@ -127,14 +127,9 @@ final class BlockingService: @unchecked Sendable {
         store.shield.applicationCategories = categories.isEmpty ? nil : .specific(categories)
         store.shield.webDomainCategories = categories.isEmpty ? nil : .specific(categories)
         store.shield.webDomains = webDomains.isEmpty ? nil : webDomains
-        // While the Adult Content Guard is on, the session carries the adult
-        // filter too, so no merge rule between stores can let a session's list
-        // stand in for it (E9). The guard itself lives in its own store and is
-        // untouched when this block ends.
-        store.webContent.blockedByFilter = AdultDomainList.sessionPolicy(
-            domains: domains,
-            guardOn: AdultContentGuard.shared.isEnabled
-        )
+        // The session's own names only. The Adult Content Guard lives in its
+        // own store and iOS applies the stricter of the two (E9).
+        store.webContent.blockedByFilter = AdultDomainList.sessionPolicy(domains: domains)
     }
 
     enum AddError: LocalizedError, Equatable {
