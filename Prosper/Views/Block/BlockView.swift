@@ -8,6 +8,8 @@ struct BlockView: View {
     @State private var pendingPrefill: BlockPrefill?
     @State private var showSchedules = false
     @State private var showAddToBlock = false
+    /// A schedule locking right now, opened for adding from the Lock tab (UX-25).
+    @State private var addingToSchedule: ScheduledLock?
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
 
     /// What the Lock screen shows while a block runs.
@@ -70,6 +72,15 @@ struct BlockView: View {
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
             .sheet(isPresented: $showSchedules) { ScheduleListView() }
+            .sheet(item: $addingToSchedule) { lock in
+                AddToLockView(
+                    lockedSelection: lock.selection,
+                    lockedDomains: lock.domains,
+                    until: ScheduledLockService.shared.frozenUntil(lock) ?? .now
+                ) { additions, domains in
+                    try ScheduledLockService.shared.add(selection: additions, domains: domains, to: lock)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -191,11 +202,22 @@ struct BlockView: View {
                 Text("\(lock.name) is locking")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(ProsperColor.ink)
-                Text("Until \(end.formatted(date: .omitted, time: .shortened)). A schedule can't be changed while it runs.")
+                Text("Until \(end.formatted(date: .omitted, time: .shortened)). You can add to it, but not remove anything until then.")
                     .font(.subheadline)
                     .foregroundStyle(ProsperColor.ink3)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
+                if lock.lockedItemCount > 0 {
+                    SelectionChips(selection: lock.selection, typedDomains: lock.domains, cap: 12)
+                        .padding(.horizontal, 32)
+                }
+                Button {
+                    addingToSchedule = lock
+                } label: {
+                    Label("Add apps or sites", systemImage: "plus.circle")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
             } else {
                 Text("Nothing is locked")
                     .font(.title3.weight(.semibold))

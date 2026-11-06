@@ -28,6 +28,7 @@
 		33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD81363CEE9AFA44997EAE05 /* NotificationService.swift */; };
 		361B952FC1B2C2BF95C33AA7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FB8BB816C2BB41E121A5550C /* PrivacyInfo.xcprivacy */; };
 		365525317D3068C6437BA124 /* UsageIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912B1621B5ECD8CF9E64759D /* UsageIcon.swift */; };
+		372D0B2EAAB3CAAE6080DF4D /* OfferToSchedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */; };
 		386CE05BFEEAA81AF978B0BF /* WasteDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF7EB78677F7CC415C34A53 /* WasteDefaultsTests.swift */; };
 		3AF1F2A254EBD1DE5AED807B /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		3DDDF02502063707F3B8B5C6 /* InsightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071EA35FC7FB8558AEFC887C /* InsightEngine.swift */; };
@@ -257,6 +258,7 @@
 		A4E6B811AC6801D9D1952ACD /* WarningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningService.swift; sourceTree = "<group>"; };
 		A632709C4CC649D29F82481B /* BlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockView.swift; sourceTree = "<group>"; };
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
+		AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferToSchedules.swift; sourceTree = "<group>"; };
 		AB3332376609E00896D14B23 /* InsightsReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsReportView.swift; sourceTree = "<group>"; };
 		AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningDeliveryTests.swift; sourceTree = "<group>"; };
 		B8F0966BDF79094A611FF59E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 		7D2DC5A17B1E4A67D11E2DAE /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */,
 				FCE86A244991500CE0C12F76 /* SelectionChips.swift */,
 				00B4ABC1CFA6F0C70DAC220D /* WasteListEditor.swift */,
 			);
@@ -852,6 +855,7 @@
 				DAAF3E2B9D3934517B1ECE94 /* LockExitCopy.swift in Sources */,
 				D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */,
 				33379EDA5AF57EFAB9C93470 /* NotificationService.swift in Sources */,
+				372D0B2EAAB3CAAE6080DF4D /* OfferToSchedules.swift in Sources */,
 				5F42D0FA89DE3702D30847DF /* PersistenceConfig.swift in Sources */,
 				41AE4B3B1A323F4604640A83 /* PlatformCatalog.swift in Sources */,
 				6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */,
