@@ -138,6 +138,13 @@ A permanent, one-way block of adult content, requested 2026-11-06. Behaviourally
 
 ---
 
+### Epic M: Prosper for Mac (Basira `M0`–`M7`)
+A native macOS app with the same four pillars, requested 2026-11-08: no nudity at all, control of social media sites and wasted time, then connected devices. The Screen Time API is unavailable on macOS (every symbol is `@available(macOS, unavailable)` in the macOS 27 SDK), so the Mac has its own enforcement: a Network Extension content filter + DNS proxy for sites, a background agent for apps, and Apple's `SensitiveContentAnalysis` for on-screen nudity. Shared models and domain logic move to a local Swift package. The full brief, architecture, tickets and decisions are in `docs/mac/PLAN.md`.
+
+- **M0** Foundation and shared core · **M1** Network layer (filter + DNS) · **M2** Adult Content Guard for Mac · **M3** Usage and insights · **M4** Sessions and schedules · **M5** Warnings and growth · **M6** Tamper resistance · **M7** Connected devices (sync + remote lock)
+
+---
+
 ## Technical Approach
 
 ### Frameworks
@@ -238,3 +245,6 @@ FamilyControls needs a paid Apple Developer Program membership; enrollment in pr
 4. **See the day**: E7.1 heatmap → E7.2 checking reflex → UX-1 Dashboard → UX-2 Stats IA.
 5. **Name the habits**: E7.3 rituals, E7.4 notification pull, E7.5 rabbit holes, E7.6 drift; UX-4 icons, UX-5 shield copy, UX-3 onboarding.
 6. **Close the loop**: UX-6 weekly review, then E5 score/streaks and E4.3-4.5 escalation.
+
+### Mac — planned 2026-11-08
+Epic M (`M0`–`M7`) ticketed in Basira; brief in `docs/mac/PLAN.md`. Nothing built yet. First milestone is "the Mac says no": M0 foundation → M1 filter/DNS engine → M2 guard.
