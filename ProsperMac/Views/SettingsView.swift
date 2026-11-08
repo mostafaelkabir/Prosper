@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -59,6 +60,7 @@ struct ProtectionSection: View {
                         StatTile(value: "\(status.safeSearchRewritesToday)", label: "SafeSearch answers")
                         StatTile(value: "\(status.unnamedToday)", label: "Unnamed connections", footnote: "Allowed and counted")
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -253,11 +255,17 @@ struct BrowserSection: View {
                     HStack {
                         Text(InstalledApps.named(id).name).font(.system(size: 13)).foregroundStyle(ProsperColor.ink)
                         Spacer()
-                        Text(access[id] == true ? "Allowed" : "Refused: allow StolenEyes Agent in System Settings → Privacy & Security → Automation")
+                        Text(access[id] == true ? "Allowed" : "Not allowed: switch on StolenEyes under \(InstalledApps.named(id).name) in Automation settings")
                             .font(.system(size: 12)).foregroundStyle(access[id] == true ? ProsperColor.productive : ProsperColor.distracting)
                     }
                 }
-                Text("Blocking does not depend on this: the network filter blocks locked sites in every browser either way.")
+                if access.values.contains(false) {
+                    Button("Open Automation settings") {
+                        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")!)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                Text("With the network filter installed, locked and adult sites are blocked in every browser whether or not this is allowed.")
                     .font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
             }
         }

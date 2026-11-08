@@ -28,9 +28,24 @@ final class SystemSetup: NSObject, ObservableObject {
 
     var allOn: Bool { extensionState.isOn && filterState.isOn && dnsState.isOn && agentState.isOn }
 
+    /// False for a build installed with `--without-filter`: the extension is
+    /// not in the bundle, so there is nothing to activate.
+    static var bundleHasFilter: Bool {
+        let url = Bundle.main.bundleURL.appendingPathComponent("Contents/Library/SystemExtensions/\(extensionID).systemextension")
+        return FileManager.default.fileExists(atPath: url.path)
+    }
+
+    static let noFilterMessage = "This copy of StolenEyes was installed without its network filter, because the full build could not be signed yet. Apps are locked and browser tabs on locked or adult sites are closed, but nothing is blocked at the network level until the full build is installed."
+
     /// Reads the current state of everything without changing anything.
     func refresh() {
         refreshAgent()
+        guard Self.bundleHasFilter else {
+            extensionState = .failed(Self.noFilterMessage)
+            filterState = .failed("Comes with the network filter.")
+            dnsState = .failed("Comes with the network filter.")
+            return
+        }
         NEFilterManager.shared().loadFromPreferences { [weak self] error in
             Task { @MainActor in
                 guard let self else { return }
@@ -58,6 +73,10 @@ final class SystemSetup: NSObject, ObservableObject {
     /// only switches things on.
     func installEverything() {
         registerAgent()
+        guard Self.bundleHasFilter else {
+            refresh()
+            return
+        }
         activateExtension()
     }
 
@@ -173,7 +192,7 @@ final class SystemSetup: NSObject, ObservableObject {
     /// switch them back on. Called on launch and every minute while the app
     /// runs. Never the other way round: there is no code that turns them off.
     func reassert() {
-        guard extensionState.isOn || filterState != .unknown else { return }
+        guard Self.bundleHasFilter, extensionState.isOn || filterState != .unknown else { return }
         if filterState == .off { enableFilter() } else if dnsState == .off { enableDNSProxy() }
     }
 }

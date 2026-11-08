@@ -39,6 +39,7 @@ struct TodayView: View {
                 StatTile(value: firstActive, label: "First active")
                 StatTile(value: longestRun.value, label: "Longest distracting stretch", footnote: longestRun.name)
             }
+            .fixedSize(horizontal: false, vertical: true)
 
             ProsperCard {
                 VStack(alignment: .leading, spacing: 10) {
@@ -150,13 +151,24 @@ struct SetupCard: View {
     @EnvironmentObject var model: AppModel
     var openSettings: () -> Void
 
+    private var title: String {
+        if !model.settings.onboarded { return "Welcome to StolenEyes for Mac" }
+        if !SystemSetup.bundleHasFilter && model.agentRunning { return "Running without the network filter" }
+        return "Protection is not fully on"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "exclamationmark.shield.fill").foregroundStyle(ProsperColor.distracting)
-                Text(model.settings.onboarded ? "Protection is not fully on" : "Welcome to StolenEyes for Mac")
+                Text(title)
                     .font(.system(size: 16, weight: .semibold)).foregroundStyle(ProsperColor.ink)
             }
+            if !SystemSetup.bundleHasFilter && model.agentRunning {
+                Text(SystemSetup.noFilterMessage)
+                    .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
+                Button("See what's on", action: openSettings).buttonStyle(.bordered)
+            } else {
             Text("StolenEyes needs three things from macOS: its network filter (blocks sites in every browser), a DNS proxy (SafeSearch and the adult guard), and a background helper (measures time and closes locked apps). macOS asks you to approve each once.")
                 .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
             HStack {
@@ -167,6 +179,7 @@ struct SetupCard: View {
                 }
                 .buttonStyle(.borderedProminent).tint(ProsperColor.accent)
                 Button("See what's missing", action: openSettings).buttonStyle(.bordered)
+            }
             }
         }
         .padding(16)

@@ -21,6 +21,7 @@ final class AgentDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         agentLog.info("Agent started")
         enforcer.log(.agentStarted, ProcessInfo.processInfo.processName)
+        sampler.excludeHost = { [weak self] host in self?.rules.active.reason(forHost: host) == .adultGuard }
         rules.onChange = { [weak self] in
             guard let self else { return }
             self.enforcer.rules = self.rules.active

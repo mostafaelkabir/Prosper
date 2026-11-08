@@ -9,8 +9,8 @@ struct InsightsView: View {
             AuroraHeroCard {
                 HStack(alignment: .center, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Last 7 days").labelCaps()
-                        HeroNumber(value: (model.week.distractingSeconds / 7).usageFormatted, unit: "distracting a day")
+                        Text(measuredDays < 7 ? "Since measuring began" : "Last 7 days").labelCaps()
+                        HeroNumber(value: (model.week.distractingSeconds / Double(measuredDays)).usageFormatted, unit: "distracting a day")
                         Text("\(model.week.totalSeconds.usageFormatted) on the Mac in total · \(model.week.unlocks) unlocks")
                             .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2)
                     }
@@ -34,6 +34,7 @@ struct InsightsView: View {
                     }
                     .chartXAxis { AxisMarks(values: .stride(by: .day)) { _ in AxisValueLabel(format: .dateTime.weekday(.abbreviated)) } }
                     .frame(height: 150)
+                    Text("Hours on the Mac each day; distracting time in coral.").font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                 }
             }
 
@@ -50,9 +51,9 @@ struct InsightsView: View {
             ProsperCard {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Your heaviest hours").labelCaps()
-                    HourlyChart(hourly: model.week.hourly.map { $0 / 7 }, distracting: model.week.hourlyDistracting.map { $0 / 7 })
+                    HourlyChart(hourly: model.week.hourly.map { $0 / Double(measuredDays) }, distracting: model.week.hourlyDistracting.map { $0 / Double(measuredDays) })
                         .frame(height: 130)
-                    Text("Average minutes per hour across the week.").font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
+                    Text("Average minutes in each hour, across \(measuredDays) measured day\(measuredDays == 1 ? "" : "s").").font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                 }
             }
 
@@ -85,6 +86,9 @@ struct InsightsView: View {
         }
         .navigationTitle("Insights")
     }
+
+    /// Days with any measurement, so averages are not diluted by days before StolenEyes was installed.
+    private var measuredDays: Int { max(1, model.weekDays.filter { $0.day != nil }.count) }
 
     private var blocked: [(String, Int)] {
         let since = Date().addingTimeInterval(-7 * 86_400)

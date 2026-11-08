@@ -28,7 +28,8 @@ public enum MacCopy {
     away your history, which is the price.
     """
 
-    public static let guardShield = "This is behind the guard. Deleting StolenEyes would remove it. Nothing else will."
+    /// The shield for a locked app or site.
+    public static let lockShield = "Deleting StolenEyes would end this lock. Nothing else will."
 
     public static let urgePasses = "The urge peaks and passes, usually within a few minutes. Stand up, get water, step outside. You decided this with a clear head."
 

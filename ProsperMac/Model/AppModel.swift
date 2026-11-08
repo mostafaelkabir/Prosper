@@ -11,7 +11,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var settings = MacSettings()
     @Published private(set) var today: UsageSummary = .build(days: [], classifier: MacClassifier())
     @Published private(set) var week: UsageSummary = .build(days: [], classifier: MacClassifier())
-    @Published private(set) var weekDays: [(date: Date, day: UsageDay?)] = []
+    @Published private(set) var weekDays: [DayEntry] = []
     @Published private(set) var status: AgentStatus?
     @Published private(set) var events: [MacEvent] = []
     @Published private(set) var now = Date()
@@ -20,6 +20,9 @@ final class AppModel: ObservableObject {
     let setup = SystemSetup()
     private let filter = FilterClient()
     private var timer: Timer?
+    private var ticks = 0
+    /// Kept out of `status` so a heartbeat every 5 s does not re-render every view.
+    private var heartbeat: Date?
 
     init(snapshot: Bool = false) {
         #if DEBUG
@@ -34,21 +37,40 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Reads the shared folder. Publishes only what changed, so an idle window
+    /// does not redraw itself (and its charts) every two seconds.
     func reload() {
-        now = Date()
-        rules = MacStore.loadRules(at: now)
-        settings = MacStore.loadSettings()
-        status = MacStore.read(AgentStatus.self, from: MacStore.statusURL)
-        events = MacStore.read([MacEvent].self, from: MacStore.eventsURL) ?? []
-        let classifier = MacClassifier(settings: settings)
-        let days = MacStore.loadDays(endingAt: now, count: 7)
-        today = .build(days: days.filter { $0.day == UsageDay.key(for: now) }, classifier: classifier)
-        week = .build(days: days, classifier: classifier)
-        weekDays = (0..<7).reversed().compactMap { offset in
-            guard let date = Calendar.current.date(byAdding: .day, value: -offset, to: now) else { return nil }
-            let key = UsageDay.key(for: date)
-            return (date, days.first { $0.day == key })
+        let t = Date()
+        ticks += 1
+        var changed = false
+        func set<T: Equatable>(_ keyPath: ReferenceWritableKeyPath<AppModel, T>, _ value: T) {
+            if self[keyPath: keyPath] != value {
+                self[keyPath: keyPath] = value
+                changed = true
+            }
         }
+        set(\.rules, MacStore.loadRules(at: t))
+        let newSettings = MacStore.loadSettings()
+        let settingsChanged = newSettings != settings
+        set(\.settings, newSettings)
+        var newStatus = MacStore.read(AgentStatus.self, from: MacStore.statusURL)
+        heartbeat = newStatus?.heartbeat
+        newStatus?.heartbeat = .distantPast
+        set(\.status, newStatus)
+        set(\.events, MacStore.read([MacEvent].self, from: MacStore.eventsURL) ?? [])
+
+        if ticks == 1 || ticks % 5 == 0 || settingsChanged {
+            let classifier = MacClassifier(settings: settings)
+            let days = MacStore.loadDays(endingAt: t, count: 7)
+            set(\.today, .build(days: days.filter { $0.day == UsageDay.key(for: t) }, classifier: classifier))
+            set(\.week, .build(days: days, classifier: classifier))
+            set(\.weekDays, (0..<7).reversed().compactMap { offset in
+                guard let date = Calendar.current.date(byAdding: .day, value: -offset, to: t) else { return nil }
+                let key = UsageDay.key(for: date)
+                return DayEntry(date: Calendar.current.startOfDay(for: date), day: days.first { $0.day == key })
+            })
+        }
+        if changed || t.timeIntervalSince(now) >= 15 { now = t }
     }
 
     var active: ActiveRules { ActiveRules(rules: rules, at: now) }
@@ -68,7 +90,10 @@ final class AppModel: ObservableObject {
 
     var guardOn: Bool { rules.guardState != nil }
 
-    var agentRunning: Bool { status?.isFresh(at: now) ?? false }
+    var agentRunning: Bool {
+        guard let heartbeat else { return false }
+        return Date().timeIntervalSince(heartbeat) < 20
+    }
 
     // MARK: - Actions (all add-only)
 
@@ -195,7 +220,8 @@ final class AppModel: ObservableObject {
         let classifier = MacClassifier()
         today = .build(days: [days.last!], classifier: classifier)
         week = .build(days: days, classifier: classifier)
-        weekDays = days.enumerated().map { (cal.date(byAdding: .day, value: $0.offset - 6, to: now)!, $0.element) }
+        weekDays = days.enumerated().map { DayEntry(date: cal.date(byAdding: .day, value: $0.offset - 6, to: now)!, day: $0.element) }
+        heartbeat = now
         var r = RulesBook.enablingGuard(.empty, now: now.addingTimeInterval(-86_400 * 3))
         r = (try? RulesBook.startingSession(r, minutes: 90, domains: ["news.ycombinator.com"], bundleIDs: ["com.tinyspeck.slackmacgap"], platformIDs: ["youtube", "reddit"], appNames: ["com.tinyspeck.slackmacgap": "Slack"], now: now.addingTimeInterval(-1200)).0) ?? r
         r = (try? RulesBook.addingSchedule(r, name: "Evenings", window: ScheduleWindow(startMinute: 21 * 60, endMinute: 7 * 60), domains: [], bundleIDs: [], platformIDs: ["youtube", "instagram"], now: now).0) ?? r
@@ -207,4 +233,9 @@ final class AppModel: ObservableObject {
         events = (0..<5).map { MacEvent(at: now.addingTimeInterval(Double(-$0 * 900)), kind: .siteBlocked, subject: $0 % 2 == 0 ? "youtube.com" : "Slack") }
     }
     #endif
+}
+
+struct DayEntry: Equatable {
+    let date: Date
+    let day: UsageDay?
 }

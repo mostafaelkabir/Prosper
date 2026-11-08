@@ -104,6 +104,7 @@
 		85DFF8114B2EE2B62391781F /* ProsperCore in Frameworks */ = {isa = PBXBuildFile; productRef = E795C42AB2E28D2A28866861 /* ProsperCore */; };
 		8624A6A143E83A5A56D2E881 /* TodayHeroReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49565334CAB253E5F9C6CAA9 /* TodayHeroReportView.swift */; };
 		8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */; };
+		876077B1BBC0121C305C2056 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE5638E38E6EF1698733D6C4 /* Assets.xcassets */; };
 		87AB6DF952067C3A9CC88C77 /* SharedGuardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0958B2E2262200B2D52204B0 /* SharedGuardState.swift */; };
 		87D9ACCAE9A3CBF70D76E6E2 /* ProsperShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FF9D4872F6C040F6DFF6B18A /* ProsperShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
@@ -418,6 +419,7 @@
 		E8091D8D8CE32952E1044E15 /* QuickBlockPresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickBlockPresets.swift; sourceTree = "<group>"; };
 		EBA48729E878E058C7A790F7 /* InterventionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterventionView.swift; sourceTree = "<group>"; };
 		EDBD8B9C4ABB995B46105FC7 /* ScreenGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenGuard.swift; sourceTree = "<group>"; };
+		EE5638E38E6EF1698733D6C4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EF00BD105719ADF5B27514F4 /* CoreExports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreExports.swift; sourceTree = "<group>"; };
 		F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummary.swift; sourceTree = "<group>"; };
 		F4785AFA626F9A90CBD3D6BC /* WarningEscalation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningEscalation.swift; sourceTree = "<group>"; };
@@ -600,6 +602,7 @@
 				F4C2860CAB5A37DAD832B467 /* LaunchAgents */,
 				524A2AA6DE14393E5665FEF7 /* Model */,
 				15D9D77527EBF9C7D3DB825F /* Views */,
+				EE5638E38E6EF1698733D6C4 /* Assets.xcassets */,
 				9D582400D26C3672F0EEB21B /* ProsperMac.entitlements */,
 			);
 			path = ProsperMac;
@@ -1067,6 +1070,7 @@
 			buildConfigurationList = C75686CE4E186FF6E4EC1B9E /* Build configuration list for PBXNativeTarget "ProsperMac" */;
 			buildPhases = (
 				73E3627E1D23098F6B1C58FD /* Sources */,
+				4545A0DFC252EBC51F1EB960 /* Resources */,
 				6E87DFB779E9452FCB248C78 /* CopyFiles */,
 				24E481E2520E74AB76369CD9 /* Frameworks */,
 				419B7DE7FEA54914F3F6FC34 /* Embed System Extensions */,
@@ -1198,6 +1202,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4545A0DFC252EBC51F1EB960 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				876077B1BBC0121C305C2056 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7CA52325A78F8784FBA7CA2A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1786,6 +1798,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1794,7 +1807,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1958,6 +1973,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1966,7 +1982,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

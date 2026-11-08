@@ -221,7 +221,16 @@ public enum RegistrableDomain {
     /// Second-level labels under which registrations happen one level deeper.
     static let secondLevel: Set<String> = ["co", "com", "org", "net", "ac", "gov", "edu", "ne", "or"]
 
-    /// "www.news.bbc.co.uk" → "bbc.co.uk"; "m.youtube.com" → "youtube.com".
+    /// Hosting platforms where each subdomain is a different site.
+    static let sharedHosts: Set<String> = [
+        "run.app", "web.app", "firebaseapp.com", "appspot.com", "github.io", "gitlab.io", "vercel.app",
+        "netlify.app", "pages.dev", "workers.dev", "herokuapp.com", "azurewebsites.net", "cloudfront.net",
+        "blogspot.com", "wordpress.com", "substack.com", "medium.com", "notion.site", "framer.app",
+        "webflow.io", "glitch.me", "fly.dev", "onrender.com", "replit.app", "streamlit.app", "ngrok.io", "ngrok-free.app",
+    ]
+
+    /// "www.news.bbc.co.uk" → "bbc.co.uk"; "m.youtube.com" → "youtube.com";
+    /// "myapp-123.run.app" stays itself.
     /// A heuristic without the public suffix list: good for display and
     /// grouping, never used for blocking.
     public static func of(_ host: String) -> String {
@@ -229,6 +238,7 @@ public enum RegistrableDomain {
         guard labels.count > 2 else { return labels.joined(separator: ".") }
         let tld = labels[labels.count - 1]
         let sld = labels[labels.count - 2]
+        if sharedHosts.contains(sld + "." + tld) { return labels.suffix(3).joined(separator: ".") }
         let take = (tld.count == 2 && secondLevel.contains(sld)) ? 3 : 2
         return labels.suffix(take).joined(separator: ".")
     }

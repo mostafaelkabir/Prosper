@@ -179,6 +179,8 @@ struct UsageTests {
     func helpers() {
         #expect(RegistrableDomain.of("www.news.bbc.co.uk") == "bbc.co.uk")
         #expect(RegistrableDomain.of("m.youtube.com") == "youtube.com")
+        #expect(RegistrableDomain.of("myapp-12ab.a.run.app") == "a.run.app")
+        #expect(RegistrableDomain.of("mostafa.github.io") == "mostafa.github.io")
         #expect(DurationText.short(3900) == "1h 05m")
         #expect(DurationText.countdown(3849) == "1:04:09")
     }

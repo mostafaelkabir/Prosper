@@ -76,6 +76,25 @@ Turn it on in Settings (hold 3 s). There is no way back: do this on purpose.
 |---|---|---|
 | 4.1 ⏱ | Activity Monitor during an hour of browsing. | StolenEyesAgent < 1 % average CPU, < 150 MB; with Screen Guard on < 5 %. Extension < 50 MB. |
 
+## Results — 2026-11-08, `--without-filter` build (QA pass)
+
+| Step | Result |
+|---|---|
+| 0.1, 0.2 | Pass: installs, helper registered and running under launchd. |
+| 1.1 (app part) | Pass: Calculator quit on launch, shield with countdown, attempt logged. |
+| 1.1 (site part, tab close) | Pass: `example.com` tab closed in Chrome and the lock shield shown. Network blocking pending the full build. |
+| 1.2, 1.3, 1.5 | Pass. |
+| 1.10 | Pass: a schedule open now quits Calculator; a hand-forged removal while open is undone; removal after the window closes is kept. |
+| 2.1 (name rule, tab close) | Pass: `porn-guard-test.example` / `xxx-…` / `hentai-…` tabs closed in Chrome with the guard screen. |
+| 2.7 | Expected red: "signed without Sensitive Content Analysis" (needs the full build). |
+| 2.9 | Pass: guard removed from `rules.json`, or the file deleted, comes back within a second with the original switch-on date. |
+| 3.2 | **Fixed:** Chrome refused silently (no prompt) because the main app lacked the Apple Events usage text and entitlement macOS checks for the helper it launches. The helper now asks explicitly; the prompt appeared and access works. |
+| 4.1 | Pass: helper 0.12 % CPU, 25 MB. App window was 7.3 % idle: **fixed** to 0.04 % by publishing only changed state. |
+
+Other fixes from this pass: guard-blocked hosts and system dialogs (UserNotificationCenter, loginwindow) are no longer written to usage history; hosts on shared platforms (`*.run.app`, `*.github.io`…) keep their own name; Insights averages divide by measured days, not 7; shield Close button keeps its colour; equal stat tiles; Aurora accent and a Mac app icon; the app says plainly when it was installed without the filter.
+
+Not verifiable here: the menu bar icon (hidden behind a full-screen window during the pass), logout/reboot survival, everything marked 🔌.
+
 ## Inspect
 
 ```bash

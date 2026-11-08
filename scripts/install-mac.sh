@@ -39,7 +39,9 @@ else
 PLIST
   codesign --force --options runtime --timestamp=none --sign "$IDENTITY" --entitlements "$ENT/agent.plist" \
     "$BUILT/Contents/Library/LoginItems/StolenEyesAgent.app"
-  codesign --force --options runtime --timestamp=none --sign "$IDENTITY" "$BUILT"
+  # The app needs the Apple Events entitlement too: macOS holds it responsible
+  # for the helper's requests.
+  codesign --force --options runtime --timestamp=none --sign "$IDENTITY" --entitlements "$ENT/agent.plist" "$BUILT"
   codesign --verify --deep --strict "$BUILT"
 fi
 

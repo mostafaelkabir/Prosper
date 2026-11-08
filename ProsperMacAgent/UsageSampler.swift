@@ -23,7 +23,19 @@ final class UsageSampler {
     private var lastSave = Date.distantPast
     private var appInfo: [String: AppUsage] = [:]
     private var run: (key: String, name: String, start: Date)?
+    private var sanitized = false
     static let idleThreshold: TimeInterval = 60
+    /// System UI that comes to the front (prompts, the lock screen) but is not
+    /// time anyone chose to spend.
+    static let ignored: Set<String> = [
+        "com.apple.loginwindow", "com.apple.ScreenSaver.Engine", "com.apple.UserNotificationCenter",
+        "com.apple.SecurityAgent", "com.apple.coreautha", "com.apple.LocalAuthentication.UIAgent",
+        "com.apple.CoreServicesUIAgent", "com.apple.dock",
+    ]
+    /// Hosts never written to history: the agent sets this to "behind the
+    /// guard", so adult sites a person was stopped from do not sit in their
+    /// usage files.
+    var excludeHost: (String) -> Bool = { _ in false }
 
     /// The host of the frontmost browser tab as of the last tick.
     private(set) var activeHost: String?
@@ -47,6 +59,7 @@ final class UsageSampler {
 
     /// Once a second from the agent's main timer.
     func tick(now: Date = Date()) {
+        if !sanitized { sanitize() }
         if now.timeIntervalSince(settingsLoadedAt) > 30 {
             classifier = MacClassifier(settings: MacStore.loadSettings())
             settingsLoadedAt = now
@@ -57,11 +70,12 @@ final class UsageSampler {
         if let id = front?.bundleIdentifier, BrowserReader.isBrowser(id), !screenLocked, !asleep {
             activeHost = browser.activeHost(bundleID: id)
         }
+        let recordedHost = activeHost.flatMap { excludeHost($0) ? nil : $0 }
 
         let present = !screenLocked && !asleep && (Self.secondsSinceInput() < Self.idleThreshold || keepsDisplayAwake(front))
         var next: Current?
-        if present, let app = front, let id = app.bundleIdentifier, id != "com.apple.loginwindow", id != "com.apple.ScreenSaver.Engine" {
-            next = Current(bundleID: id, site: activeHost.map(RegistrableDomain.of))
+        if present, let app = front, let id = app.bundleIdentifier, !Self.ignored.contains(id) {
+            next = Current(bundleID: id, site: recordedHost.map(RegistrableDomain.of))
         }
 
         if segment?.current != next {
@@ -96,6 +110,7 @@ final class UsageSampler {
             if key != day.day {
                 save()
                 day = MacStore.loadDay(key) ?? UsageDay(day: key)
+                sanitized = false
             }
             let midnight = Calendar.current.startOfDay(for: cursor).addingTimeInterval(86_400)
             let sliceEnd = min(end, midnight)
@@ -126,6 +141,15 @@ final class UsageSampler {
         }
     }
 
+    /// Drops system UI and guard-blocked hosts that older builds recorded.
+    private func sanitize() {
+        sanitized = true
+        let before = day
+        for id in Self.ignored { day.apps[id] = nil }
+        for host in day.sites.keys where excludeHost(host) { day.sites[host] = nil }
+        if day != before { save() }
+    }
+
     func save() {
         lastSave = Date()
         try? MacStore.write(day, to: MacStore.usageURL(for: day.day))
@@ -152,7 +176,7 @@ final class UsageSampler {
 
     @objc private func appActivated(_ note: Notification) {
         guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let id = app.bundleIdentifier else { return }
+              let id = app.bundleIdentifier, !Self.ignored.contains(id) else { return }
         day.recordOpen(bundleID: id, app: self.app(id))
         tick()
     }

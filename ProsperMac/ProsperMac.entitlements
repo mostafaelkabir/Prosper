@@ -13,5 +13,7 @@
 	<array>
 		<string>V9WJ9X99FX.com.mostafa.prosper.mac</string>
 	</array>
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
 </dict>
 </plist>

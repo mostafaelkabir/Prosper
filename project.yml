@@ -287,11 +287,18 @@ targets:
       base:
         PRODUCT_NAME: StolenEyes
         PRODUCT_MODULE_NAME: ProsperMac
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: StolenEyes
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        # macOS holds the app responsible for the helper it launches, so the
+        # consent prompts for the helper's Apple Events and screen capture are
+        # checked against these too. Without them Chrome refused silently.
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
@@ -304,6 +311,7 @@ targets:
           - content-filter-provider-systemextension
           - dns-proxy-systemextension
         com.apple.developer.system-extension.install: true
+        com.apple.security.automation.apple-events: true
         com.apple.security.application-groups:
           - V9WJ9X99FX.com.mostafa.prosper.mac
     scheme:

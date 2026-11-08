@@ -164,7 +164,7 @@ struct StatTile: View {
                 Text(footnote).font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(14)
         .background(ProsperColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))

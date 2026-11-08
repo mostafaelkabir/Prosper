@@ -162,18 +162,21 @@ struct ShieldView: View {
                     Text("Tried \(attempts) times today. Each one you let pass makes the next one weaker.")
                         .foregroundStyle(ProsperColor.ink2)
                 }
-                Text(reason == .adultGuard ? MacCopy.guardShield : LockExitCopy.shield.replacingOccurrences(of: "block", with: "lock"))
+                Text(reason == .adultGuard ? LockExitCopy.guardShield : MacCopy.lockShield)
                     .font(.footnote)
                     .foregroundStyle(ProsperColor.unclassified)
                     .padding(.top, 8)
+                // Drawn by hand: the panel never becomes key, and a system
+                // prominent button in an inactive window loses its colour.
                 Button(action: dismiss) {
                     Text("Close")
                         .font(.headline)
-                        .padding(.horizontal, 36)
-                        .padding(.vertical, 10)
+                        .foregroundStyle(ProsperColor.onAccent)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 11)
+                        .background(ProsperColor.accent, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(ProsperColor.accent)
+                .buttonStyle(.plain)
                 .keyboardShortcut(.defaultAction)
                 .padding(.top, 10)
             }
