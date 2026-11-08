@@ -49,6 +49,12 @@ final class Enforcer {
         shield.show(subject: name, reason: reason, attempts: attempts(for: name))
     }
 
+    /// The Screen Guard found something: cover the screen with the guard's words.
+    func showGuardScreen(appName: String) {
+        log(.guardScreen, appName)
+        shield.show(subject: appName, reason: .adultGuard, attempts: 0)
+    }
+
     @objc private func appEvent(_ note: Notification) {
         guard let rules,
               let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,

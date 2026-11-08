@@ -644,6 +644,25 @@ that needs the real OS.
 
 ---
 
+## 11. Status — 2026-11-08 (snapshot; Basira is the source of truth)
+
+Built on branch `feat/mac-mvp`:
+
+- **M0.1** `Packages/ProsperCore`: `PlatformCatalog`, `BlockDomain`, `LockExitCopy`, `AdultDomains`, `TimeClassKind`, `ProsperColor` (UIKit/AppKit), `ProsperType` moved and compiled into iOS by path; iOS app + extensions build, 116 iOS tests pass. Mac core: `MacRules`/`RulesBook` (add-only merge), `ActiveRules`, `DomainMatcher`, `GuardMatcher`, `BypassRules`, `SNIParser`, `DNSMessage`/`SafeSearch`, `UsageDay`/`UsageSummary`/`MacClassifier`, `MacStore`, `FilterControl` XPC; 32 package tests.
+- **M0.2** Mac targets, embedded agent (`SMAppService.agent`, KeepAlive) and system extension.
+- **M1.2–M1.4** filter-data provider (hostname → SNI peek → HTTP Host → DNS map; QUIC/853/DoH closing), DNS proxy (NXDOMAIN, SafeSearch rewrite, HTTPS-record stripping, forwards to the original server), XPC with team code-signing requirement; root-owned rules copy.
+- **M2.1–M2.4 (MVP)** guard state with no off switch, ~300-domain curated list + name rules, SafeSearch/Restricted Mode, Screen Guard with `SensitiveContentAnalysis` (needs the entitlement in the full build), guard UI.
+- **M3.1–M3.4 (MVP)** usage sampler (idle, lock, sleep, video-aware), browser URL reader (Safari/Chrome/Brave/Edge/Arc…), aggregation and classification, Today and Insights, menu bar.
+- **M4.1–M4.5 (MVP)** sessions, add-to-running, extend, schedules (removable only while off), app enforcer, site shield, completion notification, no-cancel audit test.
+
+Verified on this Mac (no-filter build, Apple Development signed, in `/Applications`): helper registers and runs under launchd; `kill -9` → relaunched within ~1 s; a Calculator lock quits it on launch and logs the attempt; deleting the lock from `rules.json` → restored within 2 s; the lock lifts on time and leaves the file.
+
+**Blocked:** the full build (system extension, Network Extension and Sensitive Content Analysis entitlements) needs Xcode to provision Mac profiles. On 2026-11-08 the team's account returned "PLA Update available" (the Program License Agreement must be accepted at developer.apple.com) and then Xcode had no account signed in. After both are fixed: `bash scripts/install-mac.sh`, approve the extension, filter and DNS proxy, run `MAC-DEV-test-script.md` §0–2, then write `filter-matrix.md` (M0.3, M1.5).
+
+Not done yet: M0.3/M1.5 matrices (need the running extension), M0.4 Developer ID + notarization, M2.1 large licensed list (download needs approval), M3.6 knowledgeC import, M5 warnings, M6 tamper ladder beyond the merge/KeepAlive/reassert basics, M7 sync.
+
+---
+
 ## Appendix — sources
 
 Facts marked "verified" come from the macOS 27.0 SDK on this machine:

@@ -180,14 +180,29 @@ extension UsageSummary {
 /// Screen background and padding shared by every tab.
 struct ScreenScroll<Content: View>: View {
     @ViewBuilder var content: Content
+    @Environment(\.snapshotMode) private var snapshotMode
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) { content }
-                .padding(24)
-                .frame(maxWidth: 860, alignment: .leading)
-                .frame(maxWidth: .infinity)
+        let stack = VStack(alignment: .leading, spacing: 18) { content }
+            .padding(24)
+            .frame(maxWidth: 860, alignment: .leading)
+            .frame(maxWidth: .infinity)
+        if snapshotMode {
+            stack.background(ProsperColor.background)
+        } else {
+            ScrollView { stack }.background(ProsperColor.background)
         }
-        .background(ProsperColor.background)
+    }
+}
+
+private struct SnapshotModeKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// True while rendering PNG snapshots (Debug only): no scroll views, which ImageRenderer cannot draw.
+    var snapshotMode: Bool {
+        get { self[SnapshotModeKey.self] }
+        set { self[SnapshotModeKey.self] = newValue }
     }
 }

@@ -98,13 +98,13 @@ struct HourlyChart: View {
     var body: some View {
         Chart {
             ForEach(0..<24, id: \.self) { hour in
-                BarMark(x: .value("Hour", hour), y: .value("Minutes", max(0, (hourly[safe: hour] ?? 0) - (distracting[safe: hour] ?? 0)) / 60))
+                BarMark(x: .value("Hour", hour), y: .value("Minutes", max(0, (hourly[safe: hour] ?? 0) - (distracting[safe: hour] ?? 0)) / 60), width: .fixed(14))
                     .foregroundStyle(ProsperColor.unclassified.opacity(0.55))
-                BarMark(x: .value("Hour", hour), y: .value("Minutes", (distracting[safe: hour] ?? 0) / 60))
+                BarMark(x: .value("Hour", hour), y: .value("Minutes", (distracting[safe: hour] ?? 0) / 60), width: .fixed(14))
                     .foregroundStyle(ProsperColor.distracting)
             }
         }
-        .chartXScale(domain: 0...23)
+        .chartXScale(domain: -0.5...23.5)
         .chartXAxis {
             AxisMarks(values: [0, 6, 12, 18, 23]) { value in
                 AxisValueLabel {

@@ -182,6 +182,7 @@ struct GuardSection: View {
                 Text(MacCopy.guardFull).font(.system(size: 12)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
 
                 if let state = model.rules.guardState {
+                    StatusLine(title: "Screen Guard", state: screenGuardState, detail: "Checks the window in front of browsers, image viewers, video players and chat apps for explicit images, on this Mac only, and covers the screen when it finds one.")
                     if !state.extraDomains.isEmpty || !state.bundleIDs.isEmpty {
                         Text("Also behind it").labelCaps()
                         ItemsLine(platformIDs: [], domains: state.extraDomains, bundleIDs: state.bundleIDs, appNames: state.appNames)
@@ -219,6 +220,18 @@ struct GuardSection: View {
             .padding(24)
             .frame(width: 560, height: 560)
             .background(ProsperColor.background)
+        }
+    }
+}
+
+extension GuardSection {
+    var screenGuardState: SystemSetup.StepState {
+        switch model.status?.screenGuard ?? .off {
+        case .running: .on
+        case .off: model.agentRunning ? .working : .failed("The background helper is not running.")
+        case .needsScreenRecording: .needsApproval("Allow StolenEyes Agent in System Settings → Privacy & Security → Screen & System Audio Recording.")
+        case .sensitiveContentWarningOff: .needsApproval("Turn on System Settings → Privacy & Security → Sensitive Content Warning. It is the one setting StolenEyes cannot switch on for you; Apple's classifier only runs while it is on.")
+        case .unavailable: .failed("This build is signed without Apple's Sensitive Content Analysis capability. It arrives with the full build (network filter included).")
         }
     }
 }

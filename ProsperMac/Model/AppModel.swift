@@ -21,7 +21,13 @@ final class AppModel: ObservableObject {
     private let filter = FilterClient()
     private var timer: Timer?
 
-    init() {
+    init(snapshot: Bool = false) {
+        #if DEBUG
+        if snapshot {
+            loadSnapshotData()
+            return
+        }
+        #endif
         reload()
         timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.reload() }
@@ -158,4 +164,47 @@ final class AppModel: ObservableObject {
             return false
         }
     }
+
+    #if DEBUG
+    /// Invented numbers for `--render-snapshots` only. Debug builds only: a
+    /// release build cannot show figures that are not the user's (REL-11).
+    private func loadSnapshotData() {
+        let cal = Calendar.current
+        var days: [UsageDay] = []
+        for offset in (0..<7).reversed() {
+            let date = cal.date(byAdding: .day, value: -offset, to: now)!
+            var day = UsageDay(day: UsageDay.key(for: date))
+            let scale = 0.6 + Double((offset * 37) % 10) / 10
+            day.apps["com.apple.dt.Xcode"] = AppUsage(name: "Xcode", seconds: 9000 * scale, opens: 14, category: "public.app-category.developer-tools")
+            day.apps["com.google.Chrome"] = AppUsage(name: "Google Chrome", seconds: 7200 * scale, opens: 40, isBrowser: true)
+            day.apps["com.tinyspeck.slackmacgap"] = AppUsage(name: "Slack", seconds: 2400 * scale, opens: 30)
+            day.apps["com.apple.MobileSMS"] = AppUsage(name: "Messages", seconds: 900 * scale, opens: 12)
+            day.sites["youtube.com"] = SiteUsage(seconds: 3600 * scale, visits: 9)
+            day.sites["reddit.com"] = SiteUsage(seconds: 1500 * scale, visits: 6)
+            day.sites["github.com"] = SiteUsage(seconds: 1200 * scale, visits: 8)
+            for h in 8..<23 {
+                day.hourly[h] = 1500 * scale
+                day.hourlyDistracting[h] = (h >= 20 || h == 13) ? 1100 * scale : 150 * scale
+            }
+            day.unlocks = 23
+            day.firstActive = cal.date(bySettingHour: 7, minute: 42, second: 0, of: date)
+            day.longestDistractingRun = 2900 * scale
+            day.longestDistractingRunName = "youtube.com"
+            days.append(day)
+        }
+        let classifier = MacClassifier()
+        today = .build(days: [days.last!], classifier: classifier)
+        week = .build(days: days, classifier: classifier)
+        weekDays = days.enumerated().map { (cal.date(byAdding: .day, value: $0.offset - 6, to: now)!, $0.element) }
+        var r = RulesBook.enablingGuard(.empty, now: now.addingTimeInterval(-86_400 * 3))
+        r = (try? RulesBook.startingSession(r, minutes: 90, domains: ["news.ycombinator.com"], bundleIDs: ["com.tinyspeck.slackmacgap"], platformIDs: ["youtube", "reddit"], appNames: ["com.tinyspeck.slackmacgap": "Slack"], now: now.addingTimeInterval(-1200)).0) ?? r
+        r = (try? RulesBook.addingSchedule(r, name: "Evenings", window: ScheduleWindow(startMinute: 21 * 60, endMinute: 7 * 60), domains: [], bundleIDs: [], platformIDs: ["youtube", "instagram"], now: now).0) ?? r
+        rules = r
+        settings = MacSettings(rememberedDomains: ["espn.com", "news.ycombinator.com"], onboarded: true)
+        status = AgentStatus(heartbeat: now, agentStartedAt: now.addingTimeInterval(-7200), agentVersion: "0.1",
+                             filter: FilterStatus(filterStartedAt: now.addingTimeInterval(-7200), dnsStartedAt: now.addingTimeInterval(-7200), rulesRevision: 4, guardOn: true, activeLocks: 1, blockedToday: 37, unnamedToday: 3, safeSearchRewritesToday: 112, day: UsageDay.key(for: now)),
+                             browserAccess: ["com.google.Chrome": true, "com.apple.Safari": false], screenGuard: .running)
+        events = (0..<5).map { MacEvent(at: now.addingTimeInterval(Double(-$0 * 900)), kind: .siteBlocked, subject: $0 % 2 == 0 ? "youtube.com" : "Slack") }
+    }
+    #endif
 }

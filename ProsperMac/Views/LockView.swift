@@ -185,7 +185,7 @@ struct LockView: View {
                     }
                     LockItemsPicker(selection: $selection, remembered: model.settings.rememberedDomains)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("\(selection.summary) until \(Date().addingTimeInterval(Double(minutes * 60)).formatted(date: .omitted, time: .shortened))")
+                        Text(selection.isEmpty ? "Choose platforms, sites or apps to lock." : "\(selection.summary) until \(Date().addingTimeInterval(Double(minutes * 60)).formatted(date: .omitted, time: .shortened))")
                             .font(.system(size: 13, weight: .medium)).foregroundStyle(ProsperColor.ink)
                         HoldToConfirmButton(title: "Hold to lock for \(Self.label(minutes))", enabled: !selection.isEmpty) {
                             if model.startLock(minutes: minutes, domains: selection.domains, apps: Array(selection.apps), platformIDs: Array(selection.platformIDs)) {

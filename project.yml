@@ -326,6 +326,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: StolenEyes Agent
         INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
         INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
@@ -338,6 +339,9 @@ targets:
         com.apple.security.application-groups:
           - V9WJ9X99FX.com.mostafa.prosper.mac
         com.apple.security.automation.apple-events: true
+        # Screen Guard (M2.3): Apple's on-device nudity classifier.
+        com.apple.developer.sensitivecontentanalysis.client:
+          - analysis
 
   ProsperMacFilter:
     type: system-extension

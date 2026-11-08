@@ -4,6 +4,12 @@ import SwiftUI
 struct ProsperMacApp: App {
     @StateObject private var model = AppModel()
 
+    init() {
+        #if DEBUG
+        SnapshotRenderer.runIfRequested()
+        #endif
+    }
+
     var body: some Scene {
         Window("StolenEyes", id: "main") {
             RootView()
