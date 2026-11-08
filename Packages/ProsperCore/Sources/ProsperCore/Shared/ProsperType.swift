@@ -2,16 +2,16 @@ import SwiftUI
 
 /// Typographic roles for Prosper. Numbers are SF Rounded and tabular; the one
 /// "sentence you read" (insights) is serif; labels are small uppercase caps.
-enum ProsperFont {
-    static func hero(_ size: CGFloat = 48) -> Font {
+public enum ProsperFont {
+    public static func hero(_ size: CGFloat = 48) -> Font {
         .system(size: size, weight: .bold, design: .rounded)
     }
-    static let insight = Font.system(.title3, design: .serif)
-    static let body = Font.body
-    static let dataRow = Font.system(.subheadline).monospacedDigit()
+    public static let insight = Font.system(.title3, design: .serif)
+    public static let body = Font.body
+    public static let dataRow = Font.system(.subheadline).monospacedDigit()
 }
 
-extension View {
+public extension View {
     /// 11pt, uppercase, wide tracking, tertiary ink — for section/eyebrow labels.
     func labelCaps() -> some View {
         self
@@ -23,10 +23,10 @@ extension View {
 }
 
 /// A ready-made caps label.
-struct LabelCaps: View {
+public struct LabelCaps: View {
     let text: String
-    init(_ text: String) { self.text = text }
-    var body: some View {
+    public init(_ text: String) { self.text = text }
+    public var body: some View {
         Text(text).labelCaps()
     }
 }
