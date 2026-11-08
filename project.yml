@@ -264,6 +264,9 @@ targets:
       - path: ProsperMac
         excludes:
           - LaunchAgents
+      # The Aurora components are pure SwiftUI and shared with the iPhone app.
+      - path: Prosper/DesignSystem/AuroraComponents.swift
+      - path: Prosper/DesignSystem/ProsperComponents.swift
       - path: ProsperMac/LaunchAgents/com.mostafa.prosper.mac.agent.plist
         buildPhase:
           copyFiles:

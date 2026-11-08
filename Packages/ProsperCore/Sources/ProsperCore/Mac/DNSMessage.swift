@@ -35,7 +35,8 @@ public struct DNSRecord: Equatable, Sendable {
             }
             var buffer = [CChar](repeating: 0, count: Int(INET6_ADDRSTRLEN))
             guard inet_ntop(AF_INET6, &addr, &buffer, socklen_t(buffer.count)) != nil else { return nil }
-            return String(cString: buffer)
+            let end = buffer.firstIndex(of: 0) ?? buffer.count
+            return String(decoding: buffer[..<end].map { UInt8(bitPattern: $0) }, as: UTF8.self)
         }
         return nil
     }
