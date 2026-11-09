@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.mostafa
   deploymentTarget:
     iOS: "17.0"
+    macOS: "15.0"
   xcodeVersion: "16.0"
   createIntermediateGroups: true
   groupSortPosition: top
@@ -12,12 +13,21 @@ settings:
     SWIFT_VERSION: "6.0"
     DEVELOPMENT_TEAM: V9WJ9X99FX
 
+# Shared core (M0.1). The Mac targets link it; the iOS targets compile the same
+# files by path so the iOS binary is built exactly as before (docs/mac/PLAN.md §3.7).
+packages:
+  ProsperCore:
+    path: Packages/ProsperCore
+
 targets:
   Prosper:
     type: application
     platform: iOS
     sources:
       - path: Prosper
+      # Shared with the Mac (ProsperCore); compiled by path so the iOS build
+      # gains no new dependency (PLAN.md §3.7, SC4).
+      - path: Packages/ProsperCore/Sources/ProsperCore/Shared
       # Report views are compiled into the app too so the simulator and previews
       # can render them with sample data (the extension renders the real data).
       - path: ProsperReport/UsageSummary.swift
@@ -98,6 +108,7 @@ targets:
     sources:
       - path: ProsperMonitor
       - path: Prosper/Models
+      - path: Packages/ProsperCore/Sources/ProsperCore/Shared
       - path: Prosper/Services/PersistenceConfig.swift
       # Warning ladder + pending-intervention flag are shared with the app.
       - path: Prosper/Services/WarningEscalation.swift
@@ -143,8 +154,9 @@ targets:
     sources:
       - path: ProsperShield
       - path: Prosper/Services/SharedBlockState.swift
-      # One source for the "deleting Prosper ends a block" line (REL-8).
-      - path: Prosper/Services/LockExitCopy.swift
+      # One source for the "deleting Prosper ends a block" line (REL-8), in
+      # ProsperCore's shared files.
+      - path: Packages/ProsperCore/Sources/ProsperCore/Shared
       # The Adult Content Guard's record, so a guarded app gets the guard's
       # words instead of a block's countdown (E9).
       - path: Prosper/Services/SharedGuardState.swift
@@ -214,7 +226,7 @@ targets:
       - path: Prosper/Extensions/ReportContext.swift
       - path: Prosper/DesignSystem
       - path: Prosper/Services/SharedClassification.swift
-      - path: Prosper/Services/PlatformCatalog.swift
+      - path: Packages/ProsperCore/Sources/ProsperCore/Shared
       - path: PrivacyManifests/ProsperReport/PrivacyInfo.xcprivacy
         buildPhase: resources
     settings:
@@ -240,3 +252,170 @@ targets:
         CFBundleDisplayName: StolenEyes
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.deviceactivityui.report-extension
+
+  # ── Mac (docs/mac/PLAN.md) ─────────────────────────────────────────────────
+  # The app is the UI only: it never enforces anything. The agent (a KeepAlive
+  # launchd agent inside the bundle) measures, quits blocked apps and keeps the
+  # rules; the system extension filters every network flow and DNS query.
+  ProsperMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: ProsperMac
+        excludes:
+          - LaunchAgents
+      # The Aurora components are pure SwiftUI and shared with the iPhone app.
+      - path: Prosper/DesignSystem/AuroraComponents.swift
+      - path: Prosper/DesignSystem/ProsperComponents.swift
+      - path: ProsperMac/LaunchAgents/com.mostafa.prosper.mac.agent.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
+    dependencies:
+      - package: ProsperCore
+      - target: ProsperMacAgent
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Library/LoginItems
+      - target: ProsperMacFilter
+        embed: true
+        codeSign: true
+    settings:
+      base:
+        PRODUCT_NAME: StolenEyes
+        PRODUCT_MODULE_NAME: ProsperMac
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        # macOS holds the app responsible for the helper it launches, so the
+        # consent prompts for the helper's Apple Events and screen capture are
+        # checked against these too. Without them Chrome refused silently.
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 3
+        MARKETING_VERSION: 0.1
+    entitlements:
+      path: ProsperMac/ProsperMac.entitlements
+      properties:
+        # Development-signed values. A Developer ID build (M0.4) needs the
+        # -systemextension forms; development profiles only carry these.
+        com.apple.developer.networking.networkextension:
+          - content-filter-provider
+          - dns-proxy
+        com.apple.developer.system-extension.install: true
+        com.apple.security.automation.apple-events: true
+        com.apple.security.application-groups:
+          - V9WJ9X99FX.com.mostafa.prosper.mac
+    scheme:
+      testTargets:
+        - ProsperMacTests
+
+  ProsperMacAgent:
+    type: application
+    platform: macOS
+    sources:
+      - path: ProsperMacAgent
+      # Same icon as the app: macOS shows the helper's on its notifications,
+      # permission prompts and in Login Items.
+      - path: ProsperMac/Assets.xcassets
+    dependencies:
+      - package: ProsperCore
+    settings:
+      base:
+        PRODUCT_NAME: StolenEyesAgent
+        PRODUCT_MODULE_NAME: ProsperMacAgent
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac.agent
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes Agent
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 3
+        MARKETING_VERSION: 0.1
+        SKIP_INSTALL: YES
+    entitlements:
+      path: ProsperMacAgent/ProsperMacAgent.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - V9WJ9X99FX.com.mostafa.prosper.mac
+        com.apple.security.automation.apple-events: true
+        # Screen Guard (M2.3): Apple's on-device nudity classifier.
+        com.apple.developer.sensitivecontentanalysis.client:
+          - analysis
+
+  ProsperMacFilter:
+    type: system-extension
+    platform: macOS
+    sources:
+      - path: ProsperMacFilter
+    dependencies:
+      - package: ProsperCore
+    settings:
+      base:
+        # A system extension's bundle must be named after its identifier.
+        PRODUCT_NAME: com.mostafa.prosper.mac.filter
+        PRODUCT_MODULE_NAME: ProsperMacFilter
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac.filter
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 3
+        MARKETING_VERSION: 0.1
+        SKIP_INSTALL: YES
+    entitlements:
+      path: ProsperMacFilter/ProsperMacFilter.entitlements
+      properties:
+        # Development-signed values. A Developer ID build (M0.4) needs the
+        # -systemextension forms; development profiles only carry these.
+        com.apple.developer.networking.networkextension:
+          - content-filter-provider
+          - dns-proxy
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.network.server: true
+        com.apple.security.application-groups:
+          - V9WJ9X99FX.com.mostafa.prosper.mac
+    info:
+      path: ProsperMacFilter/Info.plist
+      properties:
+        CFBundleDisplayName: StolenEyes Filter
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: SYSX
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSSystemExtensionUsageDescription: StolenEyes uses this to block the websites you choose and adult content, in every browser.
+        NetworkExtension:
+          NEMachServiceName: V9WJ9X99FX.com.mostafa.prosper.mac.filter
+          NEProviderClasses:
+            com.apple.networkextension.filter-data: $(PRODUCT_MODULE_NAME).FilterDataProvider
+            com.apple.networkextension.dns-proxy: $(PRODUCT_MODULE_NAME).DNSProxyProvider
+
+  ProsperMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: ProsperMacTests
+    dependencies:
+      - package: ProsperCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"

@@ -16,9 +16,9 @@ import Foundation
 /// Kept in one place because the same fact is stated in onboarding, in Settings,
 /// on the shield, in the App Store description and in the App Review notes, and
 /// five copies would drift.
-enum LockExitCopy {
+public enum LockExitCopy {
     /// Settings and onboarding: the full explanation.
-    static let full = """
+    public static let full = """
     A block has no cancel button. Once you start one, nothing in StolenEyes will \
     end it early — not settings, not deleting your data, not reinstalling your \
     lists. That is the whole point.
@@ -30,15 +30,15 @@ enum LockExitCopy {
     """
 
     /// One line, for places with no room for the full version.
-    static let short = "Deleting StolenEyes ends any block. Nothing else does."
+    public static let short = "Deleting StolenEyes ends any block. Nothing else does."
 
     /// The shield screen, where the user is at their least patient. Phrased so
     /// it reads as the closed door it is rather than as a suggestion.
-    static let shield = "Deleting StolenEyes would end this block. Nothing else will."
+    public static let shield = "Deleting StolenEyes would end this block. Nothing else will."
 
     /// The Adult Content Guard (E9) has no timer either. Same exit, said for
     /// something that is meant to last.
-    static let guardFull = """
+    public static let guardFull = """
     The guard has no off switch. Not in Settings, not by deleting your data, \
     not by setting StolenEyes up again. That is the whole point: it was decided \
     once, with a clear head, and it stays decided.
@@ -49,10 +49,10 @@ enum LockExitCopy {
     """
 
     /// The shield for something behind the guard.
-    static let guardShield = "Deleting StolenEyes would remove this guard. Nothing else will."
+    public static let guardShield = "Deleting StolenEyes would remove this guard. Nothing else will."
 
     /// For the App Store / TestFlight description.
-    static let storeDescription = """
+    public static let storeDescription = """
     StolenEyes blocks cannot be cancelled. There is no override, no "just five \
     more minutes", no hidden setting. A block ends when its timer ends.
 
@@ -62,7 +62,7 @@ enum LockExitCopy {
     """
 
     /// For App Review notes, so a reviewer who starts a block is never stuck.
-    static let reviewNotes = """
+    public static let reviewNotes = """
     Blocks are deliberately not cancellable from inside the app — that is the \
     product. If you start a block during review and need it gone before the \
     timer ends, delete the app: that removes the ManagedSettings restrictions \

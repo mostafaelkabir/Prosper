@@ -10,32 +10,42 @@ import Foundation
 /// `*.cdninstagram.com`. Matching the platform's keywords anywhere in an app's
 /// name or a web domain catches all of them — and matches the app by its display
 /// name, so we don't need Apple's picker to classify apps either.
-struct Platform: Identifiable, Hashable, Sendable {
-    let id: String
-    let name: String
+public struct Platform: Identifiable, Hashable, Sendable {
+    public let id: String
+    public let name: String
     /// SF Symbol drawn inside the platform's brand tile (see `BrandMark`), and
     /// on its own in the classification editor.
-    let symbol: String
+    public let symbol: String
     /// The platform's own brand colour, 0xRRGGBB. Used for the tile we draw
     /// wherever iOS gives us no real app icon — websites, and every surface
     /// outside the report extension (see `UsageIcon`).
-    let tintHex: UInt
+    public let tintHex: UInt
     /// Concrete registrable domains — used for blocking/warnings, which must name
     /// exact hosts (keyword matching can't drive a content filter).
-    let domains: [String]
+    public let domains: [String]
     /// Lowercased substrings that mark a host or app name as this platform. Kept
     /// specific (never a bare letter) so clustering doesn't over-reach. Includes
     /// the CDN/asset hosts iOS actually books the time against.
-    let keywords: [String]
+    public let keywords: [String]
     /// A sensible built-in class for platforms whose nature is unambiguous — the
     /// big social feeds are `.distracting`, work tools are `.productive`. Applied
     /// only as a last resort, so a user's own label always wins (UX-20). Genuinely
     /// ambiguous products (WhatsApp, Netflix…) leave this `nil` so the user
     /// decides. YouTube counts as distracting by the user's choice (UX-24).
-    var defaultClass: SharedClassification.ClassKind? = nil
+    public var defaultClass: TimeClassKind? = nil
+
+    public init(id: String, name: String, symbol: String, tintHex: UInt, domains: [String], keywords: [String], defaultClass: TimeClassKind? = nil) {
+        self.id = id
+        self.name = name
+        self.symbol = symbol
+        self.tintHex = tintHex
+        self.domains = domains
+        self.keywords = keywords
+        self.defaultClass = defaultClass
+    }
 
     /// The host shown to represent the platform.
-    var primaryDomain: String { domains[0] }
+    public var primaryDomain: String { domains[0] }
 
     /// Whether an already-lowercased app name or web host belongs to this
     /// platform.
@@ -45,7 +55,7 @@ struct Platform: Identifiable, Hashable, Sendable {
     /// and their time would be filed under X. Everything else is a plain
     /// substring, which is what catches app display names and CDN hosts
     /// ("youtube" in "YouTube Music" and in "r1---sn-x.googlevideo.com").
-    func matches(_ lowercasedText: String) -> Bool {
+    public func matches(_ lowercasedText: String) -> Bool {
         keywords.contains { keyword in
             if keyword.contains(".") {
                 return lowercasedText == keyword || lowercasedText.hasSuffix("." + keyword)
@@ -55,10 +65,10 @@ struct Platform: Identifiable, Hashable, Sendable {
     }
 }
 
-enum PlatformCatalog {
+public enum PlatformCatalog {
     /// Ordered roughly by how often they eat time. The custom-site field handles
     /// anything not here.
-    static let all: [Platform] = [
+    public static let all: [Platform] = [
         Platform(id: "facebook",  name: "Facebook",    symbol: "f.cursive",        tintHex: 0x1877F2, domains: ["facebook.com", "fb.com", "messenger.com"], keywords: ["facebook", "fbcdn", "fbsbx", "messenger"], defaultClass: .distracting),
         Platform(id: "instagram", name: "Instagram",   symbol: "camera.fill",      tintHex: 0xE1306C, domains: ["instagram.com"],                            keywords: ["instagram", "cdninstagram"], defaultClass: .distracting),
         Platform(id: "youtube",   name: "YouTube",     symbol: "play.fill",        tintHex: 0xFF0000, domains: ["youtube.com", "youtu.be", "m.youtube.com"], keywords: ["youtube", "youtu.be", "ytimg", "googlevideo", "ggpht"], defaultClass: .distracting),
@@ -80,18 +90,18 @@ enum PlatformCatalog {
 
     /// Every domain owned by any catalog platform, lowercased — used to keep the
     /// custom-site list from repeating a host a platform already manages.
-    static let allDomains: Set<String> = Set(all.flatMap { $0.domains.map { $0.lowercased() } })
+    public static let allDomains: Set<String> = Set(all.flatMap { $0.domains.map { $0.lowercased() } })
 
     /// The platform an app name or web host belongs to (case-insensitive), or
     /// nil. Returns the first catalog platform whose keyword matches `text`.
-    static func match(_ text: String?) -> Platform? {
+    public static func match(_ text: String?) -> Platform? {
         guard let text, !text.isEmpty else { return nil }
         let hay = text.lowercased()
         return all.first { $0.matches(hay) }
     }
 
     /// The platform with this id, e.g. from a rolled-up usage row's `platformID`.
-    static func platform(id: String) -> Platform? {
+    public static func platform(id: String) -> Platform? {
         all.first { $0.id == id }
     }
 
@@ -105,9 +115,9 @@ enum PlatformCatalog {
     /// claimed "Operator" — scaling their time away as if it were browsing and
     /// keeping them out of the concentration insight (QA-9). Whole words still
     /// catch "Microsoft Edge", "Opera GX", "Firefox Focus" and "Arc Search".
-    static let browserKeywords: Set<String> = ["safari", "chrome", "firefox", "edge", "brave", "opera", "duckduckgo", "arc"]
+    public static let browserKeywords: Set<String> = ["safari", "chrome", "firefox", "edge", "brave", "opera", "duckduckgo", "arc"]
 
-    static func isBrowser(_ name: String?) -> Bool {
+    public static func isBrowser(_ name: String?) -> Bool {
         guard let name = name?.lowercased() else { return false }
         let words = name.split { !$0.isLetter && !$0.isNumber }
         return words.contains { browserKeywords.contains(String($0)) }

@@ -32,24 +32,9 @@ enum AdultDomainList {
     /// Blocked by name. Lower-case bare domains, exactly as `BlockDomain.normalize`
     /// would produce them; the unit tests hold that line. Subdomains are
     /// covered by the filter's domain matching.
-    static let builtIn: [String] = [
-        // Tube sites
-        "pornhub.com",
-        "xvideos.com",
-        "xnxx.com",
-        "xhamster.com",
-        "spankbang.com",
-        "motherless.com",
-        // Cam sites and creator platforms: clean landing pages, so classifiers miss them
-        "chaturbate.com",
-        "stripchat.com",
-        "onlyfans.com",
-        // Clip host and drawn content
-        "redgifs.com",
-        "nhentai.net",
-        // The directory used to find every other site
-        "theporndude.com",
-    ]
+    /// Shared with the Mac guard, which blocks these and far more
+    /// (`AdultDomains.mac`).
+    static let builtIn: [String] = AdultDomains.builtIn
 
     /// Sites the user can add by name. Kept small on purpose: a device report
     /// puts the real, undocumented limit near 49 domains across the filter,

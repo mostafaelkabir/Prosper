@@ -160,7 +160,8 @@ enum SharedClassification {
     }
 
     /// The three classes we can assign; Unclassified is the absence of a match.
-    enum ClassKind: Sendable, Hashable { case productive, distracting, rest }
+    /// Defined in ProsperCore so the Mac classifies with the same type.
+    typealias ClassKind = TimeClassKind
 
     static func load() -> Snapshot {
         guard let defaults else { return Snapshot() }
