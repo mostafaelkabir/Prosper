@@ -307,9 +307,11 @@ targets:
     entitlements:
       path: ProsperMac/ProsperMac.entitlements
       properties:
+        # Development-signed values. A Developer ID build (M0.4) needs the
+        # -systemextension forms; development profiles only carry these.
         com.apple.developer.networking.networkextension:
-          - content-filter-provider-systemextension
-          - dns-proxy-systemextension
+          - content-filter-provider
+          - dns-proxy
         com.apple.developer.system-extension.install: true
         com.apple.security.automation.apple-events: true
         com.apple.security.application-groups:
@@ -374,9 +376,11 @@ targets:
     entitlements:
       path: ProsperMacFilter/ProsperMacFilter.entitlements
       properties:
+        # Development-signed values. A Developer ID build (M0.4) needs the
+        # -systemextension forms; development profiles only carry these.
         com.apple.developer.networking.networkextension:
-          - content-filter-provider-systemextension
-          - dns-proxy-systemextension
+          - content-filter-provider
+          - dns-proxy
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
         com.apple.security.network.server: true
