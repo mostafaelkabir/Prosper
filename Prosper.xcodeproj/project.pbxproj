@@ -145,6 +145,7 @@
 		B40C7A6639711E28D34AB404 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		B8742D2E3979E22EA03CCC0B /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
 		BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8F0966BDF79094A611FF59E /* Assets.xcassets */; };
+		BDA5A48EB89C2573422D8E60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE5638E38E6EF1698733D6C4 /* Assets.xcassets */; };
 		C2356B36E7B17E654EEAD5D0 /* BlockDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E868A17200694E814150C7 /* BlockDomain.swift */; };
 		C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */; };
 		C38694944BB561C81CFD2ACB /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
@@ -1051,6 +1052,7 @@
 			buildConfigurationList = E4B9982575BA82248CEFFCFF /* Build configuration list for PBXNativeTarget "ProsperMacAgent" */;
 			buildPhases = (
 				ED7267827FC0831F91BF5DF0 /* Sources */,
+				133CF3544E412067E45DEE53 /* Resources */,
 				BE29DBF8E1AB116152DAB6AB /* Frameworks */,
 			);
 			buildRules = (
@@ -1202,6 +1204,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		133CF3544E412067E45DEE53 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BDA5A48EB89C2573422D8E60 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4545A0DFC252EBC51F1EB960 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1561,7 +1571,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacFilter/ProsperMacFilter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ProsperMacFilter/Info.plist;
@@ -1701,7 +1711,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacFilter/ProsperMacFilter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ProsperMacFilter/Info.plist;
@@ -1802,7 +1812,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
@@ -1830,7 +1840,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacAgent/ProsperMacAgent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "StolenEyes Agent";
@@ -1977,7 +1987,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
@@ -2005,7 +2015,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacAgent/ProsperMacAgent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "StolenEyes Agent";

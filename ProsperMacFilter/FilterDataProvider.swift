@@ -47,6 +47,12 @@ final class FilterDataProvider: NEFilterDataProvider {
         // Inbound-initiated flows (servers on this Mac) are not browsing.
         if socketFlow.direction == .inbound { return .allow() }
 
+        // DNS is the proxy's job: it answers blocked names with NXDOMAIN.
+        // macOS labels the resolver's socket with the name being looked up,
+        // and dropping it instead makes the resolver retry for seconds and
+        // mark the DNS server unresponsive.
+        if port == 53 { return .allow() }
+
         if rules.guardOn, rules.closeBypasses,
            BypassRules.verdict(isUDP: isUDP, remotePort: port, remoteAddress: address) == .block {
             keeper.countBlocked()

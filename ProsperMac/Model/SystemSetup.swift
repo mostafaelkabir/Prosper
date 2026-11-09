@@ -121,6 +121,19 @@ final class SystemSetup: NSObject, ObservableObject {
         OSSystemExtensionManager.shared.submitRequest(request)
     }
 
+    /// Re-submits activation on launch, as Apple recommends: a no-op when
+    /// the installed extension is this version, and the way an updated app
+    /// replaces it with the new one. Only once the user has set it up.
+    func updateExtension() {
+        guard Self.bundleHasFilter, Bundle.main.bundlePath.hasPrefix("/Applications/") else { return }
+        NEFilterManager.shared().loadFromPreferences { [weak self] _ in
+            Task { @MainActor in
+                guard let self, NEFilterManager.shared().providerConfiguration != nil else { return }
+                self.activateExtension()
+            }
+        }
+    }
+
     // MARK: - Filter and DNS proxy
 
     private func enableFilter() {

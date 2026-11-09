@@ -95,11 +95,31 @@ Other fixes from this pass: guard-blocked hosts and system dialogs (UserNotifica
 
 Not verifiable here: the menu bar icon (hidden behind a full-screen window during the pass), logout/reboot survival, everything marked 🔌.
 
+## Results — 2026-11-08, full build (development-signed, extension build 3)
+
+| Step | Result |
+|---|---|
+| 0.3, 0.4 | Pass: `com.mostafa.prosper.mac.filter (0.1/3) [activated enabled]`; content filter and DNS proxy allowed. A rebuilt app replaces the extension on launch without asking again (activation is re-submitted on every launch). |
+| 2.1 | Pass at the network level: `pornhub.com`, `de.pornhub.com`, `xvideos.com`, `xhamster.com` → NXDOMAIN in ~1 ms (UDP, TCP and the system resolver); `curl` fails; with the real address forced (`--resolve`), the TLS server name is still dropped. |
+| 2.2 | Pass: made-up `freeporn-guard-test.com` → NXDOMAIN. |
+| 2.3, 2.4 | Pass: `www.google.com` → 216.239.38.120 (forcesafesearch), `www.youtube.com` → 216.239.38.119 (restrictmoderate), `www.bing.com` = `strict.bing.com`, `duckduckgo.com` = `safe.duckduckgo.com`, over UDP and TCP. |
+| 2.5 | Pass: DoH to `cloudflare-dns.com`, `dns.google` and `https://1.1.1.1` fails. HTTPS/SVCB records answer empty. |
+| 2.6 | Pass: UDP 443 dropped after the first datagram (`Broken pipe`). |
+| 2.7 | "Sensitive Content Warning is off": turn it on in System Settings → Privacy & Security → Sensitive Content Warning. The entitlement is now present. |
+
+**Fixed in this pass:**
+- The content filter dropped the system resolver's own port-53 socket (macOS labels it with the name being looked up), so `getaddrinfo` for a blocked name hung for 5–8 s and mDNSResponder marked the DNS server unresponsive for 60 s. The filter now leaves port 53 to the DNS proxy: blocked names fail in 0.02 s.
+- DNS over TCP passed through untouched and returned the real address of a blocked name. TCP queries now get the same rules as UDP (NXDOMAIN, SafeSearch, empty HTTPS records); the rest still goes to the server over TCP.
+- Development profiles carry `content-filter-provider` / `dns-proxy`, not the `-systemextension` forms.
+- The helper had the blank app icon on notifications, permission prompts and Login Items; it now shares the app icon.
+
+Noted, not a bug: lookups take 0.6–1 s on this network because the internet round trip itself is 570–900 ms (router 18 ms); the proxy adds ~1 ms.
+
 ## Inspect
 
 ```bash
 systemextensionsctl list
-log stream --predicate 'subsystem BEGINSWITH "com.mostafa.prosper"' --level debug
+/usr/bin/log stream --predicate 'subsystem BEGINSWITH "com.mostafa.prosper"' --level debug
 launchctl print gui/$(id -u)/com.mostafa.prosper.mac.agent | head
 cat ~/Library/Application\ Support/StolenEyes/agent-status.json
 ```

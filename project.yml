@@ -302,7 +302,7 @@ targets:
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 3
         MARKETING_VERSION: 0.1
     entitlements:
       path: ProsperMac/ProsperMac.entitlements
@@ -325,6 +325,9 @@ targets:
     platform: macOS
     sources:
       - path: ProsperMacAgent
+      # Same icon as the app: macOS shows the helper's on its notifications,
+      # permission prompts and in Login Items.
+      - path: ProsperMac/Assets.xcassets
     dependencies:
       - package: ProsperCore
     settings:
@@ -335,12 +338,13 @@ targets:
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: StolenEyes Agent
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
         INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 3
         MARKETING_VERSION: 0.1
         SKIP_INSTALL: YES
     entitlements:
@@ -370,7 +374,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 3
         MARKETING_VERSION: 0.1
         SKIP_INSTALL: YES
     entitlements:

@@ -655,11 +655,11 @@ Built on branch `feat/mac-mvp`:
 - **M3.1–M3.4 (MVP)** usage sampler (idle, lock, sleep, video-aware), browser URL reader (Safari/Chrome/Brave/Edge/Arc…), aggregation and classification, Today and Insights, menu bar.
 - **M4.1–M4.5 (MVP)** sessions, add-to-running, extend, schedules (removable only while off), app enforcer, site shield, completion notification, no-cancel audit test.
 
-Verified on this Mac (no-filter build, Apple Development signed, in `/Applications`): helper registers and runs under launchd; `kill -9` → relaunched within ~1 s; a Calculator lock quits it on launch and logs the attempt; deleting the lock from `rules.json` → restored within 2 s; the lock lifts on time and leaves the file.
+Verified on this Mac: helper registers and runs under launchd; `kill -9` → relaunched within ~1 s; a Calculator lock quits it on launch and logs the attempt; deleting the lock from `rules.json` → restored within 2 s; the lock lifts on time and leaves the file.
 
-**Blocked:** the full build (system extension, Network Extension and Sensitive Content Analysis entitlements) needs Xcode to provision Mac profiles. On 2026-11-08 the team's account returned "PLA Update available" (the Program License Agreement must be accepted at developer.apple.com) and then Xcode had no account signed in. After both are fixed: `bash scripts/install-mac.sh`, approve the extension, filter and DNS proxy, run `MAC-DEV-test-script.md` §0–2, then write `filter-matrix.md` (M0.3, M1.5).
+**Full build installed 2026-11-08** (development-signed by team V9WJ9X99FX; Developer ID is M0.4): extension activated and enabled, content filter and DNS proxy allowed. Guard verified at the network level: listed and name-rule hosts NXDOMAIN over UDP/TCP/system resolver, SNI drop with a forced address, SafeSearch and YouTube Restricted Mode rewrites, DoH and QUIC closed, HTTPS records empty. Results in `MAC-DEV-test-script.md`.
 
-Not done yet: M0.3/M1.5 matrices (need the running extension), M0.4 Developer ID + notarization, M2.1 large licensed list (download needs approval), M3.6 knowledgeC import, M5 warnings, M6 tamper ladder beyond the merge/KeepAlive/reassert basics, M7 sync.
+Not done yet: M0.3/M1.5 per-browser matrices (the extension now runs; needs Safari/Chrome/Brave passes), M0.4 Developer ID + notarization, M2.1 large licensed list (download needs approval), M3.6 knowledgeC import, M5 warnings, M6 tamper ladder beyond the merge/KeepAlive/reassert basics, M7 sync.
 
 ---
 

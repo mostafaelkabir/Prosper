@@ -50,5 +50,7 @@ osascript -e 'tell application id "com.mostafa.prosper.mac" to quit' 2>/dev/null
 pkill -x StolenEyesAgent 2>/dev/null || true
 rm -rf "/Applications/$APP_NAME"
 ditto "$BUILT" "/Applications/$APP_NAME"
+# Re-register so Finder, the Dock and notifications show the new icon, not a cached one.
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f -R "/Applications/$APP_NAME" || true
 echo "Installed /Applications/$APP_NAME ($MODE)"
 open "/Applications/$APP_NAME"

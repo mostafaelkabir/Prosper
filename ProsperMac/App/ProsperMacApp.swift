@@ -19,6 +19,7 @@ struct ProsperMacApp: App {
                     // Put back a filter someone switched off, and keep the helper registered.
                     if model.settings.onboarded {
                         model.setup.registerAgent()
+                        model.setup.updateExtension()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { model.setup.reassert() }
                     }
                 }

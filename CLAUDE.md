@@ -70,11 +70,11 @@ Typed domains in a block session are blocked with `ManagedSettingsStore().webCon
 - `WarningEvent` — logged distraction warnings and acknowledgments
 - `UserSettings` — thresholds, goals, waste categories (singleton)
 
-## Mac (MVP built, filter awaiting signing)
+## Mac (MVP installed with its network filter, development-signed)
 
 The Mac version is specified in `docs/mac/PLAN.md` (Basira epics `M0`–`M7`); read it before touching anything Mac-related. Targets in `project.yml`: `ProsperMac` (SwiftUI app, product `StolenEyes.app`, UI only), `ProsperMacAgent` (KeepAlive launchd agent inside the bundle: usage sampler, browser URL reader, app enforcer, shield, Screen Guard, rules keeper), `ProsperMacFilter` (system extension: content filter + DNS proxy + XPC), `ProsperMacTests`. Shared code is `Packages/ProsperCore`: `Shared/` is compiled into the iOS targets by path, `Mac/` is Mac-only. The Mac app also compiles `Prosper/DesignSystem/AuroraComponents.swift` and `ProsperComponents.swift` by path.
 
 - Rules live in `MacRules` and change only through `RulesBook` (add-only). Every copy (the user's `~/Library/Application Support/StolenEyes/rules.json`, the agent's memory, the extension's root-owned copy) is combined with `MacRules.merged`, which cannot drop a running lock or the guard. Do not add an operation that shortens, ends or removes a running lock, or shrinks/disables the guard; `NoCancelAuditTests` enumerates the XPC protocol.
-- Install: `bash scripts/install-mac.sh` (full; needs an Apple ID in Xcode with the license accepted, creates profiles itself) or `--without-filter` (dev cert, no system extension). The extension only loads from `/Applications`.
+- Install: `bash scripts/install-mac.sh` (full; needs an Apple ID in Xcode with the license accepted, creates profiles itself; bump `CURRENT_PROJECT_VERSION` on the Mac targets so the app replaces the running extension on launch) or `--without-filter` (dev cert, no system extension). The extension only loads from `/Applications`.
 - Test: `cd Packages/ProsperCore && swift test`; `xcodebuild -scheme ProsperMac test CODE_SIGNING_ALLOWED=NO`; on-device steps in `docs/mac/MAC-DEV-test-script.md`. A Debug build can render every tab to PNG with `StolenEyes --render-snapshots <dir>`.
 - Non-negotiables: the Mac lock enforcer has **no cancel**, the Mac guard has **no off switch**, and development reset paths compile only under `#if DEBUG` + `PROSPER_DEV_RESET=1` in a separate dev-tools scheme, never in a release build (none exist yet). The Screen Time frameworks are unavailable on macOS.
