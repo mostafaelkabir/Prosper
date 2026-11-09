@@ -37,7 +37,7 @@ struct InsightsReportView: View {
             // Range-neutral: the same view serves Today and the 7-day range (QA-9).
             Text("Still learning").labelCaps()
             Text("Insights appear once StolenEyes has enough usage in this range to say something true.")
-                .font(.system(size: 13))
+                .scaledFont(13)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -52,7 +52,7 @@ struct InsightCardView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: card.systemImage)
-                .font(.system(size: 15, weight: .semibold))
+                .scaledFont(15, weight: .semibold)
                 .foregroundStyle(ProsperColor.accent)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 4) {
@@ -61,7 +61,7 @@ struct InsightCardView: View {
                     .foregroundStyle(ProsperColor.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(card.evidence)
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }

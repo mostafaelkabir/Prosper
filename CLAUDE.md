@@ -59,6 +59,14 @@ Four extension targets embedded in the main app:
 
 `project.yml` is the source of truth for targets; run `xcodegen generate` after changing it, then open `Prosper.xcodeproj`. Build for iOS Simulator or a personal device. The FamilyControls entitlement requires `.individual` authorization on a real device. The simulator cannot enforce blocks or show Screen Time data; report views fall back to sample data there.
 
+## Accessibility (US release bar, UX-27)
+
+- Text uses `.scaledFont(size, weight:)` (follows Dynamic Type on iPhone, exact on Mac), never `.font(.system(size:))`; fixed sizes only for hero numbers and glyphs inside fixed shapes.
+- `ProsperColor` text tokens meet WCAG AA (4.5:1) on every surface in light and dark; check contrast before changing one.
+- Hold-to-confirm controls stay usable without holding: VoiceOver/Voice Control/Switch Control activate them (with a hint that says it cannot be undone), and on Mac Tab + hold Space/Return works.
+- Hosted `DeviceActivityReport`s cannot size themselves: the app reserves `ReportLayout.heroHeight(for:)`, the extension caps its type size, and `ReportLayoutTests` measures every size. Update the table if the hero grows.
+- Screens that centre with `Spacer`s wrap in `FitOrScroll` so large text scrolls instead of truncating.
+
 ## Website Blocking
 
 Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard's own store (`AdultDomainList.policy`). Sessions and schedules always write `.specific` (`AdultDomainList.sessionPolicy`): stacking `.auto` across stores left an iOS 26.5 iPhone blocking nothing. Keep the guard's named list short; the filter has been seen to stop blocking once roughly 49 domains are in play across stores.

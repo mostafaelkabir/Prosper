@@ -99,7 +99,7 @@ struct BlockView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = max(0, session.endTime.timeIntervalSince(context.date))
             let progress = session.duration > 0 ? remaining / session.duration : 0
-            VStack(spacing: 22) {
+            FitOrScroll { VStack(spacing: 22) {
                 Spacer()
 
                 CountdownRing(
@@ -159,12 +159,17 @@ struct BlockView: View {
                 )
                 .ignoresSafeArea()
             )
+            }
         }
     }
 
     // MARK: - Idle
 
     private var idleContent: some View {
+        FitOrScroll { idleStack }
+    }
+
+    private var idleStack: some View {
         VStack(spacing: 24) {
             Spacer()
             TimelineView(.periodic(from: .now, by: 30)) { context in

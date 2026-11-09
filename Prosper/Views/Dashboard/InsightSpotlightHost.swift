@@ -11,11 +11,11 @@ struct InsightSpotlightHost: View {
     var body: some View {
         #if targetEnvironment(simulator)
         InsightsReportView(cards: InsightCard.samples, limit: 1)
-            .overlay(alignment: .bottomTrailing) {
+            .safeAreaInset(edge: .bottom, spacing: 4) {
                 Text("Example data")
                     .labelCaps()
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
             }
         #else
         DeviceActivityReport(.insights, filter: filter)

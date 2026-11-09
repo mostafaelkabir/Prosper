@@ -40,9 +40,15 @@ struct CountdownRing: View {
 /// left-to-right over `duration`; releasing early cancels. Haptics tick during
 /// the hold and confirm on completion (suppressed under Reduce Motion — the
 /// fill itself stays, since it is the affordance).
+///
+/// VoiceOver, Voice Control and Switch Control cannot hold, so for them it is
+/// a button whose hint states the consequence; activating it commits (UX-27).
+/// The height grows with Dynamic Type instead of clipping the label.
 struct HoldToLock: View {
     var title: String = "Hold to lock"
     var duration: Double = 2.0
+    /// What happens, spoken after the title. Say it plainly: it cannot be undone.
+    var accessibilityHint: String = "Starts the lock now. Nothing can end it early."
     var onComplete: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -57,23 +63,24 @@ struct HoldToLock: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(ProsperColor.card2)
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(ProsperColor.slate)
-                    .frame(width: geo.size.width * progress)
-                HStack(spacing: 8) {
-                    Image(systemName: "lock.fill")
-                    Text(label)
+        HStack(spacing: 8) {
+            Image(systemName: "lock.fill")
+            Text(label)
+        }
+        .font(.headline)
+        .multilineTextAlignment(.center)
+        .foregroundStyle(progress > 0.55 ? Color.white : ProsperColor.ink)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .background {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    ProsperColor.card2
+                    ProsperColor.slate.frame(width: geo.size.width * progress)
                 }
-                .font(.headline)
-                .foregroundStyle(progress > 0.55 ? Color.white : ProsperColor.ink)
-                .frame(maxWidth: .infinity)
             }
         }
-        .frame(height: 56)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .contentShape(Rectangle())
         .gesture(
@@ -86,6 +93,15 @@ struct HoldToLock: View {
                 .onEnded { _ in cancel() }
         )
         .animation(.easeOut(duration: 0.2), value: progress == 0)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityHint(accessibilityHint)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            guard progress < 1 else { return }
+            progress = 1
+            complete()
+        }
     }
 
     private func begin() {
@@ -124,5 +140,21 @@ struct HoldToLock: View {
         holding = false
         if !reduceMotion { UIImpactFeedbackGenerator(style: .rigid).impactOccurred() }
         progress = 0
+    }
+}
+
+/// A screen that centres its content (with `Spacer`s) when it fits, and
+/// scrolls when large text makes it taller than the screen, instead of
+/// squeezing sentences into "…" (UX-27).
+struct FitOrScroll<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        GeometryReader { geo in
+            ScrollView {
+                content.frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
     }
 }

@@ -157,7 +157,7 @@ extension AuthorizationManager.State {
         case .denied:
             return "Screen Time access was turned off, so StolenEyes can't read your usage or start a block. You can turn it back on in iOS Settings — open Settings, go to Screen Time, then Apps With Screen Time Access, and switch StolenEyes on."
         case .restricted:
-            return "Apple only lets an Apple Account manage its own Screen Time. If this account is under 18 and part of a Family Sharing group, its Screen Time belongs to the family organiser, and StolenEyes can't take it over. The same applies on a device managed by an employer or school. StolenEyes won't work on this account."
+            return "Apple only lets an Apple Account manage its own Screen Time. If this account is under 18 and part of a Family Sharing group, its Screen Time belongs to the family organizer, and StolenEyes can't take it over. The same applies on a device managed by an employer or school. StolenEyes won't work on this account."
         case .unavailable(let reason):
             return reason
         }

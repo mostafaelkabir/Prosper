@@ -156,11 +156,13 @@ struct UsageReportView: View {
                                  showsLists: context != .overview)
             }
         }
-        .overlay(alignment: .bottomTrailing) {
+        // Below the content, not over it: at large text an overlay sat on
+        // the last row (UX-27).
+        .safeAreaInset(edge: .bottom, spacing: 4) {
             Text("Example data")
                 .labelCaps()
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal, 8)
-                .padding(.vertical, 4)
         }
         #else
         DeviceActivityReport(context, filter: filter)

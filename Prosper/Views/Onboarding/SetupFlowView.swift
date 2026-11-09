@@ -118,7 +118,7 @@ struct SetupFlowView: View {
             Image(systemName: "lock.shield")
                 .font(.system(size: 56))
                 .foregroundStyle(.tint)
-            Text("A block cannot be cancelled")
+            Text("A block cannot be canceled")
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
             Text(LockExitCopy.full)

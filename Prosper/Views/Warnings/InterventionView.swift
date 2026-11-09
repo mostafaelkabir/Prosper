@@ -124,7 +124,7 @@ struct InterventionView: View {
                 onAcknowledge()
             } label: {
                 Text(requiresPhrase ? "Keep going anyway" : "I understand")
-                    .font(.system(size: 15, weight: .medium))
+                    .scaledFont(15, weight: .medium)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: 45)
                     .foregroundStyle(canAcknowledge ? ProsperColor.ink2 : ProsperColor.unclassified)

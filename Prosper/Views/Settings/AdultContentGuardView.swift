@@ -219,7 +219,7 @@ struct AdultContentGuardView: View {
                 .font(ProsperFont.insight)
                 .foregroundStyle(ProsperColor.ink)
                 .fixedSize(horizontal: false, vertical: true)
-            HoldToLock(title: "Hold to guard, for good", duration: 3.0, onComplete: enable)
+            HoldToLock(title: "Hold to guard, for good", duration: 3.0, accessibilityHint: "Turns on the guard for good. There is no off switch.", onComplete: enable)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
