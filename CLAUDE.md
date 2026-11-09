@@ -69,3 +69,7 @@ Typed domains in a block session are blocked with `ManagedSettingsStore().webCon
 - `UsageStat` — per-app per-day usage data
 - `WarningEvent` — logged distraction warnings and acknowledgments
 - `UserSettings` — thresholds, goals, waste categories (singleton)
+
+## Mac (planned, not yet built)
+
+The Mac version is specified in `docs/mac/PLAN.md` (Basira epics `M0`–`M7`). Read it before touching anything Mac-related. Non-negotiables carried over: the Mac lock enforcer has **no cancel**, the Mac guard has **no off switch**, and development reset paths compile only under `#if DEBUG` + `PROSPER_DEV_RESET=1` in a separate dev-tools scheme, never in a release build. The Screen Time frameworks are unavailable on macOS; the Mac uses a Network Extension content filter + DNS proxy (system extension), a login-item agent and `SensitiveContentAnalysis`. Shared code lives in `Packages/ProsperCore` once M0.1 lands; iOS targets compile its files by path.
