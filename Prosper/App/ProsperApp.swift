@@ -41,6 +41,12 @@ struct ProsperApp: App {
             }
             .modelContainer(PersistenceConfig.sharedModelContainer)
             .onChange(of: scenePhase) { _, phase in
+                // Connected devices (M7.3): send this iPhone's day to the Mac
+                // and fetch the Mac's while open; one last send on the way out.
+                if authManager.isAuthorized {
+                    if phase == .active { ConnectedDevices.shared.appBecameActive() }
+                    if phase == .background { ConnectedDevices.shared.appWentToBackground() }
+                }
                 guard phase == .active else { return }
                 // Returning to the app is the reliable moment to lift a block whose
                 // timer elapsed while the system monitor didn't fire.
@@ -51,6 +57,10 @@ struct ProsperApp: App {
                 // than trusted from launch (REL-10).
                 authManager.refresh()
             }
+        }
+        .backgroundTask(.appRefresh(ConnectedDevices.refreshTaskID)) {
+            await ConnectedDevices.shared.syncNow()
+            await ConnectedDevices.scheduleBackgroundRefresh()
         }
     }
 

@@ -164,7 +164,7 @@ struct WasteMonitorRequest: Equatable, Sendable {
     /// Bump `version` whenever the way events are built changes, so existing
     /// installs pick the new shape up once.
     var fingerprint: String {
-        let version = "v2"
+        let version = "v3" // v3: waste markers for connected devices (M7.3)
         let selection = selectionData.flatMap(Self.canonicalJSON) ?? "none"
         return "\(version)|\(enabled ? 1 : 0)|\(thresholdMinutes)|\(selection)"
     }

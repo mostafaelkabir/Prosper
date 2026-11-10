@@ -13,6 +13,7 @@ final class AgentDelegate: NSObject, NSApplicationDelegate {
         self?.enforcer.showGuardScreen(appName: name)
     }
     private let rules = AgentRules()
+    private let cloud = AgentSync()
     private var runningSessionEnds: [UUID: Date] = [:]
     private let startedAt = Date()
     private var timer: Timer?
@@ -51,6 +52,7 @@ final class AgentDelegate: NSObject, NSApplicationDelegate {
         screenGuard.tick(guardOn: rules.active.guardOn)
         if ticks % 5 == 0 { notifyFinishedLocks() }
         if ticks % 5 == 1 { writeStatus() }
+        cloud.tick(rules: rules.rules)
     }
 
     /// "Lock finished" when a session that was running reaches its end.

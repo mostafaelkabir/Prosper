@@ -9,5 +9,15 @@
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
+	<!-- Connected devices (M7.3): iOS wakes the app now and then to send this
+	     iPhone's day to the user's Mac and fetch the Mac's. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.mostafa.prosper.sync</string>
+	</array>
 </dict>
 </plist>

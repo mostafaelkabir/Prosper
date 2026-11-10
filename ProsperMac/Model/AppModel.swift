@@ -16,6 +16,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var events: [MacEvent] = []
     @Published private(set) var now = Date()
     @Published var lastError: String?
+    /// Connected devices (M7.5), as the agent last synced them.
+    @Published private(set) var syncStatus = SyncStatus()
+    @Published private(set) var devices: [RemoteDevice] = []
 
     let setup = SystemSetup()
     private let filter = FilterClient()
@@ -59,6 +62,11 @@ final class AppModel: ObservableObject {
         set(\.status, newStatus)
         set(\.events, MacStore.read([MacEvent].self, from: MacStore.eventsURL) ?? [])
 
+        if ticks == 1 || ticks % 5 == 0, let file = SyncStore.read(MacStore.syncURL) {
+            set(\.syncStatus, file.status)
+            set(\.devices, file.devices)
+        }
+
         if ticks == 1 || ticks % 5 == 0 || settingsChanged {
             let classifier = MacClassifier(settings: settings)
             let days = MacStore.loadDays(endingAt: t, count: 7)
@@ -89,6 +97,11 @@ final class AppModel: ObservableObject {
     }
 
     var guardOn: Bool { rules.guardState != nil }
+
+    /// Asks the agent, which owns the iCloud connection, to sync now.
+    func syncNow() {
+        try? Date().ISO8601Format().write(to: MacStore.syncRequestURL, atomically: true, encoding: .utf8)
+    }
 
     var agentRunning: Bool {
         guard let heartbeat else { return false }
@@ -195,6 +208,18 @@ final class AppModel: ObservableObject {
     /// release build cannot show figures that are not the user's (REL-11).
     private func loadSnapshotData() {
         let cal = Calendar.current
+        let phoneID = "snapshot-iphone"
+        let todayKey = DayReport.key(for: now)
+        syncStatus = SyncStatus(account: .available, lastSentAt: now, lastFetchedAt: now.addingTimeInterval(-60))
+        devices = [RemoteDevice(
+            snapshot: DeviceSnapshot(deviceID: phoneID, name: "iPhone", platform: .iPhone, updatedAt: now.addingTimeInterval(-240),
+                                     guardOn: true, guardSince: now.addingTimeInterval(-2 * 86_400),
+                                     lock: LockSummary(startedAt: now.addingTimeInterval(-900), endsAt: now.addingTimeInterval(2700), items: ["instagram.com", "2 apps"])),
+            days: [todayKey: DayReport(deviceID: phoneID, day: todayKey, measurement: .wasteMarkers,
+                                    wasteMarks: [15, 30, 45, 60, 75].map { WasteMark(minutes: $0, reachedAt: now.addingTimeInterval(Double($0 - 90) * 120)) },
+                                    warnings: [WarningLine(level: 2, text: "1h in your waste list", at: now.addingTimeInterval(-1800))],
+                                    locksStarted: [LockLine(startedAt: now.addingTimeInterval(-900), endsAt: now.addingTimeInterval(2700), itemCount: 3)])]
+        )]
         var days: [UsageDay] = []
         for offset in (0..<7).reversed() {
             let date = cal.date(byAdding: .day, value: -offset, to: now)!

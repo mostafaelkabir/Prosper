@@ -492,6 +492,23 @@ Design constraints, decided now so M0–M6 do not paint us into a corner:
   (`youtube`, `reddit`) and domains; each device maps platforms to its own
   apps (the iPhone keeps a one-time "which apps here are YouTube" mapping made
   with `FamilyActivityPicker`).
+- **Built 2026-11-10 (M7.1–M7.3, M7.5)**, with two decisions changed from
+  the sketch above. (1) `CKSyncEngine` over the private database instead of
+  SwiftData + CloudKit: the Mac keeps JSON files and its agent has no
+  SwiftData, so one engine in `ProsperCore/Sync` serves both. Records are
+  `DeviceSnapshot` (one per device) and `DayReport` (one per device per day)
+  in zone `Prosper`, payload JSON so fields can be added without a schema
+  change; each device writes only its own records, so there are no
+  cross-device conflicts. (2) The iPhone's "coarse waste totals" are 24
+  silent `DeviceActivityEvent` markers (every 15 min to 4 h, then 30 min to
+  8 h) on the waste monitor, recorded by ProsperMonitor (`WasteMarkLog`); the
+  Mac shows "at least 1h 15m, passed at 9:40 PM". On the Mac the agent syncs
+  (publish every minute when something changed, fetch every 2 min) and
+  writes `sync.json` for the app; on the iPhone the app syncs while open,
+  on leaving, and on background refresh. CloudKit traps in a build without
+  the entitlement, so both sides check before touching it (the
+  `--without-filter` install and unsigned test builds show "built without
+  iCloud"). Remote locks (M7.4, M7.6) are not built.
 - Tickets: **M7.1** container + sync models; **M7.2** Mac publishes rollups
   and lock state; **M7.3** iPhone publishes what it can and reads Mac rollups;
   **M7.4** remote lock both ways with CloudKit subscriptions (silent push wakes
@@ -659,7 +676,7 @@ Verified on this Mac: helper registers and runs under launchd; `kill -9` → rel
 
 **Full build installed 2026-11-08** (development-signed by team V9WJ9X99FX; Developer ID is M0.4): extension activated and enabled, content filter and DNS proxy allowed. Guard verified at the network level: listed and name-rule hosts NXDOMAIN over UDP/TCP/system resolver, SNI drop with a forced address, SafeSearch and YouTube Restricted Mode rewrites, DoH and QUIC closed, HTTPS records empty. Results in `MAC-DEV-test-script.md`.
 
-Not done yet: M0.3/M1.5 per-browser matrices (the extension now runs; needs Safari/Chrome/Brave passes), M0.4 Developer ID + notarization, M2.1 large licensed list (download needs approval), M3.6 knowledgeC import, M5 warnings, M6 tamper ladder beyond the merge/KeepAlive/reassert basics, M7 sync.
+Not done yet: M0.3/M1.5 per-browser matrices (the extension now runs; needs Safari/Chrome/Brave passes), M0.4 Developer ID + notarization, M2.1 large licensed list (download needs approval), M3.6 knowledgeC import, M5 warnings, M6 tamper ladder beyond the merge/KeepAlive/reassert basics, M7.4/M7.6 remote locks (M7 monitoring is built, see §4 M7).
 
 ---
 

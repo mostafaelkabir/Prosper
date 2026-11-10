@@ -76,6 +76,16 @@ Turn it on in Settings (hold 3 s). There is no way back: do this on purpose.
 |---|---|---|
 | 4.1 ⏱ | Activity Monitor during an hour of browsing. | StolenEyesAgent < 1 % average CPU, < 150 MB; with Screen Guard on < 5 %. Extension < 50 MB. |
 
+## 5. Connected devices (M7)
+
+| # | Do | Expect |
+|---|---|---|
+| 5.1 | Settings → Connected devices on the Mac. | Green "Connected through your iCloud account", this Mac listed. `sync.json` has `"account": "available"`, `zoneReady` true. |
+| 5.2 | Install the iPhone app (same Apple Account) and open it once. | Within ~2 min the Mac's Today shows "Your iPhone" with its lock and guard; the iPhone's Today shows "Your Mac" with exact minutes. |
+| 5.3 | Lock something on the iPhone, open the app, wait 2 min. | The Mac's iPhone card says "Locked until …" with the items. |
+| 5.4 | Use the iPhone's waste apps for 15+ minutes, open the app. | The Mac shows "15m+ in the waste list today" and when it was passed. |
+| 5.5 | Sign out of iCloud on one device. | That device shows the sign-in sentence; the other device's card stays at its last data, marked stale after 3 h. |
+
 ## Results — 2026-11-08, `--without-filter` build (QA pass)
 
 | Step | Result |

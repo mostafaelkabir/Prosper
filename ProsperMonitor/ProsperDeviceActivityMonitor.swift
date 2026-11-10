@@ -91,8 +91,13 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         logger.notice("Threshold reached — event: \(event.rawValue, privacy: .public), activity: \(activity.rawValue, privacy: .public)")
         sweepExpiredBlockIfNeeded()
 
-        guard activity == PersistenceConfig.wasteActivityName,
-              let level = WarningLevel.level(for: event) else { return }
+        guard activity == PersistenceConfig.wasteActivityName else { return }
+        // A silent marker for the user's other devices (M7.3): note it, nothing more.
+        if let minutes = WasteMarkLog.minutes(for: event) {
+            WasteMarkLog.record(minutes: minutes)
+            return
+        }
+        guard let level = WarningLevel.level(for: event) else { return }
 
         // 1. Persist so the app can show a warning history and a rough
         // "time wasted today" number that survives the extension exiting.
@@ -100,6 +105,7 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
         let context = ModelContext(container)
         let settings = UserSettings.current(context: context)
         let minutes = level.thresholdMinutes(base: settings.wasteWarningThresholdMinutes)
+        WasteMarkLog.record(minutes: minutes)
 
         // 0. A reinstalled monitor that counts the whole day can reach a rung
         // the user was already given this morning. Deliver each rung once per
