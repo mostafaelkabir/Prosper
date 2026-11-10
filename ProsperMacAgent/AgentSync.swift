@@ -33,7 +33,8 @@ final class AgentSync {
     func tick(rules: MacRules, now: Date = Date()) {
         guard !busy else { return }
         let requested = (try? MacStore.syncRequestURL.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
-        let asked = requested.map { $0 > lastRequest } ?? false
+        // A request is honoured at most every 10 s, however often the app asks.
+        let asked = (requested.map { $0 > lastRequest } ?? false) && now.timeIntervalSince(lastFetch) >= 10
         let fetchDue = asked || now.timeIntervalSince(lastFetch) >= Self.fetchInterval
         guard asked || fetchDue || now.timeIntervalSince(lastPublish) >= Self.publishInterval else { return }
         if let requested { lastRequest = max(lastRequest, requested) }

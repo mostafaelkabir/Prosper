@@ -34,9 +34,13 @@ public struct DeviceSnapshot: Codable, Equatable, Sendable {
     /// The lock running now, if any.
     public var lock: LockSummary?
     public var schedules: [ScheduleSummary]
+    /// iPhone only: false when its waste monitor isn't running (no apps
+    /// picked for the waste list), so "no markers" must not read as "no use".
+    public var measuresWaste: Bool?
 
     public init(deviceID: String, name: String, platform: DevicePlatform, updatedAt: Date = Date(), appVersion: String = "",
-                guardOn: Bool = false, guardSince: Date? = nil, lock: LockSummary? = nil, schedules: [ScheduleSummary] = []) {
+                guardOn: Bool = false, guardSince: Date? = nil, lock: LockSummary? = nil, schedules: [ScheduleSummary] = [],
+                measuresWaste: Bool? = nil) {
         self.deviceID = deviceID
         self.name = name
         self.platform = platform
@@ -46,6 +50,7 @@ public struct DeviceSnapshot: Codable, Equatable, Sendable {
         self.guardSince = guardSince
         self.lock = lock
         self.schedules = schedules
+        self.measuresWaste = measuresWaste
     }
 
     public init(from decoder: Decoder) throws {
@@ -59,6 +64,7 @@ public struct DeviceSnapshot: Codable, Equatable, Sendable {
         guardSince = try? c.decode(Date.self, forKey: .guardSince)
         lock = try? c.decode(LockSummary.self, forKey: .lock)
         schedules = (try? c.decode([ScheduleSummary].self, forKey: .schedules)) ?? []
+        measuresWaste = try? c.decode(Bool.self, forKey: .measuresWaste)
     }
 
     /// The same snapshot without its timestamp, to tell a real change from a

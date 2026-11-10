@@ -60,7 +60,7 @@ struct ConnectedDevicesTests {
             PhoneSyncBuilder.Session(startedAt: now.addingTimeInterval(-7200), endsAt: now.addingTimeInterval(-3600), domains: ["old.com"], appCount: 0),
         ]
         let guardSince = now.addingTimeInterval(-86_400)
-        let snapshot = PhoneSyncBuilder.snapshot(deviceID: "phone", sessions: sessions, schedules: [], guardSince: guardSince, appVersion: "1.0", now: now)
+        let snapshot = PhoneSyncBuilder.snapshot(deviceID: "phone", sessions: sessions, schedules: [], guardSince: guardSince, measuresWaste: true, appVersion: "1.0", now: now)
         #expect(snapshot.platform == .iPhone)
         #expect(snapshot.guardOn)
         #expect(snapshot.guardSince == guardSince)
@@ -93,5 +93,31 @@ struct ConnectedDevicesTests {
         #expect(PhoneSyncBuilder.windowText(every).hasSuffix("· Every day"))
         let weekdays = PhoneSyncBuilder.Schedule(name: "Work", startMinute: 9 * 60, endMinute: 17 * 60, weekdays: Set(2...6), isOnNow: true)
         #expect(PhoneSyncBuilder.windowText(weekdays).hasSuffix("· Weekdays"))
+    }
+}
+
+/// The build that added iCloud crashed on launch and set the real store aside
+/// each time; the fixed build must put it back, not start empty.
+struct StoreRecoveryTests {
+    @Test("A store set aside with no live store is restored, the fullest copy first")
+    func restoresArchivedStore() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("store-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let live = dir.appendingPathComponent("Prosper.store")
+        try Data(repeating: 1, count: 4096).write(to: dir.appendingPathComponent("Prosper.store.unreadable-2026-11-10T14-22-59Z"))
+        try Data(repeating: 2, count: 16).write(to: dir.appendingPathComponent("Prosper.store-wal.unreadable-2026-11-10T14-22-59Z"))
+        try Data(repeating: 3, count: 10).write(to: dir.appendingPathComponent("Prosper.store.unreadable-2026-11-10T14-24-07Z"))
+        #expect(PersistenceConfig.restoreArchivedStoreIfMissing(at: live))
+        #expect(try Data(contentsOf: live).count == 4096)
+        #expect(FileManager.default.fileExists(atPath: live.path + "-wal"))
+        // With a live store present nothing is touched.
+        #expect(!PersistenceConfig.restoreArchivedStoreIfMissing(at: live))
+    }
+
+    @Test("No archive, nothing to do")
+    func nothingToRestore() {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("store-\(UUID().uuidString)")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        #expect(!PersistenceConfig.restoreArchivedStoreIfMissing(at: dir.appendingPathComponent("Prosper.store")))
     }
 }

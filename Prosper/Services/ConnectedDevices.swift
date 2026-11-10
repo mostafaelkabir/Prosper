@@ -114,7 +114,9 @@ final class ConnectedDevices: ObservableObject {
         }
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let snapshot = PhoneSyncBuilder.snapshot(deviceID: deviceID, sessions: sessions, schedules: schedules,
-                                                 guardSince: SharedGuardState.appGroup?.enabledAt, appVersion: version, now: now)
+                                                 guardSince: SharedGuardState.appGroup?.enabledAt,
+                                                 measuresWaste: WasteMonitorRecord.appGroup.map { $0.fingerprint != nil && $0.failure == nil } ?? false,
+                                                 appVersion: version, now: now)
         let days = [now, now.addingTimeInterval(-86_400)].map { date in
             let key = DayReport.key(for: date)
             return PhoneSyncBuilder.day(key, deviceID: deviceID, marks: WasteMarkLog.marks(day: key),

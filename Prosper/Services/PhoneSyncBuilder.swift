@@ -27,7 +27,7 @@ enum PhoneSyncBuilder {
     }
 
     static func snapshot(deviceID: String, sessions: [Session], schedules: [Schedule], guardSince: Date?,
-                         appVersion: String, now: Date = .now) -> DeviceSnapshot {
+                         measuresWaste: Bool, appVersion: String, now: Date = .now) -> DeviceSnapshot {
         let running = sessions.filter { $0.startedAt <= now && now < $0.endsAt }
         let lock = running.isEmpty ? nil : LockSummary(
             startedAt: running.map(\.startedAt).min() ?? now,
@@ -37,7 +37,8 @@ enum PhoneSyncBuilder {
         return DeviceSnapshot(
             deviceID: deviceID, name: "iPhone", platform: .iPhone, updatedAt: now, appVersion: appVersion,
             guardOn: guardSince != nil, guardSince: guardSince, lock: lock,
-            schedules: schedules.map { ScheduleSummary(name: $0.name, window: windowText($0), isOnNow: $0.isOnNow) }
+            schedules: schedules.map { ScheduleSummary(name: $0.name, window: windowText($0), isOnNow: $0.isOnNow) },
+            measuresWaste: measuresWaste
         )
     }
 

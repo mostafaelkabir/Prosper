@@ -33,6 +33,9 @@ struct ProsperApp: App {
                                 // The guard is permanent; rewriting it on launch
                                 // heals a restore or update that dropped it (E9).
                                 AdultContentGuard.shared.reassertIfEnabled()
+                                // onChange(of: scenePhase) misses the first
+                                // .active of a cold launch, so start here (M7.3).
+                                ConnectedDevices.shared.appBecameActive()
                             }
                     } else {
                         AuthorizationView(authManager: authManager)

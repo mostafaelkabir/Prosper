@@ -97,7 +97,22 @@ struct RemoteDeviceCard: View {
 
     // MARK: - iPhone: waste-list markers
 
+    @ViewBuilder
     private func markersDay(_ day: DayReport) -> some View {
+        if snapshot.measuresWaste == false && day.wasteMarks.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Not measuring time yet").scaledFont(17, weight: .semibold).foregroundStyle(ProsperColor.ink)
+                Text("The iPhone can only time apps picked for its waste list. In StolenEyes on the iPhone, open Settings and pick your waste apps (Instagram, YouTube…). Typed websites are blocked but can't be timed.")
+                    .scaledFont(13)
+                    .foregroundStyle(ProsperColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } else {
+            measuredMarkers(day)
+        }
+    }
+
+    private func measuredMarkers(_ day: DayReport) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             let floor = day.wasteAtLeastSeconds
             HStack(alignment: .firstTextBaseline, spacing: 6) {

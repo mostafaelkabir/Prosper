@@ -60,7 +60,7 @@ public actor CloudSync: CKSyncEngineDelegate {
         guard entitled, let engine else { return }
         do {
             try await engine.sendChanges()
-            try await engine.fetchChanges()
+            try await pullZone()
             store.setStatus { $0.lastError = nil }
         } catch {
             syncLog.error("Sync failed: \(error.localizedDescription, privacy: .public)")
@@ -105,7 +105,7 @@ public actor CloudSync: CKSyncEngineDelegate {
                 syncEngine.state.add(pendingRecordZoneChanges: store.allOwnRecordNames.map { .saveRecord(SyncRecords.recordID($0)) })
             case .signOut, .switchAccounts:
                 // Another account's devices are not ours to show.
-                store.update { $0.remote = [:]; $0.systemFields = [:]; $0.zoneReady = false }
+                store.update { $0.remote = [:]; $0.systemFields = [:]; $0.zoneReady = false; $0.zoneToken = nil }
             @unknown default:
                 break
             }
@@ -114,41 +114,13 @@ public actor CloudSync: CKSyncEngineDelegate {
         case .fetchedDatabaseChanges(let changes):
             if changes.deletions.contains(where: { $0.zoneID == SyncRecords.zoneID }) {
                 // The zone was deleted (the user cleared iCloud data): start over.
-                store.update { $0.remote = [:]; $0.systemFields = [:]; $0.zoneReady = false }
+                store.update { $0.remote = [:]; $0.systemFields = [:]; $0.zoneReady = false; $0.zoneToken = nil }
                 syncEngine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: SyncRecords.zoneID))])
                 syncEngine.state.add(pendingRecordZoneChanges: store.allOwnRecordNames.map { .saveRecord(SyncRecords.recordID($0)) })
             }
 
         case .fetchedRecordZoneChanges(let changes):
-            let own = store.deviceID
-            store.update { file in
-                for modification in changes.modifications {
-                    let record = modification.record
-                    guard let item = SyncRecords.item(from: record) else { continue }
-                    switch item {
-                    case .device(let snapshot) where snapshot.deviceID == own:
-                        file.systemFields[record.recordID.recordName] = SyncRecords.encodeSystemFields(of: record)
-                    case .device(let snapshot):
-                        var device = file.remote[snapshot.deviceID] ?? RemoteDevice(snapshot: snapshot)
-                        if snapshot.updatedAt >= device.snapshot.updatedAt { device.snapshot = snapshot }
-                        file.remote[snapshot.deviceID] = device
-                    case .day(let report) where report.deviceID == own:
-                        file.systemFields[record.recordID.recordName] = SyncRecords.encodeSystemFields(of: record)
-                    case .day(let report):
-                        var device = file.remote[report.deviceID]
-                            ?? RemoteDevice(snapshot: DeviceSnapshot(deviceID: report.deviceID, name: "Device", platform: .mac, updatedAt: .distantPast))
-                        if (device.days[report.day]?.updatedAt ?? .distantPast) <= report.updatedAt { device.days[report.day] = report }
-                        file.remote[report.deviceID] = device
-                    }
-                }
-                for deletion in changes.deletions {
-                    switch SyncRecordName.parse(deletion.recordID.recordName) {
-                    case .device(let id)? where id != own: file.remote[id] = nil
-                    case .day(let device, let day)? where device != own: file.remote[device]?.days[day] = nil
-                    default: file.systemFields[deletion.recordID.recordName] = nil
-                    }
-                }
-            }
+            apply(records: changes.modifications.map(\.record), deleted: changes.deletions.map(\.recordID))
 
         case .sentDatabaseChanges(let changes):
             if changes.savedZones.contains(where: { $0.zoneID == SyncRecords.zoneID }) {
@@ -225,6 +197,74 @@ public actor CloudSync: CKSyncEngineDelegate {
                 return nil
             }
             return record
+        }
+    }
+
+    // MARK: - Fetching
+
+    /// Reads what changed in the zone since our last token. The engine fetches
+    /// only zones a push told it about, and without push notifications that is
+    /// never: "no zone IDs needing to be fetched", and the other device never
+    /// appeared. The zone holds a few dozen small records, so asking every
+    /// couple of minutes costs next to nothing.
+    private func pullZone() async throws {
+        var token = store.snapshot.zoneToken.flatMap {
+            try? NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: $0)
+        }
+        var more = true
+        var retriedExpiredToken = false
+        while more {
+            let result: (modificationResultsByID: [CKRecord.ID: Result<CKDatabase.RecordZoneChange.Modification, Error>],
+                         deletions: [CKDatabase.RecordZoneChange.Deletion], changeToken: CKServerChangeToken, moreComing: Bool)
+            do {
+                result = try await container.privateCloudDatabase.recordZoneChanges(inZoneWith: SyncRecords.zoneID, since: token)
+            } catch let error as CKError where error.code == .changeTokenExpired && !retriedExpiredToken {
+                retriedExpiredToken = true
+                token = nil
+                continue
+            } catch let error as CKError where error.code == .zoneNotFound {
+                return // Nobody has published yet.
+            }
+            let records = result.modificationResultsByID.values.compactMap { try? $0.get().record }
+            apply(records: records, deleted: result.deletions.map(\.recordID))
+            token = result.changeToken
+            more = result.moreComing
+            let archived = try? NSKeyedArchiver.archivedData(withRootObject: result.changeToken, requiringSecureCoding: true)
+            store.update { $0.zoneToken = archived }
+        }
+        store.setStatus { $0.lastFetchedAt = Date() }
+    }
+
+    /// Files fetched records: other devices' into `remote`, our own only for
+    /// their system fields.
+    private func apply(records: [CKRecord], deleted: [CKRecord.ID]) {
+        let own = store.deviceID
+        store.update { file in
+            for record in records {
+                guard let item = SyncRecords.item(from: record) else { continue }
+                switch item {
+                case .device(let snapshot) where snapshot.deviceID == own:
+                    file.systemFields[record.recordID.recordName] = SyncRecords.encodeSystemFields(of: record)
+                case .device(let snapshot):
+                    var device = file.remote[snapshot.deviceID] ?? RemoteDevice(snapshot: snapshot)
+                    if snapshot.updatedAt >= device.snapshot.updatedAt { device.snapshot = snapshot }
+                    file.remote[snapshot.deviceID] = device
+                case .day(let report) where report.deviceID == own:
+                    file.systemFields[record.recordID.recordName] = SyncRecords.encodeSystemFields(of: record)
+                case .day(let report):
+                    var device = file.remote[report.deviceID]
+                        ?? RemoteDevice(snapshot: DeviceSnapshot(deviceID: report.deviceID, name: "Device", platform: .mac, updatedAt: .distantPast))
+                    if (device.days[report.day]?.updatedAt ?? .distantPast) <= report.updatedAt { device.days[report.day] = report }
+                    file.remote[report.deviceID] = device
+                }
+            }
+            for id in deleted {
+                switch SyncRecordName.parse(id.recordName) {
+                case .device(let device)? where device != own: file.remote[device] = nil
+                case .day(let device, let day)? where device != own: file.remote[device]?.days[day] = nil
+                default: file.systemFields[id.recordName] = nil
+                }
+            }
         }
     }
 

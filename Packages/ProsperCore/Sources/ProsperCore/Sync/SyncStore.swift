@@ -17,6 +17,8 @@ public struct SyncFile: Codable, Equatable, Sendable {
     /// server's change tag instead of colliding with it.
     public var systemFields: [String: Data]
     public var zoneReady: Bool
+    /// Archived `CKServerChangeToken` for our own fetch of the zone.
+    public var zoneToken: Data?
 
     public init(deviceID: String) {
         self.deviceID = deviceID
@@ -27,6 +29,7 @@ public struct SyncFile: Codable, Equatable, Sendable {
         engineState = nil
         systemFields = [:]
         zoneReady = false
+        zoneToken = nil
     }
 
     public init(from decoder: Decoder) throws {
@@ -39,6 +42,7 @@ public struct SyncFile: Codable, Equatable, Sendable {
         engineState = try? c.decode(Data.self, forKey: .engineState)
         systemFields = (try? c.decode([String: Data].self, forKey: .systemFields)) ?? [:]
         zoneReady = (try? c.decode(Bool.self, forKey: .zoneReady)) ?? false
+        zoneToken = try? c.decode(Data.self, forKey: .zoneToken)
     }
 
     /// Other devices, most recently heard from first. A reinstalled app is a
