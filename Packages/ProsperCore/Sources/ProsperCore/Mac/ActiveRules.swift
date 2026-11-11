@@ -141,16 +141,23 @@ public struct DomainMatcher: Sendable {
 /// start or end of a label, so "essex.ac.uk", "sussex.com" and "sextant.io" stay
 /// reachable while "freeporn.example" and "nudes-archive.net" do not.
 public enum GuardMatcher {
-    static let anywhere: [String] = ["porn", "xxx", "hentai", "xvideo", "xnxx", "xhamster", "redtube", "youporn", "brazzers", "onlyfans", "rule34"]
+    /// Words with no innocent use, matched anywhere: "freeporn", "ixxx".
+    static let anywhere: [String] = ["porn", "xxx", "hentai"]
+    /// Site names, matched where a name part starts ("xvideos2.com",
+    /// "de.xvideos.com"), never inside another word: Netflix's video CDN is
+    /// nfl-xvideo-.net, and matching it anywhere broke Netflix and fast.com
+    /// on every guarded Mac (QA-11).
+    static let brands: [String] = ["xvideo", "xnxx", "xhamster", "redtube", "youporn", "brazzers", "onlyfans", "rule34"]
 
     public static func looksAdult(_ host: String) -> Bool {
         let host = ActiveRules.clean(host)
         if anywhere.contains(where: { host.contains($0) }) { return true }
         let tokens = host.split(whereSeparator: { $0 == "." || $0 == "-" || $0 == "_" }).map(String.init)
+        if tokens.contains(where: { token in brands.contains { token.hasPrefix($0) } }) { return true }
         // The last label is the TLD (.xxx is caught above; .sex, .porn, .adult here).
         if let tld = tokens.last, ["sex", "porn", "adult", "xxx", "sexy"].contains(tld), tokens.count > 1 { return true }
         for token in tokens.dropLast() {
-            for word in AdultDomains.hostKeywords where token == word || (word.count >= 4 && (token.hasPrefix(word) || token.hasSuffix(word))) {
+            for word in AdultDomains.hostKeywords where !brands.contains(word) && (token == word || (word.count >= 4 && (token.hasPrefix(word) || token.hasSuffix(word)))) {
                 if allowedTokens.contains(token) { continue }
                 return true
             }

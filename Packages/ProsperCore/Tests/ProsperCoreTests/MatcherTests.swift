@@ -25,6 +25,17 @@ struct MatcherTests {
         }
     }
 
+    @Test("Brand names match where a name part starts, not inside another word (QA-11)")
+    func brandsAtLabelStart() {
+        // Netflix's video CDN, used by Netflix and fast.com: nfl-XVIDEO-.net.
+        for host in ["nflxvideo.net", "ipv4-c177-ord001-dev-ix.1.oca.nflxvideo.net", "occ-0-1-2.1.nflxso.net", "fredtube.org"] {
+            #expect(!GuardMatcher.looksAdult(host), "\(host) should pass")
+        }
+        for host in ["xvideos.com", "de.xvideos.com", "xvideos2.com", "www.xvideos.red", "xnxx.tv", "xhamster2.com", "redtube.net", "onlyfans.com", "cdn-xvideos.example"] {
+            #expect(GuardMatcher.looksAdult(host), "\(host) should be caught")
+        }
+    }
+
     @Test("Active rules say why a host or app is blocked")
     func activeRules() throws {
         let (rules, _) = try RulesBook.startingSession(.empty, minutes: 30, domains: ["reddit.com"], bundleIDs: ["com.app"], platformIDs: ["youtube"], now: now)
