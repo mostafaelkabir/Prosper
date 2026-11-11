@@ -28,6 +28,8 @@ targets:
       # Shared with the Mac (ProsperCore); compiled by path so the iOS build
       # gains no new dependency (PLAN.md §3.7, SC4).
       - path: Packages/ProsperCore/Sources/ProsperCore/Shared
+      # Connected devices (M7): the sync engine, shared with the Mac.
+      - path: Packages/ProsperCore/Sources/ProsperCore/Sync
       # Report views are compiled into the app too so the simulator and previews
       # can render them with sample data (the extension renders the real data).
       - path: ProsperReport/UsageSummary.swift
@@ -78,6 +80,12 @@ targets:
         com.apple.developer.family-controls: true
         com.apple.security.application-groups:
           - group.com.mostafa.prosper
+        # Connected devices (M7): the user's private iCloud database, shared
+        # with the Mac helper. No account of ours: iCloud is the sign-in.
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.mostafa.prosper
+        com.apple.developer.icloud-services:
+          - CloudKit
     dependencies:
       - target: ProsperMonitor
       - target: ProsperShield
@@ -109,6 +117,8 @@ targets:
       - path: ProsperMonitor
       - path: Prosper/Models
       - path: Packages/ProsperCore/Sources/ProsperCore/Shared
+      - path: Packages/ProsperCore/Sources/ProsperCore/Sync/SyncModels.swift
+      - path: Prosper/Services/WasteMarkLog.swift
       - path: Prosper/Services/PersistenceConfig.swift
       # Warning ladder + pending-intervention flag are shared with the app.
       - path: Prosper/Services/WarningEscalation.swift
@@ -225,6 +235,9 @@ targets:
       - path: ProsperReport
       - path: Prosper/Extensions/ReportContext.swift
       - path: Prosper/DesignSystem
+        # The report shows this iPhone only; it cannot reach iCloud anyway.
+        excludes:
+          - ConnectedComponents.swift
       - path: Prosper/Services/SharedClassification.swift
       - path: Packages/ProsperCore/Sources/ProsperCore/Shared
       - path: PrivacyManifests/ProsperReport/PrivacyInfo.xcprivacy
@@ -267,6 +280,7 @@ targets:
       # The Aurora components are pure SwiftUI and shared with the iPhone app.
       - path: Prosper/DesignSystem/AuroraComponents.swift
       - path: Prosper/DesignSystem/ProsperComponents.swift
+      - path: Prosper/DesignSystem/ConnectedComponents.swift
       - path: ProsperMac/LaunchAgents/com.mostafa.prosper.mac.agent.plist
         buildPhase:
           copyFiles:
@@ -356,6 +370,12 @@ targets:
         # Screen Guard (M2.3): Apple's on-device nudity classifier.
         com.apple.developer.sensitivecontentanalysis.client:
           - analysis
+        # Connected devices (M7): the helper, always running, is the Mac's
+        # side of the sync. Same container as the iPhone app.
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.mostafa.prosper
+        com.apple.developer.icloud-services:
+          - CloudKit
 
   ProsperMacFilter:
     type: system-extension

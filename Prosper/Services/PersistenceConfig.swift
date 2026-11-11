@@ -86,6 +86,12 @@ enum PersistenceConfig {
     /// it would leave a user with an active block and no screen that explains
     /// it. So we descend a ladder and record which rung we landed on.
     static let sharedModelContainer: ModelContainer = {
+        // 0. A store set aside by rung 2 while nothing replaced it comes back
+        //    first: the build that added iCloud crashed on every launch
+        //    (SwiftData tried to mirror the store to CloudKit), and rung 2 had
+        //    already moved the user's real store aside each time.
+        restoreArchivedStoreIfMissing(at: sharedStoreURL)
+
         // 1. The normal path: the shared App Group store.
         if let container = try? ModelContainer(for: schema, configurations: [configuration(at: sharedStoreURL)]) {
             return container
@@ -110,7 +116,7 @@ enum PersistenceConfig {
         // 4. Nothing on disk works. Stay open, in memory, and say so.
         if let container = try? ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
+            configurations: [ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)]
         ) {
             record(.inMemoryOnly)
             return container
@@ -122,8 +128,13 @@ enum PersistenceConfig {
         preconditionFailure("SwiftData rejected the Prosper schema; this is a build error, not a device condition.")
     }()
 
+    /// Local only, always. With the iCloud entitlement (connected devices,
+    /// M7) SwiftData would otherwise mirror this store to CloudKit on its
+    /// own, refuse these models (CloudKit forbids unique attributes and
+    /// non-optional values without defaults) and fail to open: the app
+    /// crashed on launch. Sync goes through `CloudSync` instead.
     private static func configuration(at url: URL) -> ModelConfiguration {
-        ModelConfiguration("Prosper", schema: schema, url: url, allowsSave: true)
+        ModelConfiguration("Prosper", schema: schema, url: url, allowsSave: true, cloudKitDatabase: .none)
     }
 
     static var sharedStoreURL: URL {
@@ -143,6 +154,33 @@ enum PersistenceConfig {
     /// Renames the unreadable store (and SQLite's sidecar files) out of the way.
     /// Returns false if nothing could be moved, in which case a fresh store at
     /// the same URL would fail for the same reason.
+    /// Puts the fullest `.unreadable-…` archive back when there is no live
+    /// store. If it really is unreadable, rung 2 sets it aside again and a
+    /// fresh store is made, so this cannot loop.
+    @discardableResult
+    static func restoreArchivedStoreIfMissing(at url: URL) -> Bool {
+        let manager = FileManager.default
+        guard !manager.fileExists(atPath: url.path) else { return false }
+        let directory = url.deletingLastPathComponent()
+        let prefix = url.lastPathComponent + ".unreadable-"
+        guard let names = try? manager.contentsOfDirectory(atPath: directory.path) else { return false }
+        let archives = names.filter { $0.hasPrefix(prefix) }
+        func size(_ name: String) -> Int {
+            (try? manager.attributesOfItem(atPath: directory.appendingPathComponent(name).path)[.size] as? Int) ?? 0
+        }
+        guard let best = archives.max(by: { size($0) < size($1) }) else { return false }
+        let stamp = String(best.dropFirst(prefix.count))
+        var restored = false
+        for suffix in ["", "-shm", "-wal"] {
+            let archived = directory.appendingPathComponent(url.lastPathComponent + suffix + ".unreadable-" + stamp)
+            guard manager.fileExists(atPath: archived.path) else { continue }
+            let live = URL(fileURLWithPath: url.path + suffix)
+            try? manager.removeItem(at: live)
+            if (try? manager.moveItem(at: archived, to: live)) != nil, suffix.isEmpty { restored = true }
+        }
+        return restored
+    }
+
     private static func archiveUnreadableStore(at url: URL) -> Bool {
         let manager = FileManager.default
         guard manager.fileExists(atPath: url.path) else { return false }

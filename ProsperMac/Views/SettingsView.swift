@@ -8,6 +8,13 @@ struct SettingsView: View {
     var body: some View {
         ScreenScroll {
             ProtectionSection(setup: setup)
+            ProsperCard {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Connected devices").labelCaps()
+                    ConnectedDevicesPanel(status: model.syncStatus, thisDevice: Host.current().localizedName ?? "This Mac",
+                                          devices: model.devices, otherPlatform: .iPhone, syncNow: model.syncNow)
+                }
+            }
             GuardSection()
             BrowserSection()
             ProsperCard {

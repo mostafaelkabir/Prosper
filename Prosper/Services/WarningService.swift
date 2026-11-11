@@ -109,12 +109,21 @@ final class WarningService: @unchecked Sendable {
         }
         guard !events.isEmpty else { return }
 
+        // Silent markers every 15 minutes, so the user's Mac can see how much
+        // this iPhone was used (M7.3). If iOS will not take that many events,
+        // the warnings go on without them.
+        var withMarks = events
+        for minutes in WasteMarkLog.minutes where minutes < 24 * 60 {
+            withMarks[WasteMarkLog.eventName(minutes)] = Self.event(for: selection, minutes: minutes)
+        }
+
         do {
-            try center.startMonitoring(
-                PersistenceConfig.wasteActivityName,
-                during: schedule,
-                events: events
-            )
+            do {
+                try center.startMonitoring(PersistenceConfig.wasteActivityName, during: schedule, events: withMarks)
+            } catch {
+                logger.error("Waste markers refused, scheduling warnings only: \(String(describing: error), privacy: .public)")
+                try center.startMonitoring(PersistenceConfig.wasteActivityName, during: schedule, events: events)
+            }
             record?.fingerprint = fingerprint
             record?.failure = nil
         } catch {

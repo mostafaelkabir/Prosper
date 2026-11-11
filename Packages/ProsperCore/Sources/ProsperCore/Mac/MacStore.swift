@@ -19,6 +19,23 @@ public enum MacStore {
     public static var settingsURL: URL { directory.appendingPathComponent("settings.json") }
     public static var statusURL: URL { directory.appendingPathComponent("agent-status.json") }
     public static var eventsURL: URL { directory.appendingPathComponent("events.json") }
+    /// Connected devices (M7): the agent's sync state and what it knows about
+    /// the user's other devices. The agent writes it; the app only reads it.
+    public static var syncURL: URL { directory.appendingPathComponent("sync.json") }
+    /// Touched by the app to ask the agent to sync now.
+    public static var syncRequestURL: URL { directory.appendingPathComponent("sync-request") }
+
+    /// This Mac's ID among the user's devices: made once, kept in the folder
+    /// so reinstalling the app does not make it a new device.
+    public static var deviceID: String {
+        let url = directory.appendingPathComponent("device-id")
+        if let text = try? String(contentsOf: url, encoding: .utf8), !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        let id = UUID().uuidString
+        try? id.write(to: url, atomically: true, encoding: .utf8)
+        return id
+    }
     public static var usageDirectory: URL {
         let url = directory.appendingPathComponent("usage", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)

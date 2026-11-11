@@ -10,6 +10,7 @@ import DeviceActivity
 struct DashboardView: View {
     var onResumeSetup: () -> Void = {}
     @Environment(\.dynamicTypeSize) private var typeSize
+    @ObservedObject private var connected = ConnectedDevices.shared
 
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
     @Query private var allSettings: [UserSettings]
@@ -143,6 +144,11 @@ struct DashboardView: View {
 
                     heroCard
                     if !hasAnyClassification { classifyCTA }
+
+                    // M7.5: the Mac's day, from the user's iCloud account.
+                    ForEach(connected.devices) { device in
+                        RemoteDeviceCard(device: device)
+                    }
 
                     insightSpotlight
 

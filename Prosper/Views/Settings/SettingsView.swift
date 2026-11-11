@@ -42,6 +42,8 @@ struct SettingsView: View {
         var id: Bool { keptActiveBlock }
     }
 
+    @ObservedObject private var connected = ConnectedDevices.shared
+
     private var settings: UserSettings {
         UserSettings.current(context: modelContext)
     }
@@ -54,6 +56,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 guardSection
+                connectedSection
                 warningsToggleSection
                 if warningsEnabled {
                     WasteListEditor(
@@ -112,6 +115,24 @@ struct SettingsView: View {
     }
 
     // MARK: - Sections
+
+    /// M7.5: the Mac, through the iCloud account. Nothing to sign in to.
+    private var connectedSection: some View {
+        Section {
+            NavigationLink {
+                ConnectedDevicesScreen()
+            } label: {
+                HStack {
+                    Label("Connected devices", systemImage: "laptopcomputer.and.iphone")
+                    Spacer()
+                    Text(connected.devices.isEmpty ? "Not yet" : "\(connected.devices.count + 1) devices")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } footer: {
+            Text("See your Mac's day here, and this iPhone's on your Mac. Connected through your iCloud account.")
+        }
+    }
 
     /// E9. First in Settings on purpose: it is the one decision here that is
     /// made once, and the row says which side of it the user is on.

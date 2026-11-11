@@ -33,6 +33,10 @@ struct TodayView: View {
                 OpportunityCard(eyebrow: "Opportunity", headline: opportunity.headline, evidence: opportunity.evidence, onPlan: openLock)
             }
 
+            ForEach(model.devices) { device in
+                RemoteDeviceCard(device: device, now: model.now)
+            }
+
             HStack(spacing: 12) {
                 StatTile(value: "\(model.today.unlocks)", label: "Unlocks")
                 StatTile(value: "\(model.today.opens)", label: "App opens")
