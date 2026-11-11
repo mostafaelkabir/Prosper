@@ -118,11 +118,11 @@ struct CategoryBreakdown: View {
                     Circle().fill(c.color).frame(width: 7, height: 7).padding(.top, 6)
                     VStack(alignment: .leading, spacing: 0) {
                         Text(balance.value(c).usageFormatted)
-                            .font(.system(size: 17, weight: .semibold))
+                            .scaledFont(17, weight: .semibold)
                             .monospacedDigit()
                             .foregroundStyle(ProsperColor.ink)
                         Text(c.label)
-                            .font(.system(size: 12))
+                            .scaledFont(12)
                             .foregroundStyle(ProsperColor.ink2)
                     }
                 }
@@ -216,11 +216,11 @@ struct StreakStrip: View {
             HStack {
                 HStack(spacing: 7) {
                     Image(systemName: "flame.fill").foregroundStyle(ProsperColor.accent)
-                    Text(title).font(.system(size: 16, weight: .semibold)).foregroundStyle(ProsperColor.ink)
+                    Text(title).scaledFont(16, weight: .semibold).foregroundStyle(ProsperColor.ink)
                 }
                 Spacer()
                 Button("Your goal", action: onGoal)
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.accent)
                     .frame(minHeight: 44)
             }
@@ -231,12 +231,12 @@ struct StreakStrip: View {
                             RoundedRectangle(cornerRadius: 11, style: .continuous)
                                 .fill(cellFill(day.state))
                             Text(day.state == .upcoming ? "·" : "✓")
-                                .font(.system(size: 14, weight: .semibold))
+                                .scaledFont(14, weight: .semibold)
                                 .foregroundStyle(cellInk(day.state))
                         }
                         .frame(height: 33)
                         Text(day.label)
-                            .font(.system(size: 10))
+                            .scaledFont(10)
                             .foregroundStyle(ProsperColor.ink2)
                     }
                     .frame(maxWidth: .infinity)
@@ -270,7 +270,7 @@ struct FocusCTA: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill")
-                Text(title).font(.system(size: 15, weight: .semibold))
+                Text(title).scaledFont(15, weight: .semibold)
             }
             .frame(maxWidth: .infinity)
             .frame(minHeight: 45)
@@ -293,10 +293,10 @@ struct OpportunityCard: View {
         VStack(alignment: .leading, spacing: 7) {
             Text(eyebrow).labelCaps()
             Text(headline)
-                .font(.system(size: 16, weight: .semibold))
+                .scaledFont(16, weight: .semibold)
                 .foregroundStyle(ProsperColor.ink)
             Text(evidence)
-                .font(.system(size: 12))
+                .scaledFont(12)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, 7)
@@ -323,10 +323,10 @@ struct MilestoneRow: View {
             Image(systemName: "leaf.fill").foregroundStyle(ProsperColor.productive)
             VStack(alignment: .leading, spacing: 1) {
                 Text("\(completed) of \(target) focus sessions completed")
-                    .font(.system(size: 12, weight: .semibold))
+                    .scaledFont(12, weight: .semibold)
                     .foregroundStyle(ProsperColor.ink)
                 Text(remaining == 0 ? "Milestone reached." : "Your next milestone is \(remaining) session\(remaining == 1 ? "" : "s") away.")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
             }
         }

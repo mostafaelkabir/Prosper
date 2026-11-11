@@ -204,11 +204,11 @@ struct UsageRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
                     Text(item.name)
-                        .font(.system(size: 15, weight: .medium))
+                        .scaledFont(15, weight: .medium)
                         .lineLimit(1)
                     Spacer(minLength: 8)
                     Text(item.duration.usageFormatted)
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, weight: .semibold)
                         .monospacedDigit()
                 }
                 detailLine

@@ -77,7 +77,7 @@ struct ClassificationEditorView: View {
 
     private var intro: some View {
         Text("Tell StolenEyes what each platform, app and site means to you. A platform is one thing however you reach it — Facebook is Facebook in the app or in Safari — so tag it once below. Anything you don't classify stays Unclassified; nothing is assumed productive.")
-            .font(.system(size: 13))
+            .scaledFont(13)
             .foregroundStyle(ProsperColor.ink2)
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -89,7 +89,7 @@ struct ClassificationEditorView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Platforms").labelCaps()
                 Text("One tap classifies every way you reach it — the app and all its websites. Tap again to clear. Distracting platforms join your block list; warnings only count apps and categories you pick under Apps below.")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
                 VStack(spacing: 10) {
@@ -105,11 +105,11 @@ struct ClassificationEditorView: View {
         let current = platformClass(platform)
         return HStack(spacing: 10) {
             Image(systemName: platform.symbol)
-                .font(.system(size: 17))
+                .scaledFont(17)
                 .foregroundStyle(current?.color ?? ProsperColor.ink2)
                 .frame(width: 24)
             Text(platform.name)
-                .font(.system(size: 14, weight: .medium))
+                .scaledFont(14, weight: .medium)
                 .foregroundStyle(ProsperColor.ink)
                 .lineLimit(1)
             Spacer(minLength: 8)
@@ -132,7 +132,7 @@ struct ClassificationEditorView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Where your time goes").labelCaps()
                             Text("Last 7 days · tag the biggest first")
-                                .font(.system(size: 12))
+                                .scaledFont(12)
                                 .foregroundStyle(ProsperColor.ink2)
                         }
                         Spacer()
@@ -160,7 +160,7 @@ struct ClassificationEditorView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Apps").labelCaps()
                 Text("Apple only lets you choose apps in its own picker, so pick per class. Tap a class to add or remove its apps.")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(appClasses, id: \.self) { c in
@@ -179,12 +179,12 @@ struct ClassificationEditorView: View {
                 HStack(spacing: 9) {
                     Circle().fill(c.color).frame(width: 9, height: 9)
                     Text(c.label)
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
                     Spacer()
                     let count = sel.applicationTokens.count + sel.categoryTokens.count
                     Text(count == 0 ? "Add" : "\(count) · Edit")
-                        .font(.system(size: 13, weight: .medium))
+                        .scaledFont(13, weight: .medium)
                         .foregroundStyle(ProsperColor.accent)
                     Image(systemName: "chevron.right")
                         .font(.caption2.weight(.semibold))
@@ -207,7 +207,7 @@ struct ClassificationEditorView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Other sites").labelCaps()
                 Text("Anything the platforms above don't cover. Tag it once — new subdomains are caught automatically.")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -217,14 +217,14 @@ struct ClassificationEditorView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
-                        .font(.system(size: 15))
+                        .scaledFont(15)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 12)
                         .background(ProsperColor.surface2)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         .onSubmit { addSite() }
                     Button("Add") { addSite() }
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, weight: .semibold)
                         .foregroundStyle(siteInput.trimmingCharacters(in: .whitespaces).isEmpty ? ProsperColor.ink2 : ProsperColor.accent)
                         .disabled(siteInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -232,7 +232,7 @@ struct ClassificationEditorView: View {
                 // Tagged sites, distracting first.
                 if taggedSites.isEmpty {
                     Text("No sites tagged yet. Tap a suggestion above to start.")
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                 } else {
                     VStack(spacing: 10) {
@@ -249,20 +249,23 @@ struct ClassificationEditorView: View {
         HStack(spacing: 10) {
             Circle().fill(current.color).frame(width: 8, height: 8)
             Text(domain)
-                .font(.system(size: 14))
+                .scaledFont(14)
                 .foregroundStyle(ProsperColor.ink)
                 .lineLimit(1)
             Spacer(minLength: 8)
             ClassSegments(current: current) { setClass(domain: domain, to: $0) }
             Button { removeDomain(domain) } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .bold))
+                    .scaledFont(11, weight: .bold)
                     .foregroundStyle(ProsperColor.ink2)
                     .frame(width: 24, height: 24)
                     .background(ProsperColor.surface2)
                     .clipShape(Circle())
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(domain)")
         }
     }
 
@@ -441,7 +444,7 @@ private struct ClassSegments: View {
                 let selected = c == current
                 Button { onSelect(c) } label: {
                     Text(letter(c))
-                        .font(.system(size: 12, weight: .bold))
+                        .scaledFont(12, weight: .bold)
                         .frame(width: 26, height: 26)
                         .foregroundStyle(selected ? .white : c.color)
                         .background(selected ? c.color : c.color.opacity(0.14))
@@ -479,7 +482,7 @@ private struct PlatformSegments: View {
                 let selected = c == current
                 Button { onTap(c) } label: {
                     Text(letter(c))
-                        .font(.system(size: 12, weight: .bold))
+                        .scaledFont(12, weight: .bold)
                         .frame(width: 26, height: 26)
                         .foregroundStyle(selected ? .white : c.color)
                         .background(selected ? c.color : c.color.opacity(0.14))

@@ -53,7 +53,7 @@ public enum LockExitCopy {
 
     /// For the App Store / TestFlight description.
     public static let storeDescription = """
-    StolenEyes blocks cannot be cancelled. There is no override, no "just five \
+    StolenEyes blocks cannot be canceled. There is no override, no "just five \
     more minutes", no hidden setting. A block ends when its timer ends.
 
     One exception, stated plainly: deleting StolenEyes ends any block, because the \
@@ -63,7 +63,7 @@ public enum LockExitCopy {
 
     /// For App Review notes, so a reviewer who starts a block is never stuck.
     public static let reviewNotes = """
-    Blocks are deliberately not cancellable from inside the app — that is the \
+    Blocks are deliberately not cancelable from inside the app — that is the \
     product. If you start a block during review and need it gone before the \
     timer ends, delete the app: that removes the ManagedSettings restrictions \
     immediately. This is stated to users in onboarding, in Settings, on the \

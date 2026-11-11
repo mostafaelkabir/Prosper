@@ -24,3 +24,26 @@ extension DeviceActivityReport.Context {
     /// emits `InsightCard`s; the app just hosts the result.
     static let insights = Self("Insights")
 }
+
+/// Heights the app reserves for hosted reports. A `DeviceActivityReport`
+/// renders in the extension's process and never reports its size, so the app
+/// must guess; these are measured, not guessed (`ReportLayoutTests`), and the
+/// extension caps its text size so it can never outgrow them (UX-27).
+enum ReportLayout {
+    /// The largest text size the Today hero is laid out for.
+    static let heroMaxTypeSize = DynamicTypeSize.accessibility3
+
+    /// The Today hero's height at `size` (capped at `heroMaxTypeSize`), on
+    /// the narrowest supported iPhone, with the worst-case content.
+    static func heroHeight(for size: DynamicTypeSize) -> CGFloat {
+        switch min(size, heroMaxTypeSize) {
+        case .xSmall, .small, .medium, .large: 420
+        case .xLarge: 440
+        case .xxLarge: 480
+        case .xxxLarge: 510
+        case .accessibility1: 640
+        case .accessibility2: 740
+        default: 920
+        }
+    }
+}

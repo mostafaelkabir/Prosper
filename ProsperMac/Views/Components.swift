@@ -2,7 +2,8 @@ import AppKit
 import SwiftUI
 
 /// A hold-to-confirm button: the deliberate gesture the iPhone uses before
-/// anything that cannot be undone (a lock, the guard).
+/// anything that cannot be undone (a lock, the guard). Hold the mouse, or Tab
+/// to it and hold Space or Return; VoiceOver activates it directly (UX-27).
 struct HoldToConfirmButton: View {
     let title: String
     var systemImage: String = "lock.fill"
@@ -13,6 +14,8 @@ struct HoldToConfirmButton: View {
     @State private var progress: Double = 0
     @State private var holding = false
     @State private var timer: Timer?
+    /// A keyboard hold has no gesture to end it, so the timer finishes it.
+    @State private var keyHold = false
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -38,8 +41,20 @@ struct HoldToConfirmButton: View {
             guard enabled else { return }
             pressing ? begin() : cancel()
         })
+        .focusable(enabled)
+        .onKeyPress(keys: [.space, .return], phases: [.down, .up]) { press in
+            guard enabled else { return .ignored }
+            if press.phase == .down {
+                if !holding { keyHold = true; begin() }
+            } else {
+                keyHold = false
+                if holding { cancel() }
+            }
+            return .handled
+        }
         .accessibilityElement()
         .accessibilityLabel(title)
+        .accessibilityHint(enabled ? "Hold to confirm. It cannot be undone." : "Choose something first.")
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { if enabled { action() } }
     }
@@ -51,7 +66,10 @@ struct HoldToConfirmButton: View {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1 / 60, repeats: true) { t in
             let p = min(1, Date().timeIntervalSince(start) / duration)
-            Task { @MainActor in progress = p }
+            Task { @MainActor in
+                progress = p
+                if p >= 1, keyHold { keyHold = false; finish() }
+            }
             if p >= 1 { t.invalidate() }
         }
     }

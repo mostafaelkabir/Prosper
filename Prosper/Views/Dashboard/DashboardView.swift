@@ -9,6 +9,7 @@ import DeviceActivity
 /// block flow. Reference: docs/design/approved-prosper/HANDOFF.md.
 struct DashboardView: View {
     var onResumeSetup: () -> Void = {}
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
     @Query private var allSettings: [UserSettings]
@@ -182,7 +183,7 @@ struct DashboardView: View {
             // The shipping name, as on the home screen and in the store.
             // "Prosper" is only the project/repo name (QA-9, REL-14).
             Text("STOLENEYES")
-                .font(.system(size: 12, weight: .semibold))
+                .scaledFont(12, weight: .semibold)
                 .tracking(2)
                 .foregroundStyle(ProsperColor.ink)
             Spacer()
@@ -215,10 +216,9 @@ struct DashboardView: View {
                 .id("\(range)-\(classificationSignature)-\(dayKey)")
                 // DeviceActivityReport renders in a separate process and does not
                 // report its content height back to us; inside this ScrollView the
-                // frame is the only thing reserving space. 300pt clipped the full
-                // hero (balance + "Where it went" + reflex) once real data loaded,
-                // so reserve enough for the whole design. See QA-7.
-                .frame(minHeight: 420, alignment: .top)
+                // frame is the only thing reserving space (QA-7). It grows with
+                // the user's text size, measured in ReportLayoutTests (UX-27).
+                .frame(minHeight: ReportLayout.heroHeight(for: typeSize), alignment: .top)
         }
     }
 
@@ -242,14 +242,14 @@ struct DashboardView: View {
         Button { showClassify = true } label: {
             HStack(spacing: 12) {
                 Image(systemName: "tag.fill")
-                    .font(.system(size: 15, weight: .semibold))
+                    .scaledFont(15, weight: .semibold)
                     .foregroundStyle(ProsperColor.accent)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Classify your apps")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
                     Text("Label what's productive, distracting or rest so the numbers above become yours.")
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -310,11 +310,11 @@ struct DashboardView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Locked").labelCaps()
                         Text(Self.remainingText(remaining))
-                            .font(.system(size: 20, weight: .semibold))
+                            .scaledFont(20, weight: .semibold)
                             .monospacedDigit()
                             .foregroundStyle(ProsperColor.ink)
                         Text("until \(session.endTime.formatted(date: .omitted, time: .shortened))")
-                            .font(.system(size: 12))
+                            .scaledFont(12)
                             .foregroundStyle(ProsperColor.ink2)
                     }
                     Spacer()
@@ -330,10 +330,10 @@ struct DashboardView: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Finish setting up")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
                     Text("Pick your waste apps and sites so StolenEyes can watch for you.")
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                 }
                 Spacer()

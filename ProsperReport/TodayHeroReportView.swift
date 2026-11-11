@@ -6,6 +6,7 @@ import SwiftUI
 /// waste went, and the phone-pickup / notification counts.
 struct TodayHeroReportView: View {
     let snapshot: TodaySnapshot
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var balance: TimeBalance { snapshot.balance }
 
@@ -29,7 +30,10 @@ struct TodayHeroReportView: View {
         // fixed-height card (DeviceActivityReport does not report its own height),
         // so top-align keeps the content anchored instead of floating centred.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.bottom, 16) // clears the simulator "Example data" overlay
+        .padding(.bottom, 16)
+        // The app reserves a height for this per text size (ReportLayout);
+        // past the cap the hero would outgrow it and be clipped (UX-27).
+        .dynamicTypeSize(...ReportLayout.heroMaxTypeSize)
     }
 
     // MARK: - Hero
@@ -43,7 +47,7 @@ struct TodayHeroReportView: View {
                     .monospacedDigit()
                     .foregroundStyle(ProsperColor.distracting)
                 Text("\(balance.total.usageFormatted) tracked in total")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
             }
             Spacer()
@@ -62,12 +66,12 @@ struct TodayHeroReportView: View {
                     // brand tile otherwise — so the line is recognisable at a glance.
                     UsageIcon(item, size: 20)
                     Text(item.name)
-                        .font(.system(size: 14))
+                        .scaledFont(14)
                         .foregroundStyle(ProsperColor.ink)
                         .lineLimit(1)
                     Spacer(minLength: 8)
                     Text(item.duration.usageFormatted)
-                        .font(.system(size: 14, weight: .medium))
+                        .scaledFont(14, weight: .medium)
                         .monospacedDigit()
                         .foregroundStyle(ProsperColor.ink2)
                 }
@@ -77,8 +81,13 @@ struct TodayHeroReportView: View {
 
     // MARK: - Pickups & notifications
 
+    /// Side by side normally; stacked at accessibility sizes, where two tiles
+    /// in a row broke "Notifications" mid-word.
     private var reflexRow: some View {
-        HStack(spacing: 12) {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+        return layout {
             reflexStat(value: "\(snapshot.totalPickups)", label: "Pickups", icon: "hand.tap.fill")
             reflexStat(value: "\(snapshot.totalNotifications)", label: "Notifications", icon: "bell.fill")
         }
@@ -87,15 +96,15 @@ struct TodayHeroReportView: View {
     private func reflexStat(value: String, label: String, icon: String) -> some View {
         HStack(spacing: 9) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
+                .scaledFont(13, weight: .semibold)
                 .foregroundStyle(ProsperColor.accent)
             VStack(alignment: .leading, spacing: 0) {
                 Text(value)
-                    .font(.system(size: 18, weight: .semibold))
+                    .scaledFont(18, weight: .semibold)
                     .monospacedDigit()
                     .foregroundStyle(ProsperColor.ink)
                 Text(label)
-                    .font(.system(size: 11))
+                    .scaledFont(11)
                     .foregroundStyle(ProsperColor.ink2)
             }
         }
@@ -110,7 +119,7 @@ struct TodayHeroReportView: View {
 
     private var unclassifiedNote: some View {
         Text("Most of your time is unclassified. Label your apps and sites so StolenEyes can tell productive from distracting.")
-            .font(.system(size: 12))
+            .scaledFont(12)
             .foregroundStyle(ProsperColor.ink2)
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -119,7 +128,7 @@ struct TodayHeroReportView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("No usage yet").labelCaps()
             Text("Screen Time fills in through the day — Apple updates it every few minutes.")
-                .font(.system(size: 13))
+                .scaledFont(13)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
         }

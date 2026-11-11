@@ -110,6 +110,7 @@
 		8B2119F694B7112EC25A63E6 /* AuthorizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7015B2CA7828E7240B16C087 /* AuthorizationView.swift */; };
 		8BD30D6A449A732781E6BCF6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */; };
 		8DC829A6B7DAA35A4FB0003D /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
+		8E071129296FFAB9CD681E77 /* ReportLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2837C2CC0E492090A5ED6D0 /* ReportLayoutTests.swift */; };
 		8EC92C2C57BF14CCEB11813A /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17775B95B304B2CA3582A7B /* ProsperType.swift */; };
 		948AB45928940C70B7181176 /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17775B95B304B2CA3582A7B /* ProsperType.swift */; };
 		949B3B3E3FD495E5F7B0C561 /* NoCancelAuditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04ECDC46A412BE668DC9DEE6 /* NoCancelAuditTests.swift */; };
@@ -381,6 +382,7 @@
 		9D582400D26C3672F0EEB21B /* ProsperMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ProsperMac.entitlements; sourceTree = "<group>"; };
 		9DE8A4C6525B1024CC685F3B /* ReportContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportContext.swift; sourceTree = "<group>"; };
 		A17DBBD8586832D2DE479A76 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		A2837C2CC0E492090A5ED6D0 /* ReportLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportLayoutTests.swift; sourceTree = "<group>"; };
 		A28E1566F6D285481EEC4590 /* InstalledApps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledApps.swift; sourceTree = "<group>"; };
 		A3678B823AB6BEC5CE18E98B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A4E6B811AC6801D9D1952ACD /* WarningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningService.swift; sourceTree = "<group>"; };
@@ -776,6 +778,7 @@
 				FB591596A1C0128B15949C48 /* BlockScheduleTests.swift */,
 				70DBB124A521AFD969B1F4C1 /* ClassificationTests.swift */,
 				3497187E783594907E0D1987 /* InsightAndFormattingTests.swift */,
+				A2837C2CC0E492090A5ED6D0 /* ReportLayoutTests.swift */,
 				D239C2ADE6F18E0D763BB916 /* ScheduledLockTests.swift */,
 				864785C9A520785BE230D584 /* UsageNumbersTests.swift */,
 				AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */,
@@ -1454,6 +1457,7 @@
 				A7CFB9BCD9E4ECB6C3FD3D4C /* BlockScheduleTests.swift in Sources */,
 				F0F321942822C00F91FC2942 /* ClassificationTests.swift in Sources */,
 				A324D9560F9D546F013A149C /* InsightAndFormattingTests.swift in Sources */,
+				8E071129296FFAB9CD681E77 /* ReportLayoutTests.swift in Sources */,
 				D06F45F0A8759135C6DFB507 /* ScheduledLockTests.swift in Sources */,
 				F361E14EE661762C92FB141C /* UsageNumbersTests.swift in Sources */,
 				5CD04B48EC6C1217891DB315 /* WarningDeliveryTests.swift in Sources */,
