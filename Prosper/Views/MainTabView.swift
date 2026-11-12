@@ -6,6 +6,7 @@ struct MainTabView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var checkIn = NightlyCheckInCenter.shared
 
     @State private var selectedTab: Tab = .today
     @State private var showSetup = false
@@ -74,6 +75,13 @@ struct MainTabView: View {
                 .tag(Tab.settings)
         }
         .tint(ProsperColor.slate)
+        // A tapped check-in notification opens Today, where the question waits
+        // (E10.1).
+        .onChange(of: checkIn.wantsToShowCheckIn) { _, wants in
+            guard wants else { return }
+            selectedTab = .today
+            checkIn.wantsToShowCheckIn = false
+        }
         // An intervention that fired while setup was open is owed the moment
         // setup closes, not at the next foreground (QA-9).
         .fullScreenCover(isPresented: $showSetup, onDismiss: refreshIntervention) {

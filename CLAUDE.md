@@ -55,6 +55,8 @@ Four extension targets embedded in the main app:
 
 **The Adult Content Guard has NO off switch.** `AdultContentGuard` (`Prosper/Services/AdultContentGuard.swift`) is permanent and one-way: no disable, no clear, no remove, and coverage is append-only. It lives in its own named store (`ManagedSettingsStore(named: "adultContentGuard")`), never the default store, so a block session starting or ending (in the app or in ProsperMonitor) cannot touch it. iOS combines stores with the most restrictive setting winning. Do not add any way to switch it off or shrink it; the documented exit is deleting the app.
 
+**The install window loosens only on Friday.** `InstallWindowService` (`Prosper/Services/InstallWindow*.swift`, E9.6) switches on any time, but changing the window or switching it off is allowed only in `InstallChangeWindow` (Friday 11 AM – 1 PM), once per Friday. The gate (`ManagedSettingsStore(named: "installWindow")`, `denyAppInstallation`) is always derived from the saved rule and the clock (`InstallGate.reconcile`), never stored, and Delete my data leaves it alone. Do not add another path that changes or ends it.
+
 ## Build
 
 `project.yml` is the source of truth for targets; run `xcodegen generate` after changing it, then open `Prosper.xcodeproj`. Build for iOS Simulator or a personal device. The FamilyControls entitlement requires `.individual` authorization on a real device. The simulator cannot enforce blocks or show Screen Time data; report views fall back to sample data there.

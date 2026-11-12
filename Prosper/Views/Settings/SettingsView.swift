@@ -43,6 +43,9 @@ struct SettingsView: View {
     }
 
     @ObservedObject private var connected = ConnectedDevices.shared
+    @ObservedObject private var checkIn = NightlyCheckInCenter.shared
+    /// The install window's rule, re-read on appearance (E9.6).
+    @State private var installWindow: InstallWindowRule?
 
     private var settings: UserSettings {
         UserSettings.current(context: modelContext)
@@ -56,6 +59,8 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 guardSection
+                installWindowSection
+                checkInSection
                 connectedSection
                 warningsToggleSection
                 if warningsEnabled {
@@ -152,6 +157,44 @@ struct SettingsView: View {
             Text(guardOn
                 ? "Adult websites are blocked for good on this iPhone. There is no off switch."
                 : "Block adult websites on this iPhone, for good. Decided once, with a clear head.")
+        }
+    }
+
+    /// E9.6. Next to the guard: both close a door before the weak moment.
+    private var installWindowSection: some View {
+        Section {
+            NavigationLink {
+                InstallWindowView()
+            } label: {
+                HStack {
+                    Label("Install window", systemImage: installWindow != nil ? "lock.app.dashed" : "arrow.down.app")
+                    Spacer()
+                    Text(installWindow.map(InstallWindowView.describe) ?? "Off")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } footer: {
+            Text(installWindow != nil
+                ? "New apps install only in your daily window. It changes only on Fridays, around Jumu'ah."
+                : "Allow new apps only in a short daily window, so a weak moment can't download one.")
+        }
+    }
+
+    /// E10.1.
+    private var checkInSection: some View {
+        Section {
+            NavigationLink {
+                NightlyCheckInSettingsView()
+            } label: {
+                HStack {
+                    Label("Nightly check-in", systemImage: "moon.stars")
+                    Spacer()
+                    Text(checkIn.isEnabled ? checkIn.reminderTimeText : "Off")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } footer: {
+            Text("One private question before you sleep, and the streak it builds.")
         }
     }
 
@@ -306,6 +349,7 @@ struct SettingsView: View {
         requirePhrase = s.level3PhraseRequired
         scheduleFailure = WarningService.shared.lastFailure
         guardOn = AdultContentGuard.shared.isEnabled
+        installWindow = InstallWindowService.shared.rule
     }
 
     /// Called by the waste list editor: the list and threshold are the only

@@ -11,6 +11,7 @@ struct DashboardView: View {
     var onResumeSetup: () -> Void = {}
     @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject private var connected = ConnectedDevices.shared
+    @ObservedObject private var checkIn = NightlyCheckInCenter.shared
 
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
     @Query private var allSettings: [UserSettings]
@@ -129,6 +130,11 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     brandRow
                     headline
+
+                    // E10.1: tonight's question, or the winning streak.
+                    if checkIn.isEnabled {
+                        NightlyCheckInCard()
+                    }
 
                     AuroraSegmented(
                         // "Last 7 days", not "This week": the filter is a rolling

@@ -1,11 +1,19 @@
 import SwiftUI
 import SwiftData
 import FamilyControls
+import UserNotifications
 
 @main
 struct ProsperApp: App {
     @StateObject private var authManager = AuthorizationManager()
     @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        // Set before launch finishes, so a check-in button tapped on the lock
+        // screen reaches the app when iOS starts it just to handle it (E10.1).
+        UNUserNotificationCenter.current().delegate = CheckInNotificationDelegate.shared
+        NightlyCheckInCenter.registerCategory()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -33,6 +41,9 @@ struct ProsperApp: App {
                                 // The guard is permanent; rewriting it on launch
                                 // heals a restore or update that dropped it (E9).
                                 AdultContentGuard.shared.reassertIfEnabled()
+                                // Derived from the rule and the clock, so a
+                                // callback iOS dropped is healed here (E9.6).
+                                InstallWindowService.shared.reconcile()
                                 // onChange(of: scenePhase) misses the first
                                 // .active of a cold launch, so start here (M7.3).
                                 ConnectedDevices.shared.appBecameActive()
@@ -55,6 +66,9 @@ struct ProsperApp: App {
                 // timer elapsed while the system monitor didn't fire.
                 BlockingService.shared.clearExpiredBlockIfNeeded()
                 ScheduledLockService.shared.reconcile()
+                InstallWindowService.shared.reconcile()
+                // Tops up the fortnight of check-in reminders (E10.1).
+                NightlyCheckInCenter.shared.reload()
                 // Screen Time access can be withdrawn in iOS Settings while
                 // Prosper is in the background, so it is re-read here rather
                 // than trusted from launch (REL-10).

@@ -135,6 +135,12 @@ A permanent, one-way block of adult content, requested 2026-11-06. Behaviourally
 - **9.3** Guard-aware shield copy (date chosen, no switch, urge-passes line, the exit), never shaming
 - **9.4** Settings screen: honest "what it blocks / what it can't", and the two iOS settings the app cannot flip (Sensitive Content Warning for on-device blur; Screen Time passcode + Deleting Apps off to close the delete-the-app exit)
 - **9.5** DNS layer (follow-up): `NEDNSSettingsManager` → CleanBrowsing Adult Filter DoH, which blocks adult domains in every app and forces SafeSearch on Google/Bing/DuckDuckGo. Needs the `dns-settings` Network Extension entitlement and a one-time user step in iOS Settings; cannot be made unbreakable, so it is a guardrail, not a wall
+- **9.6** Install window: new apps can only be installed in a short daily window (default 7–8 AM); outside it `denyAppInstallation` in the `installWindow` store. Switching it on is allowed any time; changing or switching it off only on Friday 11 AM – 1 PM (around Jumu'ah), once per Friday. Requested 2026-11-11
+
+### Epic 10: Beyond the guard (habits)
+Close the remaining routes and build the habits that replace the old one (behavioural brief, 2026-11-06).
+
+- **10.1** Nightly check-in: one private question before sleep (default 10 PM, "Did you win against your desire today?"), answered "I won" / "Not today" from the notification or Today. Builds a winning streak; a lapse ends the streak, never the record (best streak and total wins stay). Requested 2026-11-11
 
 ---
 

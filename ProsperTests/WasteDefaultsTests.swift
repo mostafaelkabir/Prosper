@@ -35,7 +35,7 @@ struct WasteDefaultsTests {
 
     @MainActor
     private func context() throws -> ModelContext {
-        let container = try ModelContainer(for: UserSettings.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let container = try ModelContainer(for: UserSettings.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
         return ModelContext(container)
     }
 

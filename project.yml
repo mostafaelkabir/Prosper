@@ -130,6 +130,8 @@ targets:
       - path: Prosper/Services/UnblockSchedule.swift
       # Scheduled locks are switched on and off from here (E3.6).
       - path: Prosper/Services/ScheduledLock.swift
+      # The install window's gate is opened and closed from here (E9.6).
+      - path: Prosper/Services/InstallWindow.swift
       # Schedules build their web filter policy with the same helper as the
       # app (E9).
       - path: Prosper/Services/AdultDomainList.swift
