@@ -99,6 +99,32 @@ here depends on iOS behaviour the simulator cannot show.
 | 6.8 | Add **Reddit** to the guard, then open Reddit. | StolenEyes shield titled **Guarded**, the date you chose it, "no off switch", the urge line, the delete-the-app line. Only **Close**. Re-open the guard screen: Reddit is listed and cannot be removed. |
 | 6.9 | Add a site by name (e.g. a mirror you found), then open it. | Blocked. Then **delete StolenEyes**: Safari opens all of 6.2 again. This is the documented exit (REL-8) — it must work, and it must be the only thing that does. |
 
+## 7. Install window (E9.6)
+
+Changes are only possible on Friday 11 AM – 1 PM, so start this section on a
+Friday morning, or accept the window you pick until the next Friday (or delete
+the app, 7.8).
+
+| # | Do | Expect |
+|---|---|---|
+| 7.1 | Settings → Install window. Pick a start **20 min from now**, 30 min. Hold to close the App Store. | Row shows the window; screen says "Closed to new apps · Opens today at …". |
+| 7.2 | App Store: try to install any free app you don't have. | Refused. Note exactly what iOS shows: App Store hidden from the Home Screen, a greyed Get button, or an alert. |
+| 7.3 ⏱ | Wait until the window opens. Don't open StolenEyes. Install the app. | Allowed (the monitor opened the gate on its own). |
+| 7.4 ⏱ | Wait until the window closes. Try another install. | Refused again without opening StolenEyes. |
+| 7.5 | Outside the window: does an **update** to an installed app (App Store → account → Updates) go through? A **TestFlight** install? | Record both. Neither is promised either way. |
+| 7.6 | Outside Friday 11–1: open the screen. | Times are read-only; "Next chance to change it: Friday …". No way to turn it off. Settings → Delete my data leaves it on. |
+| 7.7 | Friday 11–1: change the start time and save. Try to change it again. | First save works; the second is refused: "Changed already this Friday". |
+| 7.8 | Delete StolenEyes. | Installs allowed at once. The documented exit, same as every lock. |
+
+## 8. Nightly check-in (E10.1)
+
+| # | Do | Expect |
+|---|---|---|
+| 8.1 | Settings → Nightly check-in: set the time **3 min from now**. Lock the phone. | Notification "Before you sleep" with your question, no habit named. |
+| 8.2 | Long-press it: tap **I won** without unlocking into the app. | A quiet "Won today / N nights in a row" follows. Open Today: card shows the streak, tonight ✓. |
+| 8.3 | Tap **Change** on Today, answer **Not today**. | Streak 0; "Best streak" and "Won so far" unchanged. The next night's reminder is still queued. |
+| 8.4 | Answer on Today before the reminder time. | No reminder that night. |
+
 ## Reporting
 
 Record results on the DEV-1 ticket in Basira as one dated note: build number,

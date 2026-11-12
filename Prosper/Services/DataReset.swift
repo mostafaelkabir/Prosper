@@ -17,6 +17,8 @@ import SwiftData
 /// The Adult Content Guard (E9) survives for the same reason. Its record is
 /// `SharedGuardState`, which this never reads, and its restrictions live in a
 /// store this never opens. Deleting data is not an off switch for it either.
+/// Nor for the install window (E9.6): `InstallWindowState` and its store are
+/// left alone, so it still changes only on Friday.
 enum DataReset {
 
     struct Outcome {
@@ -45,6 +47,8 @@ enum DataReset {
         WarningInterventionState.clear()
         WarningDeliveryLedger.appGroup?.clear()
         SetupSkip.clear()
+        NightlyCheckInStore.appGroup?.clear()
+        NightlyCheckInCenter.shared.reload()
         PersistenceConfig.acknowledgeHealth()
         if activeBlock == nil {
             SharedBlockState.clear()

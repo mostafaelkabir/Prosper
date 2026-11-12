@@ -19,6 +19,7 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
 
     override func intervalDidStart(for activity: DeviceActivityName) {
         logger.notice("Monitoring interval started: \(activity.rawValue, privacy: .public)")
+        reconcileInstallGate(for: activity)
         if let lock = ScheduledLockStore.lock(for: activity) {
             startScheduledLock(lock)
         }
@@ -28,6 +29,7 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
 
     override func intervalDidEnd(for activity: DeviceActivityName) {
         logger.notice("Monitoring interval ended: \(activity.rawValue, privacy: .public)")
+        reconcileInstallGate(for: activity)
 
         if activity == PersistenceConfig.unblockActivityName
             || activity == PersistenceConfig.unblockSafetyActivityName {
@@ -54,6 +56,21 @@ class ProsperDeviceActivityMonitor: DeviceActivityMonitor {
             endScheduledLock(lock)
         } else {
             sweepExpiredBlockIfNeeded()
+        }
+    }
+
+    // MARK: - Install window (E9.6)
+
+    /// Opens or closes the App Store to new installs from the saved rule. Run
+    /// on every wake-up, not only the install window's own, so a dropped
+    /// callback is healed by the next one. The window's own callbacks look a
+    /// minute ahead: iOS can deliver them a few seconds early, and a close at
+    /// 7:59:57 must still close.
+    private func reconcileInstallGate(for activity: DeviceActivityName) {
+        let lookahead: TimeInterval = activity == InstallGate.activityName ? 60 : 0
+        InstallGate.reconcile(at: Date.now.addingTimeInterval(lookahead))
+        if activity == InstallGate.activityName {
+            logger.notice("Install window reconciled")
         }
     }
 

@@ -13,8 +13,8 @@ private let logger = Logger(subsystem: "com.mostafa.prosper", category: "schedul
 final class ScheduledLockService: @unchecked Sendable {
     static let shared = ScheduledLockService()
 
-    /// iOS monitors at most 20 activities per app, and the daily usage, waste
-    /// and two unblock timers already take four.
+    /// iOS monitors at most 20 activities per app, and the daily usage, waste,
+    /// two unblock timers and the install window (E9.6) already take five.
     static let maxLocks = 8
 
     private let center = DeviceActivityCenter()
