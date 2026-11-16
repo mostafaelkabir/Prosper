@@ -7,6 +7,7 @@ struct ProsperMacApp: App {
     init() {
         #if DEBUG
         SnapshotRenderer.runIfRequested()
+        HoldTestHarness.runIfRequested()
         #endif
     }
 

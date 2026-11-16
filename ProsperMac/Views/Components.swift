@@ -14,8 +14,14 @@ struct HoldToConfirmButton: View {
     @State private var progress: Double = 0
     @State private var holding = false
     @State private var timer: Timer?
-    /// A keyboard hold has no gesture to end it, so the timer finishes it.
-    @State private var keyHold = false
+    /// The mouse or key is down for the current press. A press that already
+    /// finished (or slid off) does not start again until it is released.
+    @State private var mouseDown = false
+    @State private var keyDown = false
+    @State private var holdStart = Date()
+    /// Set when a press is let go before the bar fills, so a click or a short
+    /// press says what to do instead of doing nothing.
+    @State private var tooShort = false
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -28,26 +34,43 @@ struct HoldToConfirmButton: View {
             }
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
-                Text(holding ? "Keep holding…" : title).font(.system(size: 15, weight: .semibold))
+                Text(holding ? "Keep holding…" : tooShort ? "Press and hold until the bar fills (\(Self.seconds(duration)))" : title).font(.system(size: 15, weight: .semibold))
             }
             .frame(maxWidth: .infinity)
             .foregroundStyle(enabled ? ProsperColor.onAccent : ProsperColor.ink2)
         }
         .frame(height: 46)
+        .harnessFrame("hold:\(title)")
         .contentShape(Rectangle())
-        .onLongPressGesture(minimumDuration: duration, maximumDistance: 40, perform: {
-            finish()
-        }, onPressingChanged: { pressing in
-            guard enabled else { return }
-            pressing ? begin() : cancel()
-        })
-        .focusable(enabled)
+        // Mouse down starts the hold, mouse up before the end lets it go and
+        // the timer finishes it. A zero-distance drag reports both edges
+        // reliably on macOS; onLongPressGesture next to a click-focusable view
+        // never completed, so the lock button did nothing.
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    guard enabled else { return }
+                    if !mouseDown {
+                        mouseDown = true
+                        begin()
+                    } else if holding, max(abs(value.translation.width), abs(value.translation.height)) > 40 {
+                        cancel()
+                    }
+                }
+                .onEnded { _ in
+                    mouseDown = false
+                    if holding { cancel() }
+                }
+        )
+        // Focus comes from keyboard navigation only, so a click goes to the
+        // hold gesture instead of moving focus.
+        .focusable(enabled, interactions: .activate)
         .onKeyPress(keys: [.space, .return], phases: [.down, .up]) { press in
             guard enabled else { return .ignored }
             if press.phase == .down {
-                if !holding { keyHold = true; begin() }
+                if !keyDown { keyDown = true; begin() }
             } else {
-                keyHold = false
+                keyDown = false
                 if holding { cancel() }
             }
             return .handled
@@ -60,32 +83,53 @@ struct HoldToConfirmButton: View {
     }
 
     private func begin() {
+        holdStart = Date()
+        tooShort = false
         holding = true
         progress = 0
         let start = Date()
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1 / 60, repeats: true) { t in
+        let t = Timer(timeInterval: 1 / 60, repeats: true) { t in
             let p = min(1, Date().timeIntervalSince(start) / duration)
             Task { @MainActor in
+                guard holding else { return }
                 progress = p
-                if p >= 1, keyHold { keyHold = false; finish() }
+                if p >= 1 { finish() }
             }
             if p >= 1 { t.invalidate() }
         }
+        // Common modes keep it ticking while the mouse is held down.
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
     private func cancel() {
         timer?.invalidate()
+        if holding {
+            tooShort = true
+            let shownAt = Date()
+            holdStart = shownAt
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                if holdStart == shownAt, !holding { tooShort = false }
+            }
+        }
         holding = false
         withAnimation(.easeOut(duration: 0.2)) { progress = 0 }
     }
 
     private func finish() {
         guard enabled else { return }
+        tooShort = false
         timer?.invalidate()
         holding = false
         progress = 0
         action()
+    }
+}
+
+extension HoldToConfirmButton {
+    static func seconds(_ duration: Double) -> String {
+        duration == duration.rounded() ? "\(Int(duration)) s" : String(format: "%.1f s", duration)
     }
 }
 

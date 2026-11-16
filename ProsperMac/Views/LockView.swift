@@ -60,6 +60,7 @@ struct LockItemsPicker: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             }
                             .buttonStyle(.plain)
+                            .harnessFrame("platform:\(platform.id)")
                         }
                     }
                 }
@@ -69,6 +70,7 @@ struct LockItemsPicker: View {
                 Text("Websites").labelCaps()
                 TextField("news.ycombinator.com, espn.com", text: $selection.domainsText)
                     .textFieldStyle(.roundedBorder)
+                    .harnessFrame("websites")
                 if !selection.invalidDomains.isEmpty {
                     Text("Not a website: \(selection.invalidDomains.joined(separator: ", "))")
                         .font(.system(size: 12)).foregroundStyle(ProsperColor.distracting)
@@ -172,6 +174,8 @@ struct LockView: View {
                     }
                 }
             }
+
+            RegularLockCard(justLocked: $justLocked)
 
             ProsperCard(padding: 20) {
                 VStack(alignment: .leading, spacing: 18) {
@@ -317,6 +321,111 @@ struct ScheduleCard: View {
         .padding(14)
         .background(ProsperColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+}
+
+/// The lock started most often, one hold away (QA-12). Until edited it is
+/// every platform the picker lists; Edit changes what it covers and the
+/// duration is remembered. Holding it starts an ordinary session.
+struct RegularLockCard: View {
+    @EnvironmentObject var model: AppModel
+    @Binding var justLocked: Bool
+    @State private var editing = false
+
+    var body: some View {
+        let lock = model.settings.effectiveRegularLock
+        let platforms = lock.platformIDs.compactMap(PlatformCatalog.platform(id:))
+        ProsperCard(padding: 20) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Regular lock").font(.system(size: 20, weight: .bold, design: .rounded)).foregroundStyle(ProsperColor.ink)
+                        Text(Self.summary(lock)).font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
+                    }
+                    Spacer()
+                    Button("Edit") { editing = true }.buttonStyle(.bordered)
+                }
+                if !platforms.isEmpty {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 6)], alignment: .leading, spacing: 6) {
+                        ForEach(platforms) { platform in
+                            HStack(spacing: 6) {
+                                BrandTile(platform: platform, size: 18)
+                                Text(platform.name).font(.system(size: 12, weight: .medium)).foregroundStyle(ProsperColor.ink).lineLimit(1)
+                            }
+                        }
+                    }
+                }
+                let extras = lock.domains + lock.apps.values.sorted()
+                if !extras.isEmpty {
+                    Text(extras.joined(separator: ", ")).font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
+                }
+                AuroraSegmented(options: LockView.durations.map { ($0, LockView.label($0)) }, selection: Binding(
+                    get: { lock.minutes },
+                    set: { minutes in
+                        var changed = lock
+                        changed.minutes = minutes
+                        model.saveRegularLock(changed)
+                    }))
+                HoldToConfirmButton(title: "Hold to start your regular lock for \(LockView.label(lock.minutes))", enabled: !lock.isEmpty) {
+                    if model.startRegularLock() { justLocked = true }
+                }
+            }
+        }
+        .sheet(isPresented: $editing) { EditRegularLockSheet(lock: lock) }
+    }
+
+    static func summary(_ lock: RegularLock) -> String {
+        var parts: [String] = []
+        if !lock.platformIDs.isEmpty { parts.append("\(lock.platformIDs.count) platform\(lock.platformIDs.count == 1 ? "" : "s")") }
+        if !lock.domains.isEmpty { parts.append("\(lock.domains.count) site\(lock.domains.count == 1 ? "" : "s")") }
+        if !lock.apps.isEmpty { parts.append("\(lock.apps.count) app\(lock.apps.count == 1 ? "" : "s")") }
+        return parts.isEmpty ? "Nothing in it yet. Choose what it locks with Edit." : parts.joined(separator: " · ") + ", in every browser and app on this Mac."
+    }
+}
+
+/// Changes what the Regular lock covers. Only the saved preset changes: a
+/// lock already running is untouched.
+struct EditRegularLockSheet: View {
+    @EnvironmentObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    let lock: RegularLock
+    @State private var selection = LockSelection()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Edit your regular lock").font(.system(size: 18, weight: .bold, design: .rounded))
+            Text("What one hold locks from now on. A lock that is already running does not change.")
+                .font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
+            HStack(spacing: 8) {
+                Button("Select all platforms") { selection.platformIDs = Set(RegularLock.lockablePlatformIDs) }
+                Button("Clear platforms") { selection.platformIDs = [] }
+            }
+            .buttonStyle(.bordered)
+            ScrollView { LockItemsPicker(selection: $selection, remembered: model.settings.rememberedDomains) }
+            HStack {
+                Button("Cancel") { dismiss() }
+                Spacer()
+                Button("Save") {
+                    var saved = lock
+                    let catalogOrder = RegularLock.lockablePlatformIDs
+                    saved.platformIDs = catalogOrder.filter(selection.platformIDs.contains) + selection.platformIDs.subtracting(catalogOrder).sorted()
+                    saved.domains = Array(Set(selection.domains.compactMap(BlockDomain.normalize))).sorted()
+                    saved.apps = Dictionary(selection.apps.map { ($0.bundleID, $0.name) }, uniquingKeysWith: { a, _ in a })
+                    model.saveRegularLock(saved)
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent).tint(ProsperColor.accent)
+                .disabled(selection.isEmpty || !selection.invalidDomains.isEmpty)
+            }
+        }
+        .padding(24)
+        .frame(width: 560, height: 680)
+        .background(ProsperColor.background)
+        .onAppear {
+            selection.platformIDs = Set(lock.platformIDs)
+            selection.domainsText = lock.domains.joined(separator: ", ")
+            selection.apps = Set(lock.apps.map { InstalledApps.named($0.key, fallback: $0.value) })
+        }
     }
 }
 
