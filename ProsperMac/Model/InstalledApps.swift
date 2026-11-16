@@ -7,6 +7,11 @@ struct InstalledApp: Identifiable, Hashable {
     let url: URL?
     var id: String { bundleID }
 
+    // One app per bundle ID, wherever it was found, so a saved selection
+    // matches the scanned list.
+    static func == (a: InstalledApp, b: InstalledApp) -> Bool { a.bundleID == b.bundleID }
+    func hash(into hasher: inout Hasher) { hasher.combine(bundleID) }
+
     var icon: NSImage {
         if let url { return NSWorkspace.shared.icon(forFile: url.path) }
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {

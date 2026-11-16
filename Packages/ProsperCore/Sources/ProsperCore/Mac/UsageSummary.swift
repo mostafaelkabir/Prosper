@@ -9,13 +9,21 @@ public struct MacSettings: Codable, Equatable, Sendable {
     public var rememberedDomains: [String]
     public var dailyDistractingGoalMinutes: Int
     public var onboarded: Bool
+    /// What the Lock tab's Regular lock covers. nil until the user edits it,
+    /// which means `RegularLock.standard`: every platform the picker lists.
+    public var regularLock: RegularLock?
 
-    public init(classOverrides: [String: TimeClassKind] = [:], rememberedDomains: [String] = [], dailyDistractingGoalMinutes: Int = 60, onboarded: Bool = false) {
+    public init(classOverrides: [String: TimeClassKind] = [:], rememberedDomains: [String] = [], dailyDistractingGoalMinutes: Int = 60, onboarded: Bool = false,
+                regularLock: RegularLock? = nil) {
         self.classOverrides = classOverrides
         self.rememberedDomains = rememberedDomains
         self.dailyDistractingGoalMinutes = dailyDistractingGoalMinutes
         self.onboarded = onboarded
+        self.regularLock = regularLock
     }
+
+    /// The Regular lock as the Lock tab shows it.
+    public var effectiveRegularLock: RegularLock { regularLock ?? .standard }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -23,7 +31,37 @@ public struct MacSettings: Codable, Equatable, Sendable {
         rememberedDomains = (try? c.decode([String].self, forKey: .rememberedDomains)) ?? []
         dailyDistractingGoalMinutes = (try? c.decode(Int.self, forKey: .dailyDistractingGoalMinutes)) ?? 60
         onboarded = (try? c.decode(Bool.self, forKey: .onboarded)) ?? false
+        regularLock = try? c.decodeIfPresent(RegularLock.self, forKey: .regularLock)
     }
+}
+
+/// The lock the user starts most often, one hold away at the top of the Lock
+/// tab. Only a starting point: holding it starts an ordinary add-only session
+/// through `RulesBook`, so it has no way to end or shorten anything.
+public struct RegularLock: Codable, Equatable, Sendable {
+    public var platformIDs: [String]
+    public var domains: [String]
+    /// Bundle ID → app name, so the card can name apps without scanning.
+    public var apps: [String: String]
+    public var minutes: Int
+
+    public init(platformIDs: [String], domains: [String] = [], apps: [String: String] = [:], minutes: Int = 60) {
+        self.platformIDs = platformIDs
+        self.domains = domains
+        self.apps = apps
+        self.minutes = minutes
+    }
+
+    /// The platforms the lock picker offers: everything not labelled
+    /// productive (Facebook, Instagram, YouTube, TikTok, X, Reddit, ...).
+    public static var lockablePlatformIDs: [String] {
+        PlatformCatalog.all.filter { $0.defaultClass != .productive }.map(\.id)
+    }
+
+    /// Until the user changes it: every listed platform for an hour.
+    public static var standard: RegularLock { RegularLock(platformIDs: lockablePlatformIDs) }
+
+    public var isEmpty: Bool { platformIDs.isEmpty && domains.isEmpty && apps.isEmpty }
 }
 
 /// Decides the class of a Mac app or site. A user's label always wins; then

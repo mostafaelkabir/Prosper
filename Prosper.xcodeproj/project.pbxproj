@@ -183,6 +183,7 @@
 		D680F5699C97E44818731489 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A5392C1BFA98EA99B7C63B /* StatsView.swift */; };
 		D6E283551BD33536E30B70CA /* AddToLockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EE3998A79E6D9D942968FA2 /* AddToLockView.swift */; };
 		D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72AD9387F5DEB57CF802404 /* MainTabView.swift */; };
+		DF776A90C2D193EAEEF37BBB /* HoldTestHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4759EA9BD38984E17CE8B26B /* HoldTestHarness.swift */; };
 		DF8C6AB45AA5BB28CAF26D56 /* UsageSummaryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560F3611FDB3127397CADBD /* UsageSummaryScene.swift */; };
 		E1335E39417B1E4F9DADB50D /* UsageTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E97C26A5DE91C35D4B711 /* UsageTrackingService.swift */; };
 		E181AC208F46DDDC7FA9B416 /* WasteDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604F59012226527965BFA6C3 /* WasteDefaults.swift */; };
@@ -367,6 +368,7 @@
 		425BCD169C0F914FAA06A6DA /* ScheduledLockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledLockService.swift; sourceTree = "<group>"; };
 		42C6D81C2D0BDC109D101AFA /* AgentRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentRules.swift; sourceTree = "<group>"; };
 		46B22F794056685B0173E0DA /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
+		4759EA9BD38984E17CE8B26B /* HoldTestHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldTestHarness.swift; sourceTree = "<group>"; };
 		487B10E3A71FCC1C38E9F7A0 /* ConnectedDevicesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedDevicesTests.swift; sourceTree = "<group>"; };
 		48DAF826595EED85C8C1BD65 /* NightlyCheckInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightlyCheckInTests.swift; sourceTree = "<group>"; };
 		49565334CAB253E5F9C6CAA9 /* TodayHeroReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayHeroReportView.swift; sourceTree = "<group>"; };
@@ -728,6 +730,7 @@
 			isa = PBXGroup;
 			children = (
 				EF00BD105719ADF5B27514F4 /* CoreExports.swift */,
+				4759EA9BD38984E17CE8B26B /* HoldTestHarness.swift */,
 				25924556E992D9853F926D09 /* ProsperMacApp.swift */,
 				85C6B8E7DFFD0C5FD72F8C7C /* SnapshotRenderer.swift */,
 			);
@@ -1497,6 +1500,7 @@
 				42C5F5D370C260000DA0D6AA /* Components.swift in Sources */,
 				B04B824C75671EDD7F2E65FD /* ConnectedComponents.swift in Sources */,
 				9E5BA5877921BA559EF70E2C /* CoreExports.swift in Sources */,
+				DF776A90C2D193EAEEF37BBB /* HoldTestHarness.swift in Sources */,
 				A1A4FA5F692A0EF60E0C3C29 /* InsightsView.swift in Sources */,
 				AF32AAA9AACC681CB88856B0 /* InstalledApps.swift in Sources */,
 				C5BE0C275657ABC4D8328146 /* LockView.swift in Sources */,

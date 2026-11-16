@@ -27,9 +27,23 @@ final class AppModel: ObservableObject {
     /// Kept out of `status` so a heartbeat every 5 s does not re-render every view.
     private var heartbeat: Date?
 
+    #if DEBUG
+    /// A sample-data model never writes rules or talks to the filter; its
+    /// actions are only counted, so the UI harness can check they were reached.
+    private(set) var isSnapshot = false
+    private(set) var snapshotActions = 0
+
+    /// What a live reload does to the views: publish a change.
+    func snapshotPoke() {
+        objectWillChange.send()
+        now = Date()
+    }
+    #endif
+
     init(snapshot: Bool = false) {
         #if DEBUG
         if snapshot {
+            isSnapshot = true
             loadSnapshotData()
             return
         }
@@ -122,6 +136,26 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Starts the Regular lock as saved in settings (QA-12): an ordinary
+    /// add-only session, like any other.
+    func startRegularLock() -> Bool {
+        let lock = settings.effectiveRegularLock
+        return perform {
+            try MacStore.updateRules { rules in
+                try RulesBook.startingSession(rules, minutes: lock.minutes, domains: lock.domains, bundleIDs: Array(lock.apps.keys),
+                                              platformIDs: lock.platformIDs, appNames: lock.apps).0
+            }
+        }
+    }
+
+    func saveRegularLock(_ lock: RegularLock) {
+        #if DEBUG
+        if isSnapshot { settings.regularLock = lock; return }
+        #endif
+        MacStore.updateSettings { $0.regularLock = lock }
+        reload()
+    }
+
     func add(to session: MacLockSession, domains: [String], apps: [InstalledApp], platformIDs: [String]) -> Bool {
         perform {
             try MacStore.updateRules { rules in
@@ -191,6 +225,9 @@ final class AppModel: ObservableObject {
     /// Runs a change, then sends the new rules straight to the extension too,
     /// so a lock applies even if the agent is a moment behind.
     private func perform(_ change: () throws -> Void) -> Bool {
+        #if DEBUG
+        if isSnapshot { snapshotActions += 1; return true }
+        #endif
         do {
             try change()
             lastError = nil
