@@ -4,7 +4,9 @@ import SwiftUI
 
 /// `StolenEyes --render-snapshots <folder>` writes each tab, light and dark,
 /// as a PNG with sample numbers, then exits. For checking layout without a
-/// screen (CI, a locked Mac). Debug builds only.
+/// screen (CI, a locked Mac). `--snapshot-scale 2` for Retina images (the
+/// README screenshots); `--via-window` draws through an offscreen window
+/// like the app does, which keeps charts and gradients exact. Debug builds only.
 @MainActor
 enum SnapshotRenderer {
     static func runIfRequested() {
@@ -29,17 +31,42 @@ enum SnapshotRenderer {
                     .frame(width: 900)
                     .background(ProsperColor.background)
                 let appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)!
+                let scale = args.firstIndex(of: "--snapshot-scale").flatMap { $0 + 1 < args.count ? Double(args[$0 + 1]) : nil } ?? 1
+                let file = folder.appendingPathComponent("\(name)-\(scheme == .dark ? "dark" : "light").png")
+                if args.contains("--via-window") {
+                    try? renderViaWindow(content, appearance: appearance, scale: scale)?.write(to: file)
+                    continue
+                }
                 appearance.performAsCurrentDrawingAppearance {
                     let renderer = ImageRenderer(content: content)
-                    renderer.scale = 1
+                    renderer.scale = scale
                     if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
                        let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
-                        try? png.write(to: folder.appendingPathComponent("\(name)-\(scheme == .dark ? "dark" : "light").png"))
+                        try? png.write(to: file)
                     }
                 }
             }
         }
         exit(0)
+    }
+
+    /// Hosts the view in an offscreen window at its full height and draws it.
+    private static func renderViaWindow<V: View>(_ view: V, appearance: NSAppearance, scale: Double) -> Data? {
+        let host = NSHostingView(rootView: view)
+        host.appearance = appearance
+        let size = host.fittingSize
+        host.frame = NSRect(origin: .zero, size: size)
+        let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.appearance = appearance
+        window.contentView = host
+        host.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+        guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
+                                         bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                         colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0) else { return nil }
+        rep.size = size
+        host.cacheDisplay(in: host.bounds, to: rep)
+        return rep.representation(using: .png, properties: [:])
     }
 }
 

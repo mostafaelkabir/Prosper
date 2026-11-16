@@ -50,6 +50,13 @@ enum InstalledApps {
         return found.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
+    /// Built-in macOS apps, for snapshots: never the user's own app list.
+    static var sample: [InstalledApp] {
+        [("com.apple.mail", "Mail"), ("com.apple.MobileSMS", "Messages"), ("com.apple.Music", "Music"), ("com.apple.news", "News"),
+         ("com.apple.Notes", "Notes"), ("com.apple.Photos", "Photos"), ("com.apple.Safari", "Safari"), ("com.apple.TV", "TV")]
+            .map { InstalledApp(bundleID: $0.0, name: $0.1, url: nil) }
+    }
+
     static func named(_ bundleID: String, fallback: String? = nil) -> InstalledApp {
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID), let bundle = Bundle(url: url) {
             let name = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)

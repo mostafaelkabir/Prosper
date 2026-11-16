@@ -117,6 +117,15 @@ final class AppModel: ObservableObject {
         try? Date().ISO8601Format().write(to: MacStore.syncRequestURL, atomically: true, encoding: .utf8)
     }
 
+    /// Today's "finish setting up" card. Never on the sample-data model: the
+    /// setup state it reads is this Mac's own.
+    var needsSetupCard: Bool {
+        #if DEBUG
+        if isSnapshot { return false }
+        #endif
+        return !settings.onboarded || !setup.allOn || !agentRunning
+    }
+
     var agentRunning: Bool {
         guard let heartbeat else { return false }
         return Date().timeIntervalSince(heartbeat) < 20
