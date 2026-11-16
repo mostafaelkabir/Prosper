@@ -34,6 +34,7 @@ struct LockItemsPicker: View {
     var showPlatforms = true
     @State private var allApps: [InstalledApp] = []
     @State private var search = ""
+    @Environment(\.snapshotMode) private var snapshotMode
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -116,7 +117,7 @@ struct LockItemsPicker: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
         }
-        .onAppear { if allApps.isEmpty { allApps = InstalledApps.scan() } }
+        .onAppear { if allApps.isEmpty { allApps = snapshotMode ? InstalledApps.sample : InstalledApps.scan() } }
     }
 
     private var filteredApps: [InstalledApp] {

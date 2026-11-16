@@ -8,7 +8,7 @@ struct TodayView: View {
 
     var body: some View {
         ScreenScroll {
-            if !model.settings.onboarded || !model.setup.allOn || !model.agentRunning {
+            if model.needsSetupCard {
                 SetupCard(openSettings: openSettings)
             }
 
