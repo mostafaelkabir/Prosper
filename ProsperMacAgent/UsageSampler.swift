@@ -22,7 +22,7 @@ final class UsageSampler {
     private var settingsLoadedAt = Date()
     private var lastSave = Date.distantPast
     private var appInfo: [String: AppUsage] = [:]
-    private var run: (key: String, name: String, start: Date)?
+    private var run: (key: String, name: String, start: Date, end: Date)?
     private var sanitized = false
     static let idleThreshold: TimeInterval = 60
     /// System UI that comes to the front (prompts, the lock screen) but is not
@@ -127,10 +127,14 @@ final class UsageSampler {
         guard timeClass == .distracting else { run = nil; return }
         let key = current.site ?? current.bundleID
         let name = current.site ?? info.name
-        if let r = run, r.key == key, abs(r.start.distance(to: start)) < 86_400 {
-            // Continuing: the run keeps its start.
+        // Continuing only if it picks up where the run left off: time away
+        // (idle, locked, asleep) longer than a pause starts a new run, so two
+        // sessions hours apart are not one rabbit hole.
+        if var r = run, r.key == key, start.timeIntervalSince(r.end) <= Attention.awayGap {
+            r.end = end
+            run = r
         } else {
-            run = (key, name, start)
+            run = (key, name, start, end)
         }
         if let r = run {
             let length = end.timeIntervalSince(r.start)
