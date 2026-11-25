@@ -84,7 +84,7 @@ Typed domains in a block session are blocked with `ManagedSettingsStore().webCon
 
 - The **block list** is the Distracting label: `UserSettings.wasteAppSelectionData` + `wasteDomains`. It is built on the Lock tab (`BlockView`), never only in Settings, and saved with `UserSettings.saveBlockList`. "Waste list" in older code and comments means the same list.
 - Every screen that chooses what a lock covers uses the same two rows, `AppsPickRow` and `SitesPickRow` (`Prosper/Views/Components/LockTargetRows.swift`); websites are picked in `SitePickerSheet`. Apps can only be chosen in Apple's picker. Attach a picker to a row that is always present, not to a `Group`.
-- Website tiles are drawn (`BrandMark`, `SiteIcon`), not downloaded: the app makes no request for a site's icon, and ships no third-party logo artwork. Real app icons come from Apple's tokens on a device.
+- Website tiles (`BrandMark`, `SiteIcon`) are never downloaded: the app makes no request for a site's icon. The sixteen catalog platforms carry their real mark from `Prosper/DesignSystem/BrandLogos.xcassets`, built from Simple Icons (CC0 files, the owners' trademarks) by `scripts/make-brand-logos.py`; add a platform's mark there and to `BrandLogo.platforms` together. Any other site gets a lettered tile. Real app icons come from Apple's tokens on a device. The Mac still draws SF Symbols.
 - `LabelDayView` hosts the `.dayLedger` report (`DayLedger`, grouped by label) above the label buttons. The report extension cannot pass a tap back to the app, so labels are given in the app. An app, category or site carries one label at a time (`LabelSets`).
 - `DayLedger.assemble` takes its totals from `TodaySnapshot.assemble`, so the ledger and the Today ring always agree; keep it that way.
 

@@ -92,6 +92,7 @@
 		671A44D232DB05062646B6B0 /* UsageStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE69637163805466D518E49 /* UsageStat.swift */; };
 		6A46653CB5FA33765CBA62D5 /* ProsperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9571C24CF734505B0A04A5F /* ProsperApp.swift */; };
 		6B0076A9B7912D3E0336326F /* SetupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D40CCAE0FDE3B059BBCB4F6 /* SetupFlowView.swift */; };
+		6B2D4B470C93E988A3840635 /* BrandLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */; };
 		6B7C06440DB423343FE5D07B /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
 		6C7B33406CC899A9E6D9EE24 /* ConnectedDevicesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE0B8DCDA6A924E1B419D04 /* ConnectedDevicesScreen.swift */; };
 		6EBA330352C4EBB49E02EE17 /* HourlyUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */; };
@@ -165,6 +166,7 @@
 		B8742D2E3979E22EA03CCC0B /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
 		BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8F0966BDF79094A611FF59E /* Assets.xcassets */; };
 		BDA5A48EB89C2573422D8E60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE5638E38E6EF1698733D6C4 /* Assets.xcassets */; };
+		C0D834288E404B164164ABC4 /* BrandLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */; };
 		C2356B36E7B17E654EEAD5D0 /* BlockDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E868A17200694E814150C7 /* BlockDomain.swift */; };
 		C25189A853DFA4C721F03E05 /* BlockDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3FAC08B7DA0AC5674ADDEB /* BlockDomainTests.swift */; };
 		C335C2911FC163251528FB99 /* WasteMarkLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B907718CE3480B6A344EA4 /* WasteMarkLog.swift */; };
@@ -391,6 +393,7 @@
 		4F3A201724CAEB52AFAA4F43 /* DayLedgerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayLedgerTests.swift; sourceTree = "<group>"; };
 		553A77A8345BE07979522611 /* PhoneSyncBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSyncBuilder.swift; sourceTree = "<group>"; };
 		5960C99504B61FC8D5D189CC /* DayLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayLedger.swift; sourceTree = "<group>"; };
+		598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = BrandLogos.xcassets; sourceTree = "<group>"; };
 		5F5C6C2CDF5161016ECC4350 /* AdultDomains.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdultDomains.swift; sourceTree = "<group>"; };
 		6009192158BF0C2324D2330B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		604F59012226527965BFA6C3 /* WasteDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WasteDefaults.swift; sourceTree = "<group>"; };
@@ -645,6 +648,7 @@
 			isa = PBXGroup;
 			children = (
 				BBE6DA47D979165CC918A89E /* AuroraComponents.swift */,
+				598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */,
 				78508BB1474F52320F16A4AC /* ConnectedComponents.swift */,
 				0F25C5A89EC5E58636D2C353 /* LockComponents.swift */,
 				9314AE9A9C3D53B04778361F /* ProsperComponents.swift */,
@@ -1327,6 +1331,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D834288E404B164164ABC4 /* BrandLogos.xcassets in Resources */,
 				8BD30D6A449A732781E6BCF6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1344,6 +1349,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD8A3F0C53C0D820F83D2BCB /* Assets.xcassets in Resources */,
+				6B2D4B470C93E988A3840635 /* BrandLogos.xcassets in Resources */,
 				361B952FC1B2C2BF95C33AA7 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

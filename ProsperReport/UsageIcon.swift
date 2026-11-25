@@ -97,8 +97,13 @@ struct UsageIcon: View {
     }
 }
 
-/// A platform's brand tile: its colour, its glyph, a hairline so near-black
-/// brands (X) stay visible on the dark theme.
+/// A platform's brand tile: its colour and its own mark, with a hairline so
+/// near-black brands (X, TikTok) stay visible on the dark theme.
+///
+/// The marks are bundled (`BrandLogos.xcassets`, built from Simple Icons by
+/// `scripts/make-brand-logos.py`), never downloaded. They are their owners'
+/// trademarks and are drawn only to say which app or site a row is. A
+/// platform with no bundled mark falls back to its SF Symbol.
 struct BrandMark: View {
     let platform: Platform
     var size: CGFloat = 34
@@ -106,17 +111,37 @@ struct BrandMark: View {
     var body: some View {
         RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
             .fill(platform.tint)
-            .overlay(
-                Image(systemName: platform.symbol)
-                    .font(.system(size: size * 0.46, weight: .semibold))
-                    .foregroundStyle(platform.onTint)
-            )
+            .overlay(mark.foregroundStyle(platform.onTint))
             .overlay(
                 RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
                     .strokeBorder(ProsperColor.line.opacity(0.6), lineWidth: 0.5)
             )
             .frame(width: size, height: size)
     }
+
+    @ViewBuilder
+    private var mark: some View {
+        if BrandLogo.platforms.contains(platform.id) {
+            Image(BrandLogo.imageName(platform.id))
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 0.58, height: size * 0.58)
+        } else {
+            Image(systemName: platform.symbol)
+                .font(.system(size: size * 0.46, weight: .semibold))
+        }
+    }
+}
+
+/// The brand marks in `BrandLogos.xcassets`, by catalog platform id.
+enum BrandLogo {
+    static let platforms: Set<String> = [
+        "facebook", "instagram", "youtube", "tiktok", "x", "reddit", "snapchat", "whatsapp",
+        "netflix", "twitch", "pinterest", "linkedin", "zoom", "slack", "teams", "gmail",
+    ]
+
+    static func imageName(_ platformID: String) -> String { "brand-" + platformID }
 }
 
 extension UsageIcon {

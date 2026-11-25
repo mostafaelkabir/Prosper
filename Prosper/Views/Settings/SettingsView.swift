@@ -310,7 +310,7 @@ struct SettingsView: View {
         } header: {
             Text("About")
         } footer: {
-            Text("Stolen Glance has no account and no server of its own. Your per-app usage never leaves this iPhone. A summary of your locks and warnings is kept in your own iCloud for your other devices.")
+            Text("Stolen Glance has no account and no server of its own. Your per-app usage never leaves this iPhone. A summary of your locks and warnings is kept in your own iCloud for your other devices.\n\nApp and site logos belong to their owners. They are shown only so you can tell what you are locking or labelling.")
         }
     }
 

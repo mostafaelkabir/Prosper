@@ -180,3 +180,8 @@ study, change and share it. If you distribute a modified version, it must stay o
 same license.
 
 <sub>Developed under the project name **Prosper**, which is why you will see that name in the code, the repository and the URLs.</sub>
+
+Brand marks shown in the app (Facebook, YouTube, Reddit and the like) come from
+[Simple Icons](https://simpleicons.org), whose files are CC0. The marks are
+trademarks of their owners and are not covered by this project's license. The
+app shows them only to identify the app or site you are locking or labelling.

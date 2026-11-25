@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import FamilyControls
+import UIKit
 @testable import Prosper
 
 /// The day ledger files every app and site under its label (UX-29). It sits
@@ -171,6 +172,14 @@ struct BlockListTests {
         for hex in SiteTint.palette {
             let luminance = 0.2126 * channel((hex >> 16) & 0xFF) + 0.7152 * channel((hex >> 8) & 0xFF) + 0.0722 * channel(hex & 0xFF)
             #expect(1.05 / (luminance + 0.05) >= 4.5, "0x\(String(hex, radix: 16)) is too light")
+        }
+    }
+
+    @Test("Every bundled brand mark belongs to a catalog platform and loads from the app")
+    func brandLogosAreBundled() {
+        for id in BrandLogo.platforms {
+            #expect(PlatformCatalog.platform(id: id) != nil, "\(id) is not in the catalog")
+            #expect(UIImage(named: BrandLogo.imageName(id), in: Bundle(for: UserSettings.self), with: nil) != nil, "\(id) has no image")
         }
     }
 
