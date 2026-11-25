@@ -15,11 +15,7 @@ struct AddToLockView: View {
 
     @State private var additions = FamilyActivitySelection()
     @State private var newDomains: [String] = []
-    @State private var domainInput = ""
-    @State private var domainError: String?
-    @State private var isPickerPresented = false
     @State private var addError: String?
-    @FocusState private var domainFieldFocused: Bool
 
     private var lockedCount: Int {
         lockedSelection.applicationTokens.count + lockedSelection.categoryTokens.count
@@ -44,43 +40,14 @@ struct AddToLockView: View {
                 }
 
                 Section {
-                    Button {
-                        isPickerPresented = true
-                    } label: {
-                        Label("Add apps", systemImage: "apps.iphone")
-                    }
-                    if additions.applicationTokens.count + additions.categoryTokens.count + additions.webDomainTokens.count > 0 {
-                        SelectionChips(selection: additions)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    AppsPickRow(selection: $additions)
                 } header: {
-                    Text("Apps")
+                    Text("Add")
                 }
 
+                // Only what is added in this sheet can be taken back out.
                 Section {
-                    HStack {
-                        TextField("reddit.com", text: $domainInput)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .keyboardType(.URL)
-                            .textContentType(.URL)
-                            .focused($domainFieldFocused)
-                            .onSubmit(addDomain)
-                        Button("Add", action: addDomain)
-                            .disabled(domainInput.trimmingCharacters(in: .whitespaces).isEmpty)
-                    }
-                    if let domainError {
-                        Text(domainError)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
-                    // Only sites added in this sheet can be taken back out.
-                    ForEach(newDomains, id: \.self) { domain in
-                        SiteLabel(domain: domain)
-                    }
-                    .onDelete { newDomains.remove(atOffsets: $0) }
-                } header: {
-                    Text("Websites")
+                    SitesPickRow(domains: $newDomains, lockedDomains: lockedDomains)
                 }
             }
             .navigationTitle("Add to lock")
@@ -94,7 +61,6 @@ struct AddToLockView: View {
                         .disabled(addedCount == 0)
                 }
             }
-            .familyActivityPicker(isPresented: $isPickerPresented, selection: $additions)
             .alert(
                 "Nothing was added",
                 isPresented: Binding(get: { addError != nil }, set: { if !$0 { addError = nil } })
@@ -104,21 +70,6 @@ struct AddToLockView: View {
                 Text(addError ?? "")
             }
         }
-    }
-
-    private func addDomain() {
-        guard let domain = BlockDomain.normalize(domainInput) else {
-            domainError = "Enter a website like reddit.com"
-            return
-        }
-        domainError = nil
-        if lockedDomains.contains(domain) {
-            domainError = "\(domain) is already locked"
-        } else if !newDomains.contains(domain) {
-            newDomains.append(domain)
-        }
-        domainInput = ""
-        domainFieldFocused = true
     }
 
     private func add() {

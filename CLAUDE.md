@@ -80,6 +80,14 @@ Four extension targets embedded in the main app:
 
 Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard's own store (`AdultDomainList.policy`). Sessions and schedules always write `.specific` (`AdultDomainList.sessionPolicy`): stacking `.auto` across stores left an iOS 26.5 iPhone blocking nothing. Keep the guard's named list short; the filter has been seen to stop blocking once roughly 49 domains are in play across stores.
 
+## Block list and labels (UX-28, UX-29)
+
+- The **block list** is the Distracting label: `UserSettings.wasteAppSelectionData` + `wasteDomains`. It is built on the Lock tab (`BlockView`), never only in Settings, and saved with `UserSettings.saveBlockList`. "Waste list" in older code and comments means the same list.
+- Every screen that chooses what a lock covers uses the same two rows, `AppsPickRow` and `SitesPickRow` (`Prosper/Views/Components/LockTargetRows.swift`); websites are picked in `SitePickerSheet`. Apps can only be chosen in Apple's picker. Attach a picker to a row that is always present, not to a `Group`.
+- Website tiles are drawn (`BrandMark`, `SiteIcon`), not downloaded: the app makes no request for a site's icon, and ships no third-party logo artwork. Real app icons come from Apple's tokens on a device.
+- `LabelDayView` hosts the `.dayLedger` report (`DayLedger`, grouped by label) above the label buttons. The report extension cannot pass a tap back to the app, so labels are given in the app. An app, category or site carries one label at a time (`LabelSets`).
+- `DayLedger.assemble` takes its totals from `TodaySnapshot.assemble`, so the ledger and the Today ring always agree; keep it that way.
+
 ## Data Models
 
 - `BlockSession` — one blocking period (apps, sites, duration, start time)

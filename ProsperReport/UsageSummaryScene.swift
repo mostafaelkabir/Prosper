@@ -59,3 +59,13 @@ nonisolated struct OverviewScene: DeviceActivityReportScene {
         await UsageSummary.build(from: data, sortApps: .time)
     }
 }
+
+/// Where the hours went, grouped by the label each app and site carries (UX-29).
+nonisolated struct DayLedgerScene: DeviceActivityReportScene {
+    let context: DeviceActivityReport.Context = .dayLedger
+    let content: (DayLedger) -> DayLedgerView
+
+    func makeConfiguration(representing data: DeviceActivityResults<DeviceActivityData>) async -> DayLedger {
+        DayLedger.assemble(await ClassifiedDay.walk(data, classification: SharedClassification.load()))
+    }
+}

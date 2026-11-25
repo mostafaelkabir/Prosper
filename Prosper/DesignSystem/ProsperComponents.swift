@@ -72,16 +72,19 @@ struct InsightSentence: View {
 
 /// Icon + label capsule on the `card2` surface. Replaces the old ChipShape.
 struct Chip<Content: View>: View {
+    /// The roomier chip used where the icon is the point: the lists of apps
+    /// and sites a lock covers (UX-28).
+    var large = false
     @ViewBuilder var content: Content
 
     var body: some View {
         content
-            .font(.caption.weight(.medium))
-            .foregroundStyle(ProsperColor.ink2)
+            .font(large ? .subheadline.weight(.medium) : .caption.weight(.medium))
+            .foregroundStyle(large ? ProsperColor.ink : ProsperColor.ink2)
             .lineLimit(1)
-            .imageScale(.small)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .imageScale(large ? .medium : .small)
+            .padding(.horizontal, large ? 12 : 10)
+            .padding(.vertical, large ? 8 : 6)
             .background(ProsperColor.card2)
             .clipShape(Capsule())
     }

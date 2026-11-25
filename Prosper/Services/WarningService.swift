@@ -175,7 +175,7 @@ final class WarningService: @unchecked Sendable {
         case .excessiveActivities:
             return "Warnings aren't running: iOS refused because too many Screen Time schedules are active. Try again after your current block ends."
         default:
-            return "Warnings aren't running: iOS wouldn't start watching your waste list. Change a setting here to try again, or reopen Stolen Glance."
+            return "Warnings aren't running: iOS wouldn't start watching your block list. Change a setting here to try again, or reopen Stolen Glance."
         }
     }
 }

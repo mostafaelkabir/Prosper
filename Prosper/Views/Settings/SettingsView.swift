@@ -258,14 +258,14 @@ struct SettingsView: View {
     private var classificationSection: some View {
         Section {
             NavigationLink {
-                ClassificationEditorView()
+                LabelDayView()
             } label: {
-                Label("Classify your time", systemImage: "circle.grid.2x2")
+                Label("Label your day", systemImage: "tag")
             }
         } header: {
-            Text("Time classes")
+            Text("Where your time went")
         } footer: {
-            Text("Mark apps and sites as Productive, Distracting or Intentional rest. Your waste list counts as Distracting; the rest stays Unclassified until you decide.")
+            Text("See every app and site you used, and label it Distracting, Productive or Rest. Your block list counts as Distracting; the rest stays unlabelled until you decide.")
         }
     }
 
@@ -277,7 +277,7 @@ struct SettingsView: View {
                 Label("Set up again", systemImage: "sparkles")
             }
         } footer: {
-            Text("Walk through picking waste apps, sites, and notifications again.")
+            Text("Walk through your block list and notifications again.")
         }
     }
 

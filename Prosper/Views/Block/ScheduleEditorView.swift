@@ -9,11 +9,7 @@ struct ScheduleEditorView: View {
     @State private var selection: FamilyActivitySelection
     @State private var start: Date
     @State private var end: Date
-    @State private var domainInput = ""
-    @State private var domainError: String?
-    @State private var isPickerPresented = false
     @State private var saveError: String?
-    @FocusState private var domainFieldFocused: Bool
 
     let isNew: Bool
     let onSaved: () -> Void
@@ -39,10 +35,6 @@ struct ScheduleEditorView: View {
     /// already cover now.
     private var startsNow: Bool { assembled.window(containing: .now) != nil }
 
-    private var selectedCount: Int {
-        selection.applicationTokens.count + selection.categoryTokens.count + selection.webDomainTokens.count
-    }
-
     var body: some View {
         NavigationStack {
             Form {
@@ -65,7 +57,6 @@ struct ScheduleEditorView: View {
                         .disabled(draft.name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
             .alert(
                 "Not saved",
                 isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })
@@ -123,64 +114,20 @@ struct ScheduleEditorView: View {
 
     private var appsSection: some View {
         Section {
-            Button {
-                isPickerPresented = true
-            } label: {
-                HStack {
-                    Label("Select Apps", systemImage: "apps.iphone")
-                    Spacer()
-                    Text("\(selectedCount) selected").foregroundStyle(.secondary)
-                }
-            }
-            if selectedCount > 0 {
-                SelectionChips(selection: selection, placeholderCount: selectedCount)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            AppsPickRow(selection: $selection)
         } header: {
-            Text("Apps")
+            Text("What to lock")
         } footer: {
-            Text("Starts as your waste list. Changes here only affect this schedule.")
+            Text("Starts as your block list. Changes here only affect this schedule.")
         }
     }
 
     private var websitesSection: some View {
         Section {
-            HStack {
-                TextField("reddit.com", text: $domainInput)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .keyboardType(.URL)
-                    .textContentType(.URL)
-                    .focused($domainFieldFocused)
-                    .onSubmit(addDomain)
-                Button("Add", action: addDomain)
-                    .disabled(domainInput.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-            if let domainError {
-                Text(domainError)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-            ForEach(draft.domains, id: \.self) { domain in
-                SiteLabel(domain: domain)
-            }
-            .onDelete { draft.domains.remove(atOffsets: $0) }
-        } header: {
-            Text("Websites")
+            SitesPickRow(domains: $draft.domains)
         } footer: {
             Text("Blocked in Safari and other browsers on this iPhone only.")
         }
-    }
-
-    private func addDomain() {
-        guard let domain = BlockDomain.normalize(domainInput) else {
-            domainError = "Enter a website like reddit.com"
-            return
-        }
-        domainError = nil
-        if !draft.domains.contains(domain) { draft.domains.append(domain) }
-        domainInput = ""
-        domainFieldFocused = true
     }
 
     private func save() {

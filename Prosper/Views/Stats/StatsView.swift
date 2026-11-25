@@ -21,7 +21,12 @@ struct StatsView: View {
 
     @State private var range: Range = .day
     @State private var sectionIndex = 0
-    @State private var appSort: AppSort = .time
+    /// How the What section is laid out. It opens filed under the labels,
+    /// because "where did it go" is a question about distraction first and
+    /// about app names second (UX-29).
+    enum WhatView: Hashable { case labels, time, pickups }
+    @State private var whatView: WhatView = .labels
+    @State private var showLabelDay = false
     /// Start of the day the filters were built for; see `ReportDayTracker`.
     @State private var reportDay = Calendar.current.startOfDay(for: .now)
     @Query private var allSettings: [UserSettings]
@@ -66,11 +71,14 @@ struct StatsView: View {
             .background(ProsperColor.ground)
             .navigationTitle("Insights")
             .tracksReportDay($reportDay)
+            .sheet(isPresented: $showLabelDay) { NavigationStack { LabelDayView() } }
         }
     }
 
+    /// The labels are part of the identity too: the What section shows
+    /// labelled time, and must be rebuilt when a label changes.
     private var reportID: String {
-        "\(range)-\(section)-\(appSort)-\(Int(reportDay.timeIntervalSince1970))"
+        "\(range)-\(section)-\(whatView)-\(allSettings.first?.labelSignature ?? 0)-\(Int(reportDay.timeIntervalSince1970))"
     }
 
     @ViewBuilder
@@ -83,19 +91,36 @@ struct StatsView: View {
         case .what:
             VStack(spacing: 0) {
                 HStack {
+                    // The same list, filed under labels, with the labels to
+                    // give (UX-29).
+                    Button {
+                        showLabelDay = true
+                    } label: {
+                        Label("Label apps and sites", systemImage: "tag")
+                            .font(.subheadline.weight(.semibold))
+                    }
                     Spacer()
-                    Picker("Sort apps by", selection: $appSort) {
-                        Label("Most time", systemImage: "clock").tag(AppSort.time)
-                        Label("Most pickups", systemImage: "hand.tap").tag(AppSort.pickups)
+                    Picker("Show", selection: $whatView) {
+                        Text("By label").tag(WhatView.labels)
+                        Text("Most time").tag(WhatView.time)
+                        Text("Most pickups").tag(WhatView.pickups)
                     }
                     .pickerStyle(.menu)
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByPickups)
+                UsageReportView(filter: dailyFilter, context: whatContext)
             }
         case .patterns:
             patternsPlaceholder
+        }
+    }
+
+    private var whatContext: DeviceActivityReport.Context {
+        switch whatView {
+        case .labels: .dayLedger
+        case .time: .usageSummary
+        case .pickups: .usageByPickups
         }
     }
 
@@ -149,6 +174,8 @@ struct UsageReportView: View {
                 TodayHeroReportView(snapshot: .sample)
             } else if context == .whenHeatmap {
                 HourlyHeatmapView(usage: .sample(days: sampleDayCount))
+            } else if context == .dayLedger {
+                DayLedgerView(ledger: .sample(days: sampleDayCount))
             } else {
                 // .overview shows total+chart only; the list contexts show lists only.
                 UsageSummaryView(summary: sampleSummary,

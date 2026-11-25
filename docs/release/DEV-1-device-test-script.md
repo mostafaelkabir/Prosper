@@ -37,7 +37,7 @@ be documented, not fixed.
 |---|---|---|
 | 2.1 | During a block, open a blocked app. | Stolen Glance shield: "Locked until …", when you set it, time left, the delete-the-app line. Only a **Close** button. |
 | 2.2 | Tap **Close**. | The app closes to the Home Screen. No override offered. |
-| 2.3 | Block only a **category** (e.g. Social) via Select Apps. | Every app in it shows the Stolen Glance shield (not Apple's grey default). Websites in that category are blocked too. **This was completely broken before QA-9.** |
+| 2.3 | Block only a **category** (e.g. Social) via Apps → Add. | Every app in it shows the Stolen Glance shield (not Apple's grey default). Websites in that category are blocked too. **This was completely broken before QA-9.** |
 | 2.4 | Block reddit.com while a Safari tab has it open; then open a new tab; then try Chrome. | Blocked in all three (the open tab may need Safari relaunched — the app says so). |
 | 2.5 | Start a block that ends tomorrow (e.g. 23:00 + 4 h). Open a blocked app. | Shield says the weekday, e.g. "Locked until Fri 3:00 AM". |
 | 2.6 | Try to shield **Phone**, **Messages**, **Maps**, **Wallet**. | Record which can be picked. If Phone can be shielded, that's a safety issue to raise before external testers. |
@@ -124,6 +124,23 @@ the app, 7.8).
 | 8.2 | Long-press it: tap **I won** without unlocking into the app. | A quiet "Won today / N nights in a row" follows. Open Today: card shows the streak, tonight ✓. |
 | 8.3 | Tap **Change** on Today, answer **Not today**. | Streak 0; "Best streak" and "Won so far" unchanged. The next night's reminder is still queued. |
 | 8.4 | Answer on Today before the reminder time. | No reminder that night. |
+
+## 9. Block list and labels (UX-28, UX-29)
+
+None of this can be seen in the simulator: it has no app tokens and no real usage.
+
+| # | Do | Expect |
+|---|---|---|
+| 9.1 | Lock tab, nothing locked: under **What to lock**, tap **Apps → Add**. Tick two apps in Apple's list, Done. | Apple's picker opens once and closes cleanly. Both apps show as chips with their **real icons and names**. The row says "2 apps". |
+| 9.2 | Tap **Websites → Add/Edit**. Tap a tile, type `news.ycombinator.com`, add it, Done. | The tile shows a tick; the typed site appears under "Your other sites" with a lettered tile. Both show as chips on the Lock tab. |
+| 9.3 | Leave the Lock tab and come back; force-quit and reopen. | The list is still there. |
+| 9.4 | Tap **1h**. | New Block opens with the same apps and sites already in it. Review lists every one by name. (Cancel here.) |
+| 9.5 | Today → **See where the hours went**. | The day's apps and sites, grouped under Not labelled yet / Distracting / Productive / Rest, each with its real icon and time. The coloured bar and the group totals match the Today ring. |
+| 9.6 | Tap **Productive**, tick an app that is listed under "Not labelled yet", Done. | The picker's header says what is being ticked. Within a few seconds the app moves to Productive and the totals change. Today's ring shows the same new numbers. |
+| 9.7 | Tap **Distracting**, tick the same app. | It leaves Productive and appears under Distracting, and on the Lock tab's block list. |
+| 9.8 | **Label websites and platforms** → set one platform to Rest, add a site and set it Productive. | The list re-files them. A Distracting site is on the Lock tab's list; a Productive one is not. |
+| 9.9 | Insights → What. | Opens "By label" with the same groups and totals as 9.5; "Most time" and "Most pickups" still work. |
+| 9.10 | Start a lock, then **Add apps or sites** on it. | Apps and websites can be added; a site already locked shows a padlock in the website picker and cannot be taken out. |
 
 ## Reporting
 

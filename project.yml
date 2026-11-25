@@ -36,6 +36,8 @@ targets:
       - path: ProsperReport/UsageSummaryView.swift
       - path: ProsperReport/UsageIcon.swift
       - path: ProsperReport/TodayHeroReportView.swift
+      - path: ProsperReport/DayLedger.swift
+      - path: ProsperReport/DayLedgerView.swift
       - path: ProsperReport/HourlyUsage.swift
       - path: ProsperReport/HourlyHeatmapView.swift
       - path: ProsperReport/InsightEngine.swift

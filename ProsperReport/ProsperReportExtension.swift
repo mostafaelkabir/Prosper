@@ -26,6 +26,9 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         TodayBalanceScene { snapshot in
             TodayHeroReportView(snapshot: snapshot)
         }
+        DayLedgerScene { ledger in
+            DayLedgerView(ledger: ledger)
+        }
         InsightsScene { cards in
             // Today shows the single strongest insight (glanceable, and a
             // predictable host height — DeviceActivityReport does not self-size,

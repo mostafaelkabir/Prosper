@@ -102,7 +102,7 @@ struct RemoteDeviceCard: View {
         if snapshot.measuresWaste == false && day.wasteMarks.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Not measuring time yet").scaledFont(17, weight: .semibold).foregroundStyle(ProsperColor.ink)
-                Text("The iPhone can only time apps picked for its waste list. In Stolen Glance on the iPhone, open Settings and pick your waste apps (Instagram, YouTube…). Typed websites are blocked but can't be timed.")
+                Text("The iPhone can only time apps on its block list. In Stolen Glance on the iPhone, open the Lock tab and add your apps (Instagram, YouTube…). Typed websites are blocked but can't be timed.")
                     .scaledFont(13)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -120,7 +120,7 @@ struct RemoteDeviceCard: View {
                     .scaledFont(30, weight: .semibold, design: .rounded)
                     .monospacedDigit()
                     .foregroundStyle(floor > 0 ? ProsperColor.distracting : ProsperColor.productive)
-                Text("in the waste list today")
+                Text("in block-list apps today")
                     .scaledFont(13)
                     .foregroundStyle(ProsperColor.ink2)
             }
@@ -130,7 +130,7 @@ struct RemoteDeviceCard: View {
                     .scaledFont(13)
                     .foregroundStyle(ProsperColor.ink)
             }
-            Text("The iPhone shares a marker every 15 minutes of time in its waste list. iOS keeps exact per-app minutes on the phone.")
+            Text("The iPhone shares a marker every 15 minutes of time in the apps on its block list. iOS keeps exact per-app minutes on the phone.")
                 .scaledFont(11)
                 .foregroundStyle(ProsperColor.ink3)
                 .fixedSize(horizontal: false, vertical: true)

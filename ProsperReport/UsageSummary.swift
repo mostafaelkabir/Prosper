@@ -252,61 +252,21 @@ struct TodaySnapshot: Sendable {
         var webToken: WebDomainToken? = nil
     }
 
-    /// Walks the system result tree once, assigning each app (by token) and each
-    /// website (by domain) to a time class, then hands the pieces to `assemble`.
+    /// Walks the system result tree once (`ClassifiedDay.walk`), assigning each
+    /// app (by token) and each website (by domain) to a time class, then hands
+    /// the pieces to `assemble`.
     static func build(
         from data: DeviceActivityResults<DeviceActivityData>,
         classification: SharedClassification.Snapshot
     ) async -> TodaySnapshot {
-        var total: TimeInterval = 0
-        var pickups = 0
-        var notifications = 0
-        var apps: [ClassifiedUsage] = []
-        var sites: [ClassifiedUsage] = []
-
-        for await activity in data {
-            for await segment in activity.activitySegments {
-                total += segment.totalActivityDuration
-                pickups += segment.totalPickupsWithoutApplicationActivity
-
-                for await category in segment.categories {
-                    let categoryToken = category.category.token
-
-                    for await app in category.applications {
-                        pickups += app.numberOfPickups
-                        notifications += app.numberOfNotifications
-                        let appName = app.application.localizedDisplayName
-                        apps.append(ClassifiedUsage(
-                            id: app.application.bundleIdentifier ?? appName ?? "app",
-                            name: appName,
-                            duration: app.totalActivityDuration,
-                            pickups: app.numberOfPickups,
-                            timeClass: classification.timeClass(appToken: app.application.token, categoryToken: categoryToken, appName: appName),
-                            appToken: app.application.token
-                        ))
-                    }
-
-                    for await site in category.webDomains {
-                        let host = site.webDomain.domain
-                        sites.append(ClassifiedUsage(
-                            id: host ?? "site",
-                            name: host,
-                            duration: site.totalActivityDuration,
-                            timeClass: classification.timeClass(domain: host),
-                            webToken: site.webDomain.token
-                        ))
-                    }
-                }
-            }
-        }
-
+        let day = await ClassifiedDay.walk(data, classification: classification)
         return assemble(
-            total: total,
-            pickups: pickups,
-            notifications: notifications,
-            apps: apps,
-            sites: sites,
-            userHasLabels: !classification.isEmpty
+            total: day.total,
+            pickups: day.pickups,
+            notifications: day.notifications,
+            apps: day.apps,
+            sites: day.sites,
+            userHasLabels: day.userHasLabels
         )
     }
 

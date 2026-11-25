@@ -223,7 +223,7 @@ Legend: ✅ done · 🟡 partial · ⬜ not started · 🚫 blocked
 - 2.6 ⬜ Today vs yesterday / week vs week (must live inside the report extension)
 
 ### Epic 3: Hard-Lock Blocking — 🟡 core done
-- 3.1 ✅ Create Block flow. Apps via FamilyActivityPicker; websites typed by domain (Reddit/YouTube quick-add, remembered list, 50 max)
+- 3.1 ✅ Create Block flow. The block list is built on the Lock tab (UX-28): apps via FamilyActivityPicker, websites from a tile grid or typed (50 max); a length starts the review
 - 3.2 ✅ ManagedSettingsStore shields + `webContent.blockedByFilter = .specific` for typed domains
 - 3.3 ✅ Custom shield screen (ProsperShield)
 - 3.4 ✅ Countdown with no cancel path; OS-level unblock via ProsperMonitor
