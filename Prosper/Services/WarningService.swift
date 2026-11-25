@@ -171,11 +171,11 @@ final class WarningService: @unchecked Sendable {
     private static func failureMessage(for error: Error) -> String {
         switch error as? DeviceActivityCenter.MonitoringError {
         case .unauthorized:
-            return "Warnings aren't running: iOS says StolenEyes no longer has Screen Time access. Turn it back on in Settings ▸ Screen Time, then reopen StolenEyes."
+            return "Warnings aren't running: iOS says Stolen Glance no longer has Screen Time access. Turn it back on in Settings ▸ Screen Time, then reopen Stolen Glance."
         case .excessiveActivities:
             return "Warnings aren't running: iOS refused because too many Screen Time schedules are active. Try again after your current block ends."
         default:
-            return "Warnings aren't running: iOS wouldn't start watching your waste list. Change a setting here to try again, or reopen StolenEyes."
+            return "Warnings aren't running: iOS wouldn't start watching your waste list. Change a setting here to try again, or reopen Stolen Glance."
         }
     }
 }

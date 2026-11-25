@@ -165,7 +165,7 @@ struct InstallWindowView: View {
 
     private var exitSection: some View {
         Section {
-            Text("Outside the Friday window there is no way to change or switch off the install window from StolenEyes, and deleting your data doesn't touch it. Deleting StolenEyes removes it, because iOS applies it on the app's behalf. That also throws away your history and your streak, which is the price.")
+            Text("Outside the Friday window there is no way to change or switch off the install window from Stolen Glance, and deleting your data doesn't touch it. Deleting Stolen Glance removes it, because iOS applies it on the app's behalf. That also throws away your history and your streak, which is the price.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         } header: {

@@ -102,7 +102,7 @@ struct RemoteDeviceCard: View {
         if snapshot.measuresWaste == false && day.wasteMarks.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Not measuring time yet").scaledFont(17, weight: .semibold).foregroundStyle(ProsperColor.ink)
-                Text("The iPhone can only time apps picked for its waste list. In StolenEyes on the iPhone, open Settings and pick your waste apps (Instagram, YouTube…). Typed websites are blocked but can't be timed.")
+                Text("The iPhone can only time apps picked for its waste list. In Stolen Glance on the iPhone, open Settings and pick your waste apps (Instagram, YouTube…). Typed websites are blocked but can't be timed.")
                     .scaledFont(13)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -244,7 +244,7 @@ struct ConnectedDevicesPanel: View {
                           icon: device.snapshot.platform == .mac ? "laptopcomputer" : "iphone")
             }
             if devices.isEmpty, status.account == .available {
-                Text("Your \(otherPlatform.label) isn't connected yet. Install StolenEyes on it, signed in to iCloud with the same Apple Account, and open it once. It shows up here within a couple of minutes.")
+                Text("Your \(otherPlatform.label) isn't connected yet. Install Stolen Glance on it, signed in to iCloud with the same Apple Account, and open it once. It shows up here within a couple of minutes.")
                     .scaledFont(12)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -261,7 +261,7 @@ struct ConnectedDevicesPanel: View {
                         .foregroundStyle(ProsperColor.ink2)
                 }
             }
-            Text("Your usage, locks and warnings travel only through your own iCloud account, never through a StolenEyes server. Nothing here can end a lock or turn the guard off on another device.")
+            Text("Your usage, locks and warnings travel only through your own iCloud account, never through a Stolen Glance server. Nothing here can end a lock or turn the guard off on another device.")
                 .scaledFont(11)
                 .foregroundStyle(ProsperColor.ink3)
                 .fixedSize(horizontal: false, vertical: true)

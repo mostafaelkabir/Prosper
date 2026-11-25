@@ -61,7 +61,7 @@ struct TodayView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Where it went").labelCaps()
                     if model.today.rows.isEmpty {
-                        Text(model.agentRunning ? "Nothing measured yet today. Time appears here as you use the Mac." : "StolenEyes isn't measuring yet. Finish setup to start.")
+                        Text(model.agentRunning ? "Nothing measured yet today. Time appears here as you use the Mac." : "Stolen Glance isn't measuring yet. Finish setup to start.")
                             .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).padding(.vertical, 8)
                     }
                     let top = Array(model.today.rows.prefix(12))
@@ -164,7 +164,7 @@ struct SetupCard: View {
     var openSettings: () -> Void
 
     private var title: String {
-        if !model.settings.onboarded { return "Welcome to StolenEyes for Mac" }
+        if !model.settings.onboarded { return "Welcome to Stolen Glance for Mac" }
         if !SystemSetup.bundleHasFilter && model.agentRunning { return "Running without the network filter" }
         return "Protection is not fully on"
     }
@@ -181,7 +181,7 @@ struct SetupCard: View {
                     .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
                 Button("See what's on", action: openSettings).buttonStyle(.bordered)
             } else {
-            Text("StolenEyes needs three things from macOS: its network filter (blocks sites in every browser), a DNS proxy (SafeSearch and the adult guard), and a background helper (measures time and closes locked apps). macOS asks you to approve each once.")
+            Text("Stolen Glance needs three things from macOS: its network filter (blocks sites in every browser), a DNS proxy (SafeSearch and the adult guard), and a background helper (measures time and closes locked apps). macOS asks you to approve each once.")
                 .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
             HStack {
                 Button("Set up now") {

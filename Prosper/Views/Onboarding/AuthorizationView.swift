@@ -21,7 +21,7 @@ struct AuthorizationView: View {
                         .foregroundStyle(iconTint)
                         .accessibilityHidden(true)
 
-                    Text("StolenEyes")
+                    Text("Stolen Glance")
                         .font(.largeTitle.bold())
                         .foregroundStyle(ProsperColor.ink)
 
@@ -94,7 +94,7 @@ struct AuthorizationView: View {
 
                 // Deep-linking straight to Screen Time is private API, so the
                 // route is spelled out instead of guessed at.
-                Text("Settings ▸ Screen Time ▸ Apps With Screen Time Access ▸ StolenEyes")
+                Text("Settings ▸ Screen Time ▸ Apps With Screen Time Access ▸ Stolen Glance")
                     .font(.footnote)
                     .foregroundStyle(ProsperColor.ink2)
                     .multilineTextAlignment(.center)

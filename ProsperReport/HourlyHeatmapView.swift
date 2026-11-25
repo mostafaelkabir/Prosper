@@ -178,7 +178,7 @@ struct HourlyHeatmapView: View {
                 .foregroundStyle(.secondary)
             Text("No time-of-day data yet")
                 .font(.headline)
-            Text("Once you use your iPhone, StolenEyes shows which hours pull you in. Apple updates this every few minutes.")
+            Text("Once you use your iPhone, Stolen Glance shows which hours pull you in. Apple updates this every few minutes.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

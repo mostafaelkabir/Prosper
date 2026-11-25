@@ -22,7 +22,7 @@ struct InstalledApp: Identifiable, Hashable {
 }
 
 enum InstalledApps {
-    /// Apps that cannot be locked: quitting them would break the Mac or StolenEyes.
+    /// Apps that cannot be locked: quitting them would break the Mac or Stolen Glance.
     static let excluded: Set<String> = [
         "com.apple.finder", "com.apple.loginwindow", "com.apple.dock", "com.apple.systempreferences",
         "com.mostafa.prosper.mac", "com.mostafa.prosper.mac.agent",
