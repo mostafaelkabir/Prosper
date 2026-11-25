@@ -89,4 +89,29 @@ struct GlanceMarkTests {
         #expect(!shut.contains(CGPoint(x: 100, y: 130)))
         #expect(GlanceGeometry.opening(GlanceState.rest.lid).contains(CGPoint(x: 100, y: 100)))
     }
+
+    // MARK: Lock start (DS-11)
+
+    @Test func sealStartsWideOpenWithARoundPupil() {
+        let s = GlanceTimeline.seal(at: 0)
+        #expect(s.lid == 1)
+        #expect(s.key == 0)
+        #expect(s.draw == 1 && s.word == 1)
+    }
+
+    @Test func sealGlancesAsideFirst() {
+        #expect(GlanceTimeline.seal(at: 0.2).gazeX < -13)
+    }
+
+    @Test func sealShutsOnTheThud() {
+        #expect(GlanceTimeline.seal(at: GlanceTimeline.sealShut - 0.001).lid < -0.9)
+        #expect(GlanceTimeline.seal(at: GlanceTimeline.sealShut + 0.01).gazeX == 0)
+    }
+
+    @Test func sealSettlesOnTheRestingMark() {
+        #expect(GlanceTimeline.seal(at: 0.85) == .rest)
+        #expect(GlanceTimeline.seal(at: GlanceTimeline.sealDuration) == .rest)
+        // It must finish inside the 2 s the sheet stays up.
+        #expect(GlanceTimeline.sealDuration < 2)
+    }
 }

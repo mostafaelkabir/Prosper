@@ -295,6 +295,10 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section {
+            // The mark, tap to watch the reveal again (DS-11).
+            GlanceReveal(markSize: 76, replayable: true, autoplay: false)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
             Button {
                 openURL(AppInfo.supportURL)
             } label: {
