@@ -93,14 +93,14 @@ struct DayLedgerView: View {
             if group.timeClass == .unclassified {
                 Text(group.rows.isEmpty
                     ? "Time iOS did not tie to a single app or site."
-                    : "Nothing here counts as productive or distracting until you label it.")
+                    : "Nothing here counts as productive or distracting until you label it. Tap Label on a row.")
                     .scaledFont(13)
                     .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             ForEach(group.rows) { item in
-                row(item, color: group.timeClass.color)
+                row(item, label: group.timeClass)
             }
 
             if group.hiddenCount > 0 {
@@ -119,7 +119,18 @@ struct DayLedgerView: View {
         }
     }
 
-    private func row(_ item: UsageItem, color: Color) -> some View {
+    /// One app or site, with a pill to change its label (tap to label). The
+    /// card already names the label, so a labelled row's pill is just a tag.
+    private func row(_ item: UsageItem, label: TimeClass) -> some View {
+        HStack(spacing: 6) {
+            rowContent(item, color: label.color)
+            if let target = LabelTarget(item: item) {
+                LabelPill(target: target, current: label, compact: true)
+            }
+        }
+    }
+
+    private func rowContent(_ item: UsageItem, color: Color) -> some View {
         HStack(spacing: 12) {
             UsageIcon(item, size: 36)
             VStack(alignment: .leading, spacing: 6) {

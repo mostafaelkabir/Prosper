@@ -19,6 +19,7 @@ struct MainTabView: View {
 
     var body: some View {
         tabs
+            .quickLabelSheet()
             .fullScreenCover(item: $intervention) { pending in
                 InterventionView(
                     minutes: pending.minutes,

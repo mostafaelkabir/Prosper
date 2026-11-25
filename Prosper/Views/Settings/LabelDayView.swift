@@ -88,13 +88,17 @@ struct LabelDayView: View {
         .tracksReportDay($reportDay)
         .onAppear(perform: loadIfNeeded)
         .offeringNewSitesToSchedules($sitesForSchedules)
+        // Rows above link to the one-tap label sheet; this screen is a sheet
+        // itself, so it presents that one.
+        .quickLabelSheet(isOverlay: true)
+        .onChange(of: QuickLabelRouter.shared.revision) { _, _ in reload() }
     }
 
     // MARK: - Label buttons
 
     private var labelBar: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Label apps as").labelCaps()
+            Text("Label many apps at once").labelCaps()
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 8) { labelButtons }
                 VStack(spacing: 8) { labelButtons }
@@ -120,7 +124,7 @@ struct LabelDayView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .buttonStyle(.plain)
-            Text("Tap a label, then tick the apps in Apple's list. Distracting apps also go on your block list.")
+            Text("Tap any app or site above to label it. To label many apps at once, tap a label and tick them in Apple's list.")
                 .scaledFont(12)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -428,27 +432,23 @@ struct LabelDayView: View {
     }
 
     private func persist() {
-        let s = UserSettings.current(context: modelContext)
-        let offer = ScheduledLockService.shared.sitesWorthOffering(old: s.wasteDomains, new: distractingDomains)
+        var book = LabelBook()
+        book.productive = productive
+        book.distracting = distracting
+        book.rest = rest
+        book.productiveDomains = productiveDomains
+        book.distractingDomains = distractingDomains
+        book.restDomains = restDomains
+        let offer = LabelStore.save(book, context: modelContext)
         if !offer.isEmpty { sitesForSchedules = offer }
-        s.productiveSelectionData = WasteSelectionCodec.encode(productive)
-        s.productiveDomains = productiveDomains
-        s.restSelectionData = WasteSelectionCodec.encode(rest)
-        s.restDomains = restDomains
-        // Distracting is the block list.
-        s.wasteAppSelectionData = WasteSelectionCodec.encode(distracting)
-        s.wasteAppCount = distracting.applicationTokens.count + distracting.categoryTokens.count
-        s.wasteDomains = distractingDomains
-        try? modelContext.save()
-        s.syncClassificationSnapshot()
         revision += 1
+    }
 
-        WarningService.shared.refreshSchedule(
-            enabled: s.warningsEnabled,
-            selection: distracting,
-            typedDomains: distractingDomains,
-            thresholdMinutes: s.wasteWarningThresholdMinutes
-        )
+    /// A row labelled through the one-tap sheet: take the saved labels back in.
+    private func reload() {
+        loaded = false
+        loadIfNeeded()
+        revision += 1
     }
 }
 

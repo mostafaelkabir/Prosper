@@ -54,6 +54,10 @@ struct ProsperApp: App {
                 }
             }
             .modelContainer(PersistenceConfig.sharedModelContainer)
+            // A usage row asking to be labelled (tap to label).
+            .onOpenURL { url in
+                if authManager.isAuthorized { QuickLabelRouter.shared.open(url) }
+            }
             .onChange(of: scenePhase) { _, phase in
                 // Connected devices (M7.3): send this iPhone's day to the Mac
                 // and fetch the Mac's while open; one last send on the way out.

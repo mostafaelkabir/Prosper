@@ -32,6 +32,7 @@
 		24B893714D4533FB5AA6D111 /* UsageSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3974BFC7D4583121C9877996 /* UsageSummaryView.swift */; };
 		26475C206A82AEF97932A0D9 /* DataReset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935508F248C2264EECC3FF3C /* DataReset.swift */; };
 		29506CB04BC5541E6FC79E5F /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE1515CE25AA74966B1AA1F /* PlatformCatalog.swift */; };
+		2B3A28923BE3347BEEA977F3 /* LabelLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = E031F460F0AE659A8B585B18 /* LabelLink.swift */; };
 		2C3BC7D8754331FDB8008003 /* ProsperReportExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DF7522319D26BE76512424 /* ProsperReportExtension.swift */; };
 		2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A4C6525B1024CC685F3B /* ReportContext.swift */; };
 		2D898F79E75A4D8F0425E461 /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2169B119E76ABAC5A76FD /* ProsperColor.swift */; };
@@ -49,6 +50,7 @@
 		38FB6E3368520878968EF37F /* ChartMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD9E830E91D621D5804AFA55 /* ChartMotion.swift */; };
 		397FB5A1B83265CAD7AB5059 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D821B3C8436C866FE33886B2 /* TodayView.swift */; };
 		39C3CFEE9E67E66B2197924F /* ProsperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17775B95B304B2CA3582A7B /* ProsperType.swift */; };
+		3A144FFEC45403895699D3E7 /* TapToLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F97CECE146995E981488F34 /* TapToLabelTests.swift */; };
 		3AF1F2A254EBD1DE5AED807B /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		3BEFFA49270E13B9B59BA268 /* ProsperMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25924556E992D9853F926D09 /* ProsperMacApp.swift */; };
 		3C48B5F9E8FEE6836CF31293 /* LockExitCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D527D0E0C55EC884D552F557 /* LockExitCopy.swift */; };
@@ -104,6 +106,7 @@
 		72AA96292B78C93B203D6EBE /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2184B9AB098D02131956023D /* AppModel.swift */; };
 		733FFE56124EA7481251B14A /* WarningService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E6B811AC6801D9D1952ACD /* WarningService.swift */; };
 		74A891C2EDBD5F8BD8BB0AA8 /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
+		76D366D0BEA004824DDA2BB0 /* QuickLabelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */; };
 		77A96AFCC54C9F57E8EF44C5 /* AdultContentGuardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD12A34E4E10988A8385B8E7 /* AdultContentGuardView.swift */; };
 		77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		7891767EED6D7739734576F0 /* InstallWindowService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D0304E40C6D3D2B2E06FD1 /* InstallWindowService.swift */; };
@@ -135,6 +138,7 @@
 		9696ACF143811DFCF01EF155 /* InstallWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8D4A6FC92E2966C7AEB353 /* InstallWindowView.swift */; };
 		97727BBE97137F3C9E209F77 /* ProsperMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1788F379B8103E67ABF85DA7 /* ProsperMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		97AF62DF1D6FC69958544869 /* InterventionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA48729E878E058C7A790F7 /* InterventionView.swift */; };
+		983328C5BF54E4543D054EE5 /* LabelLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = E031F460F0AE659A8B585B18 /* LabelLink.swift */; };
 		99701B527EA2A66A130E14EC /* ProsperReport.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 787F80B30CAB4A7432226247 /* ProsperReport.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A3564894D135C232E22F704 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
 		9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */; };
@@ -205,6 +209,7 @@
 		E624A084FD30737F61F4F455 /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2169B119E76ABAC5A76FD /* ProsperColor.swift */; };
 		E69DA3552390E13D27E0858B /* ProsperDeviceActivityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */; };
 		E7DCD60FE9FD1C54648F9B2D /* BlockDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E868A17200694E814150C7 /* BlockDomain.swift */; };
+		E7F2022768D176D3D254D339 /* LabelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0959B3AAD820400559CAC0C6 /* LabelStore.swift */; };
 		E9E370F6FDEDADF40174F066 /* SyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52964973BCCAAC604A7EB17 /* SyncModels.swift */; };
 		E9FC7B8A0D844E5E79875724 /* AdultContentGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3E7EA6102F0EFAB9B4DDBF /* AdultContentGuardTests.swift */; };
 		EA5BE0586095001F895D7ED3 /* DayLedgerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6097C2D9290669E75B532A /* DayLedgerView.swift */; };
@@ -341,6 +346,7 @@
 		04ECDC46A412BE668DC9DEE6 /* NoCancelAuditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoCancelAuditTests.swift; sourceTree = "<group>"; };
 		071EA35FC7FB8558AEFC887C /* InsightEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightEngine.swift; sourceTree = "<group>"; };
 		0958B2E2262200B2D52204B0 /* SharedGuardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedGuardState.swift; sourceTree = "<group>"; };
+		0959B3AAD820400559CAC0C6 /* LabelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelStore.swift; sourceTree = "<group>"; };
 		0A0925E25125DB7602985DFE /* ProsperMacAgent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProsperMacAgent.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F25C5A89EC5E58636D2C353 /* LockComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockComponents.swift; sourceTree = "<group>"; };
 		10024DFBE65A2D39D3179C2E /* com.mostafa.prosper.mac.agent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = com.mostafa.prosper.mac.agent.plist; sourceTree = "<group>"; };
@@ -433,6 +439,7 @@
 		89DF7522319D26BE76512424 /* ProsperReportExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperReportExtension.swift; sourceTree = "<group>"; };
 		8B6DEC8D1D6F75B30425713A /* SystemSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSetup.swift; sourceTree = "<group>"; };
 		8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperShieldConfiguration.swift; sourceTree = "<group>"; };
+		8F97CECE146995E981488F34 /* TapToLabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapToLabelTests.swift; sourceTree = "<group>"; };
 		8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningLevelTests.swift; sourceTree = "<group>"; };
 		912B1621B5ECD8CF9E64759D /* UsageIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageIcon.swift; sourceTree = "<group>"; };
 		9314AE9A9C3D53B04778361F /* ProsperComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperComponents.swift; sourceTree = "<group>"; };
@@ -451,6 +458,7 @@
 		A3678B823AB6BEC5CE18E98B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A4E6B811AC6801D9D1952ACD /* WarningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningService.swift; sourceTree = "<group>"; };
 		A632709C4CC649D29F82481B /* BlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockView.swift; sourceTree = "<group>"; };
+		A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLabelSheet.swift; sourceTree = "<group>"; };
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
 		AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferToSchedules.swift; sourceTree = "<group>"; };
 		AB3332376609E00896D14B23 /* InsightsReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsReportView.swift; sourceTree = "<group>"; };
@@ -484,6 +492,7 @@
 		DC1A493EE7C83D337D809A21 /* InsightsScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsScene.swift; sourceTree = "<group>"; };
 		DDBE4994A667B263D3C0FD9F /* ProsperShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ProsperShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDE1515CE25AA74966B1AA1F /* PlatformCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformCatalog.swift; sourceTree = "<group>"; };
+		E031F460F0AE659A8B585B18 /* LabelLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelLink.swift; sourceTree = "<group>"; };
 		E0388E7FC8692B7C6FAFB06C /* Enforcer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enforcer.swift; sourceTree = "<group>"; };
 		E17775B95B304B2CA3582A7B /* ProsperType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperType.swift; sourceTree = "<group>"; };
 		E39020E26FBCAFBBFF3D9AC5 /* LockTargetRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockTargetRows.swift; sourceTree = "<group>"; };
@@ -847,6 +856,7 @@
 			children = (
 				E39020E26FBCAFBBFF3D9AC5 /* LockTargetRows.swift */,
 				AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */,
+				A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */,
 				FCE86A244991500CE0C12F76 /* SelectionChips.swift */,
 				49DF880999A6B64D78F34EFA /* SitePickerSheet.swift */,
 				00B4ABC1CFA6F0C70DAC220D /* WasteListEditor.swift */,
@@ -869,6 +879,7 @@
 				48DAF826595EED85C8C1BD65 /* NightlyCheckInTests.swift */,
 				A2837C2CC0E492090A5ED6D0 /* ReportLayoutTests.swift */,
 				D239C2ADE6F18E0D763BB916 /* ScheduledLockTests.swift */,
+				8F97CECE146995E981488F34 /* TapToLabelTests.swift */,
 				864785C9A520785BE230D584 /* UsageNumbersTests.swift */,
 				AC89C6D9C4D9E3C4A3876FBA /* WarningDeliveryTests.swift */,
 				8FDD526DB1A1B2B9440E486E /* WarningLevelTests.swift */,
@@ -924,6 +935,7 @@
 				935508F248C2264EECC3FF3C /* DataReset.swift */,
 				747EB3F1DA1FFF265D2B9310 /* InstallWindow.swift */,
 				C4D0304E40C6D3D2B2E06FD1 /* InstallWindowService.swift */,
+				0959B3AAD820400559CAC0C6 /* LabelStore.swift */,
 				6423C38528091E00C3CCB15F /* NightlyCheckIn.swift */,
 				04B29499B23CFE16EA1384ED /* NightlyCheckInCenter.swift */,
 				FD81363CEE9AFA44997EAE05 /* NotificationService.swift */,
@@ -997,6 +1009,7 @@
 		D51E73D23315E413F5EEB520 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E031F460F0AE659A8B585B18 /* LabelLink.swift */,
 				9DE8A4C6525B1024CC685F3B /* ReportContext.swift */,
 				22E3DAB028B8F9167C9AE927 /* ReportDay.swift */,
 			);
@@ -1422,6 +1435,8 @@
 				9696ACF143811DFCF01EF155 /* InstallWindowView.swift in Sources */,
 				97AF62DF1D6FC69958544869 /* InterventionView.swift in Sources */,
 				9F83DBA9E981A08AC3AF51BC /* LabelDayView.swift in Sources */,
+				2B3A28923BE3347BEEA977F3 /* LabelLink.swift in Sources */,
+				E7F2022768D176D3D254D339 /* LabelStore.swift in Sources */,
 				8DC829A6B7DAA35A4FB0003D /* LockComponents.swift in Sources */,
 				A19980950F58348A558DF243 /* LockExitCopy.swift in Sources */,
 				7E8B34A15CBD58454B62E468 /* LockTargetRows.swift in Sources */,
@@ -1440,6 +1455,7 @@
 				32F7CF502ECEFE5B265CE1E6 /* ProsperComponents.swift in Sources */,
 				39C3CFEE9E67E66B2197924F /* ProsperType.swift in Sources */,
 				8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */,
+				76D366D0BEA004824DDA2BB0 /* QuickLabelSheet.swift in Sources */,
 				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
 				A8E26A302954CD921C63853C /* ReportDay.swift in Sources */,
 				16330937FCCEBE5EA6222849 /* ScheduleEditorView.swift in Sources */,
@@ -1570,6 +1586,7 @@
 				3DDDF02502063707F3B8B5C6 /* InsightEngine.swift in Sources */,
 				F51354BDC478A3C6E868C199 /* InsightsReportView.swift in Sources */,
 				E1949583E17CCBE8DF4EBCF0 /* InsightsScene.swift in Sources */,
+				983328C5BF54E4543D054EE5 /* LabelLink.swift in Sources */,
 				B8742D2E3979E22EA03CCC0B /* LockComponents.swift in Sources */,
 				120B8D64A47A00337D81B64F /* LockExitCopy.swift in Sources */,
 				EB07A9BDC6399AB7A5F24DAB /* PlatformCatalog.swift in Sources */,
@@ -1604,6 +1621,7 @@
 				E614E0741C4A650CFEADB73F /* NightlyCheckInTests.swift in Sources */,
 				8E071129296FFAB9CD681E77 /* ReportLayoutTests.swift in Sources */,
 				D06F45F0A8759135C6DFB507 /* ScheduledLockTests.swift in Sources */,
+				3A144FFEC45403895699D3E7 /* TapToLabelTests.swift in Sources */,
 				F361E14EE661762C92FB141C /* UsageNumbersTests.swift in Sources */,
 				5CD04B48EC6C1217891DB315 /* WarningDeliveryTests.swift in Sources */,
 				9A62373CE49096EBA693B2E9 /* WarningLevelTests.swift in Sources */,
