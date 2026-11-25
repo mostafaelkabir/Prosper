@@ -5,9 +5,14 @@ import FamilyControls
 struct BlockView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dynamicTypeSize) private var typeSize
-    /// Non-nil = New Block sheet opened with the block list and a length.
+    /// Non-nil = the lock sheet, opened with the block list and a length.
     @State private var pendingPrefill: BlockPrefill?
-    @State private var showSchedules = false
+    /// Bumped when a schedule is saved or removed, so a lock that has just
+    /// started shows in the header without waiting for the next clock tick.
+    @State private var scheduleRevision = 0
+    /// Draws the ring in when a lock starts (UX-30).
+    @State private var ringDrawn = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showAddToBlock = false
     /// A schedule locking right now, opened for adding from the Lock tab (UX-25).
     @State private var addingToSchedule: ScheduledLock?
@@ -81,7 +86,6 @@ struct BlockView: View {
             // your day, Settings and setup.
             .onAppear(perform: loadBlockList)
             .offeringNewSitesToSchedules($sitesForSchedules)
-            .sheet(isPresented: $showSchedules) { ScheduleListView() }
             .sheet(item: $addingToSchedule) { lock in
                 AddToLockView(
                     lockedSelection: lock.selection,
@@ -89,15 +93,6 @@ struct BlockView: View {
                     until: ScheduledLockService.shared.frozenUntil(lock) ?? .now
                 ) { additions, domains in
                     try ScheduledLockService.shared.add(selection: additions, domains: domains, to: lock)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showSchedules = true
-                    } label: {
-                        Label("Schedules", systemImage: "calendar.badge.clock")
-                    }
                 }
             }
         }
@@ -109,15 +104,22 @@ struct BlockView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = max(0, session.endTime.timeIntervalSince(context.date))
             let progress = session.duration > 0 ? remaining / session.duration : 0
+            // Held back while the lock sheet is still up, so the sweep is
+            // seen as the sheet leaves and not spent behind it.
+            let drawn = ringDrawn && pendingPrefill == nil
             FitOrScroll { VStack(spacing: 22) {
                 Spacer()
 
                 CountdownRing(
-                    progress: progress,
+                    // Sweeps round once as the lock takes hold, then follows
+                    // the clock. No idle animation after that: this is not a
+                    // screen to sit and watch.
+                    progress: drawn ? progress : 0,
                     centerText: formatTime(remaining),
                     size: 208,
                     emphasize: remaining <= 60
                 )
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.9), value: drawn)
 
                 Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(untilText(session.endTime))")
                     .font(.footnote)
@@ -171,6 +173,9 @@ struct BlockView: View {
             )
             }
         }
+        // A turn later, so the ring is first drawn empty and then sweeps.
+        .onAppear { DispatchQueue.main.async { ringDrawn = true } }
+        .onDisappear { ringDrawn = false }
     }
 
     // MARK: - Idle
@@ -186,8 +191,13 @@ struct BlockView: View {
                 TimelineView(.periodic(from: .now, by: 30)) { context in
                     idleHeader(now: context.date)
                 }
+                .id(scheduleRevision)
                 blockListCard
                 if !pinsLengths { lockForRow }
+                // Under the list a lock is built from: the same list, locked
+                // by the clock instead of by hand (UX-30).
+                SchedulesCard(onChange: { scheduleRevision += 1 })
+                    .padding(.horizontal, 20)
             }
             .padding(.top, 8)
             .padding(.bottom, 20)
@@ -256,11 +266,11 @@ struct BlockView: View {
             lock.window(containing: now).map { (lock, $0.end) }
         }
         return VStack(spacing: 10) {
-            Image(systemName: running.isEmpty ? "lock.open" : "lock.fill")
-                .font(.system(size: 32))
-                .foregroundStyle(running.isEmpty ? ProsperColor.ink3 : ProsperColor.slate)
             if let first = running.first {
                 let (lock, end) = first
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(ProsperColor.slate)
                 Text("\(lock.name) is locking")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(ProsperColor.ink)
@@ -281,16 +291,33 @@ struct BlockView: View {
                 }
                 .buttonStyle(.bordered)
             } else {
-                Text("Nothing is locked")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(ProsperColor.ink)
-                Text("Choose what to lock, then for how long. There is no way to undo it.")
-                    .font(.subheadline)
-                    .foregroundStyle(ProsperColor.ink3)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                nothingLocked
             }
         }
+    }
+
+    /// Nothing locked: one quiet line, so the list, the lengths and the
+    /// schedules get the screen (UX-30).
+    private var nothingLocked: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lock.open")
+                .scaledFont(17, weight: .semibold)
+                .foregroundStyle(ProsperColor.ink2)
+                .padding(.top, 1)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Nothing is locked")
+                    .scaledFont(17, weight: .semibold)
+                    .foregroundStyle(ProsperColor.ink)
+                Text("Choose what to lock, then for how long. There is no way to undo it.")
+                    .scaledFont(14)
+                    .foregroundStyle(ProsperColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 24)
+        .accessibilityElement(children: .combine)
     }
 
     /// How long, as the last step: the list is above, a length starts the
@@ -309,15 +336,16 @@ struct BlockView: View {
                         pendingPrefill = prefill(duration: preset.duration)
                     }
                 }
+                // Opens the same sheet; its dial sets any other length.
                 lengthTile("Other", caption: "length") {
-                    pendingPrefill = prefill(duration: 3600)
+                    pendingPrefill = prefill(duration: 30 * 60)
                 }
             }
             .disabled(listIsEmpty)
             .opacity(listIsEmpty ? 0.45 : 1)
             Text(listIsEmpty
                 ? "Add an app or a website above, then choose how long."
-                : "You see the full list before it starts. Once started, it cannot be undone.")
+                : "One more screen shows the full list and asks for a hold. Once started, it cannot be undone.")
                 .font(.footnote)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)

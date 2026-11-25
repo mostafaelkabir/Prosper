@@ -436,9 +436,11 @@ extension UsageSummary {
         for index in apps.indices { apps[index].days = spread(apps[index].duration, index) }
         for index in sites.indices { sites[index].days = spread(sites[index].duration, index + 1) }
 
+        // The total is the days added up, so the header, the average line
+        // and the bars agree; a single day is the 2h 14m the Today hero shows.
         return UsageSummary(
-            totalDuration: 134 * 60,
-            totalPickups: 63,
+            totalDuration: days.map(\.duration).reduce(0, +),
+            totalPickups: 63 * count,
             days: days,
             products: rankedProducts(apps: apps, sites: sites),
             apps: apps,

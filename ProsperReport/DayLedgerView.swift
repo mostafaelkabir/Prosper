@@ -6,6 +6,9 @@ import SwiftUI
 struct DayLedgerView: View {
     let ledger: DayLedger
 
+    /// Cards lift in one after another and their bars grow (`ChartMotion`).
+    @State private var shown = false
+
     /// The biggest row anywhere, so bars compare across the cards.
     private var peak: TimeInterval {
         ledger.groups.flatMap(\.rows).map(\.duration).max() ?? 1
@@ -18,8 +21,10 @@ struct DayLedgerView: View {
             } else {
                 VStack(alignment: .leading, spacing: 18) {
                     summary
-                    ForEach(ledger.groups) { group in
+                        .riseIn(shown, order: 0)
+                    ForEach(Array(ledger.groups.enumerated()), id: \.element.id) { index, group in
                         card(group)
+                            .riseIn(shown, order: 1 + index)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -29,6 +34,7 @@ struct DayLedgerView: View {
                 .padding(.bottom, 96)
             }
         }
+        .onFirstAppear($shown)
     }
 
     // MARK: - The whole day in one bar
@@ -55,6 +61,8 @@ struct DayLedgerView: View {
                         }
                     }
                 }
+                // The day fills in from the left, label by label.
+                .growIn(shown, delay: 0.1)
             }
             .frame(height: 12)
             .accessibilityHidden(true)
@@ -130,6 +138,7 @@ struct DayLedgerView: View {
                     Capsule()
                         .fill(color)
                         .frame(width: max(4, geo.size.width * item.duration / max(peak, 1)))
+                        .growIn(shown, delay: 0.25)
                 }
                 .frame(height: 5)
                 .background(Capsule().fill(ProsperColor.surface2))
@@ -142,7 +151,7 @@ struct DayLedgerView: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "hourglass")
-                .font(.system(size: 40))
+                .scaledFont(36)
                 .foregroundStyle(ProsperColor.ink2)
             Text("No usage recorded yet")
                 .scaledFont(17, weight: .semibold)

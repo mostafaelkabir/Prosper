@@ -19,6 +19,22 @@ struct InsightCard: Identifiable, Sendable, Hashable {
     let evidence: String
     /// SF Symbol for the card's mark.
     let systemImage: String
+    /// The one number the card is about ("64%", "18"), shown large on the
+    /// lead card in Patterns. Nil for a card with no single figure.
+    var figure: String? = nil
+    /// What the figure counts ("of phone time", "pickups").
+    var figureCaption: String? = nil
+    /// A share of the whole (0...1), drawn as a ring around the figure.
+    var fraction: Double? = nil
+
+    /// The kind as a small heading over the card, so a list of them reads as
+    /// grouped by what they are about.
+    var kindTitle: String {
+        switch kind {
+        case .checkingReflex: "Checking habit"
+        case .concentration: "Where it goes"
+        }
+    }
 }
 
 /// What one walk of the system result tree collects. Slice 1 uses only the two
@@ -105,7 +121,9 @@ enum InsightEngine {
             score: ppm,
             headline: "\(app.name) was the first app after \(app.pickups) pickups.",
             evidence: "\(app.duration.usageFormatted) in it all told — you reach for it far more than you stay.",
-            systemImage: "hand.tap.fill"
+            systemImage: "hand.tap.fill",
+            figure: "\(app.pickups)",
+            figureCaption: "pickups"
         )
     }
 
@@ -131,7 +149,10 @@ enum InsightEngine {
             score: share * 10,
             headline: "\(app.name) was \(pct)% of your phone time.",
             evidence: "\(app.duration.usageFormatted) of \(s.totalDuration.usageFormatted) tracked — the biggest single win for a block.",
-            systemImage: "chart.pie.fill"
+            systemImage: "chart.pie.fill",
+            figure: "\(pct)%",
+            figureCaption: "of phone time",
+            fraction: share
         )
     }
 
@@ -160,7 +181,8 @@ extension InsightCard {
                 id: "reflex-Instagram", kind: .checkingReflex, score: 3.4,
                 headline: "Instagram was the first app after 18 pickups.",
                 evidence: "20m in it all told — you reach for it far more than you stay.",
-                systemImage: "hand.tap.fill"
+                systemImage: "hand.tap.fill",
+                figure: "18", figureCaption: "pickups"
             ),
         ]
     }

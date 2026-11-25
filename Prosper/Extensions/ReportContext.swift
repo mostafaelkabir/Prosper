@@ -26,6 +26,10 @@ extension DeviceActivityReport.Context {
     /// Ranked plain-English insights (E7.0): the engine reads raw usage and
     /// emits `InsightCard`s; the app just hosts the result.
     static let insights = Self("Insights")
+    /// Every ranked insight for the range, as a list that scrolls: the
+    /// Patterns section of Insights (UX-30). `insights` stays the single
+    /// strongest one, for Today.
+    static let insightsList = Self("Insights List")
 }
 
 /// Heights the app reserves for hosted reports. A `DeviceActivityReport`

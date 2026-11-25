@@ -2,52 +2,53 @@ import SwiftUI
 import SwiftData
 import FamilyControls
 
+/// The one screen between choosing a lock and starting it: how long, exactly
+/// what it covers, and the hold that commits (UX-30).
+///
+/// It used to be two screens. A length tapped on the Lock tab opened a form
+/// that asked for the same list and the length again, and only then led to a
+/// review with the hold on it. Starting a lock is the habit this app exists
+/// for, so the repeated form is gone: the length is a dial at the top, the
+/// list is underneath with every name on it, and the hold is always in reach.
+///
+/// The review's rule is kept (REL-9): nothing can be locked without its name
+/// having been on this screen. Picking a *category* is the sharp edge: one tap
+/// sweeps in every app iOS files under it, including ones the user never chose
+/// and cannot see, and the picker gives no way to enumerate them. That cannot
+/// be listed, so it is said out loud instead.
 struct CreateBlockView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var selection: FamilyActivitySelection
     @State private var domains: [String]
     @State private var duration: TimeInterval
-    @State private var showCustomPicker = false
-    @State private var customHours = 1
-    @State private var customMinutes = 0
-    @State private var showConfirmation = false
+    /// Whether every blocked address is written out under the site chips.
+    @State private var showsAddresses = false
     /// Why the last hold-to-lock did not start a block. Shown as an alert:
     /// a silent failure reads exactly like success (QA-9).
     @State private var startError: String?
     /// True while the block's timers are being installed, which can take
     /// seconds when iOS is waiting on ProsperMonitor (QA-10).
     @State private var isLocking = false
+    /// When the lock that has just started ends. Non-nil plays the seal over
+    /// the sheet for a moment before it closes (UX-30).
+    @State private var sealedUntil: Date?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Every block ever started, used only to tell a first-timer from someone
     /// who knows what a block feels like.
     @Query private var allSessions: [BlockSession]
 
-    /// Prefill hook for Quick Block presets: seed the sheet with the user's
-    /// waste selection + typed domains and a chosen duration. The user still
-    /// completes the hold-to-lock. `nil` = manual entry.
+    /// Prefill hook for the Lock tab's lengths and Today's "Plan a focus
+    /// block": the block list and a chosen length. The user still completes
+    /// the hold-to-lock. `nil` = start from nothing.
     init(prefill: BlockPrefill? = nil) {
         _selection = State(initialValue: prefill?.selection ?? FamilyActivitySelection())
         _domains = State(initialValue: prefill?.domains ?? [])
         _duration = State(initialValue: max(prefill?.duration ?? 3600, BlockingService.minimumDuration))
     }
 
-    private var endTimeText: String {
-        let end = Date.now.addingTimeInterval(duration)
-        return Calendar.current.isDateInToday(end)
-            ? end.formatted(date: .omitted, time: .shortened)
-            : end.formatted(date: .abbreviated, time: .shortened)
-    }
-
-    private let allPresets: [(label: String, seconds: TimeInterval)] = [
-        ("30m", 1800),
-        ("1h", 3600),
-        ("2h", 7200),
-        ("4h", 14400),
-        ("8h", 28800),
-    ]
-
-    /// A first block is capped well below the 23h55m the custom picker allows.
+    /// A first block is capped well below the 23h55m the dial otherwise allows.
     ///
     /// Someone who has never felt an unbreakable block has no way to judge what
     /// a day of one is like, and there is no undo to learn from. Four hours is
@@ -62,51 +63,44 @@ struct CreateBlockView: View {
         isFirstBlock ? Self.firstBlockMaxDuration : 23 * 3600 + 55 * 60
     }
 
-    private var presets: [(label: String, seconds: TimeInterval)] {
-        allPresets.filter { $0.seconds <= maxDuration }
-    }
-
-    private var maxCustomHours: Int { Int(maxDuration) / 3600 }
-
     private var siteCount: Int {
         selection.webDomainTokens.count + domains.count
     }
 
     /// A waste list or saved list can hold more sites than iOS will filter.
-    /// Blocking only the first 50 while the confirm screen lists them all
-    /// would lock less than it promised, so the review step waits (QA-9).
+    /// Blocking only the first 50 while this screen lists them all would lock
+    /// less than it promised, so the hold waits (QA-9).
     private var tooManySites: Bool { domains.count > BlockingService.maxDomains }
 
     private var hasSelection: Bool {
         !selection.applicationTokens.isEmpty
-            // A category-only pick is a real selection — and the one REL-9 cares
-            // most about, since it sweeps in apps the user never named. It used
-            // to leave the lock button hidden with no explanation.
+            // A category-only pick is a real selection, and the one REL-9 cares
+            // most about, since it sweeps in apps the user never named.
             || !selection.categoryTokens.isEmpty
             || siteCount > 0
     }
 
-    private var durationText: String {
-        let hours = Int(duration) / 3600
-        let minutes = (Int(duration) % 3600) / 60
-        if hours > 0 && minutes > 0 {
-            return "\(hours)h \(minutes)m"
-        } else if hours > 0 {
-            return "\(hours) hour\(hours == 1 ? "" : "s")"
-        } else {
-            return "\(minutes) minutes"
-        }
-    }
-
     var body: some View {
         NavigationStack {
-            Form {
-                appsSection
-                websitesSection
-                durationSection
+            ScrollView {
+                VStack(spacing: 16) {
+                    lengthCard
+                    coverCard
+                    Text(LockExitCopy.short)
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ink2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 20)
             }
-            .navigationTitle("New Block")
+            .scrollBounceBehavior(.basedOnSize)
+            .background(ProsperColor.ground)
+            .navigationTitle(hasSelection ? "Lock this?" : "New lock")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(isLocking || sealedUntil != nil)
             .alert(
                 "Nothing was locked",
                 isPresented: Binding(get: { startError != nil }, set: { if !$0 { startError = nil } })
@@ -115,185 +109,183 @@ struct CreateBlockView: View {
             } message: {
                 Text(startError ?? "")
             }
-            .safeAreaInset(edge: .bottom) {
-                if hasSelection {
-                    confirmBar
-                }
-            }
+            .safeAreaInset(edge: .bottom, spacing: 0) { commitBar }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isLocking)
                 }
             }
-            .sensoryFeedback(.selection, trigger: duration)
             .onAppear {
                 loadSavedDomains()
                 clampDuration()
             }
-            .navigationDestination(isPresented: $showConfirmation) {
-                ConfirmBlockView(
-                    selection: selection,
-                    typedDomains: domains,
-                    duration: duration,
-                    isLocking: isLocking,
-                    onConfirm: startBlock
-                )
+            .onChange(of: isFirstBlock) { _, _ in clampDuration() }
+        }
+        .overlay {
+            if let sealedUntil {
+                LockSeal(until: sealedUntil)
+                    .transition(.opacity)
+                    // It is already locked; a tap just skips the rest.
+                    .onTapGesture { dismiss() }
             }
         }
+        .animation(.easeOut(duration: 0.25), value: sealedUntil)
     }
 
-    /// The same two rows as the Lock tab's block list (UX-28). Changes here
-    /// are for this block only.
-    private var appsSection: some View {
-        Section {
-            AppsPickRow(selection: $selection)
-        } header: {
-            Text("What to lock")
-        } footer: {
-            Text("To lock the YouTube or Reddit app itself, pick it under Apps. Its website is separate, under Websites.")
+    // MARK: - How long
+
+    private var lengthCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Lock for").labelCaps()
+            DurationDial(
+                duration: $duration,
+                minimum: BlockingService.minimumDuration,
+                maximum: maxDuration
+            )
+            if isFirstBlock {
+                note("Your first lock is capped at 4 hours. There is no undo, so it is worth finding out what one feels like before committing a day to it. The cap lifts after this one.")
+            } else if duration <= BlockingService.minimumDuration {
+                note("15 minutes is the shortest lock. iOS cannot time anything shorter.")
+            }
         }
+        .auroraCard()
     }
 
-    private var websitesSection: some View {
-        Section {
-            SitesPickRow(domains: $domains)
-        } footer: {
-            Text("Blocked in Safari and other browsers on this iPhone only. If a site is already open in Safari, close Safari for the block to take effect. Changes here are for this block; your usual list is on the Lock tab.")
-        }
-    }
+    // MARK: - What it covers
 
-    private var durationSection: some View {
-        Section {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(presets, id: \.seconds) { preset in
-                        Button {
-                            duration = preset.seconds
-                            showCustomPicker = false
-                        } label: {
-                            Text(preset.label)
-                                .font(.subheadline.weight(.medium))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(
-                                    duration == preset.seconds && !showCustomPicker
-                                        ? Color.accentColor
-                                        : Color(.systemGray5)
-                                )
-                                .foregroundStyle(
-                                    duration == preset.seconds && !showCustomPicker
-                                        ? .white
-                                        : .primary
-                                )
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                    }
+    /// The same two rows as the Lock tab's block list (UX-28), with nothing
+    /// folded away: every app, category and site this lock takes is named.
+    private var coverCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("What gets locked").labelCaps()
 
-                    Button {
-                        showCustomPicker = true
-                    } label: {
-                        Text("Custom")
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(showCustomPicker ? Color.accentColor : Color(.systemGray5))
-                            .foregroundStyle(showCustomPicker ? .white : .primary)
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.vertical, 4)
+            AppsPickRow(selection: $selection, chipCap: .max)
+            if !selection.categoryTokens.isEmpty {
+                warning("A category covers every app iOS files under it, including apps you did not pick yourself and ones you install later. iOS does not let Stolen Glance list them, so check this is what you want.")
             }
 
-            if showCustomPicker {
-                HStack {
-                    Picker("Hours", selection: $customHours) {
-                        ForEach(0...maxCustomHours, id: \.self) { Text("\($0)h").tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(width: 100)
+            Divider().overlay(ProsperColor.line)
 
-                    Picker("Minutes", selection: $customMinutes) {
-                        ForEach(minuteOptions, id: \.self) {
-                            Text("\($0)m").tag($0)
+            SitesPickRow(domains: $domains, chipCap: .max)
+            if !domains.isEmpty {
+                addresses
+                note("Blocked in Safari and other browsers on this iPhone only. If a site is already open in Safari, close Safari for the lock to take effect.")
+            }
+
+            note("Changes here are for this lock only. Your usual list is on the Lock tab. To lock the YouTube or Reddit app itself, pick it under Apps; its website is separate.")
+        }
+        .auroraCard()
+    }
+
+    /// The chips name each platform once; this writes out every address the
+    /// filter will actually block, for anyone who wants the exact list.
+    private var addresses: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                withAnimation(.snappy(duration: 0.25)) { showsAddresses.toggle() }
+            } label: {
+                HStack(spacing: 6) {
+                    Group {
+                        if showsAddresses {
+                            Text("Hide the addresses")
+                        } else {
+                            Text("^[Show all \(domains.count) address](inflect: true)")
                         }
                     }
-                    .pickerStyle(.wheel)
-                    .frame(width: 100)
+                    .scaledFont(13, weight: .semibold)
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                        .rotationEffect(.degrees(showsAddresses ? 180 : 0))
                 }
-                .frame(maxWidth: .infinity)
-                .onChange(of: customHours) { _, hours in
-                    if hours == 0 && customMinutes < Self.minimumMinutes { customMinutes = Self.minimumMinutes }
-                    updateCustomDuration()
-                }
-                .onChange(of: customMinutes) { _, _ in updateCustomDuration() }
+                .foregroundStyle(ProsperColor.accent)
+                .frame(minHeight: 32)
+                .contentShape(Rectangle())
             }
-        } header: {
-            Text("How long")
-        } footer: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Block for \(durationText)")
-                    .font(.subheadline.weight(.semibold))
-                Text("The shortest block is 15 minutes; iOS cannot time anything shorter.")
-                if isFirstBlock {
-                    Text("Your first block is capped at 4 hours. There is no undo, so it is worth finding out what one feels like before committing a day to it. The cap lifts after this one.")
-                }
+            .buttonStyle(.plain)
+            if showsAddresses {
+                Text(domains.joined(separator: "\n"))
+                    .scaledFont(13)
+                    .foregroundStyle(ProsperColor.ink2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }
 
-    /// Leads to the confirmation screen rather than starting the block. The
-    /// hold-to-lock now lives there, so nothing can be locked without the user
-    /// having seen the full list of what it covers (REL-9).
-    private var confirmBar: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Once it starts, nothing in this app can stop it before \(endTimeText).")
-                .font(ProsperFont.insight)
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .scaledFont(13)
+            .foregroundStyle(ProsperColor.ink2)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func warning(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .scaledFont(13, weight: .semibold)
+                .foregroundStyle(ProsperColor.ember)
+            Text(text)
+                .scaledFont(13)
                 .foregroundStyle(ProsperColor.ink)
                 .fixedSize(horizontal: false, vertical: true)
-            if tooManySites {
-                Text(BlockingService.StartError.tooManySites(domains.count).errorDescription ?? "")
-                    .font(.footnote)
-                    .foregroundStyle(.red)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ProsperColor.ember.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    // MARK: - Commit
+
+    /// The promise and the hold, always on screen. The end time is read from
+    /// the clock, so it stays true while the sheet sits open.
+    private var commitBar: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !hasSelection {
+                Text("Add an app or a website above, and the lock is ready to start.")
+                    .font(.subheadline)
+                    .foregroundStyle(ProsperColor.ink2)
                     .fixedSize(horizontal: false, vertical: true)
-            }
-            Button {
-                showConfirmation = true
-            } label: {
-                Text("Review what gets locked")
+            } else {
+                TimelineView(.periodic(from: .now, by: 20)) { context in
+                    Text("Nothing in Stolen Glance can end this before \(LockLength.endText(after: duration, from: context.date)).")
+                        .font(ProsperFont.insight)
+                        .foregroundStyle(ProsperColor.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if tooManySites {
+                    Text(BlockingService.StartError.tooManySites(domains.count).errorDescription ?? "")
+                        .font(.footnote)
+                        .foregroundStyle(ProsperColor.ember)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if isLocking {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Locking…")
+                    }
                     .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                } else {
+                    HoldToLock(title: "Hold to lock", onComplete: startBlock)
+                        .disabled(tooManySites)
+                        .allowsHitTesting(!tooManySites)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(tooManySites)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.bar)
+        .overlay(alignment: .top) { Divider().overlay(ProsperColor.line) }
     }
 
-    private static let minimumMinutes = Int(BlockingService.minimumDuration) / 60
+    // MARK: - State
 
-    /// Minutes offered by the wheel. With zero hours it starts at the iOS
-    /// minimum, so the wheel can never show a length the block will not have.
-    private var minuteOptions: [Int] {
-        Array(stride(from: customHours == 0 ? Self.minimumMinutes : 0, to: 60, by: 5))
-    }
-
-    private func updateCustomDuration() {
-        duration = max(TimeInterval(customHours * 3600 + customMinutes * 60), BlockingService.minimumDuration)
-        clampDuration()
-    }
-
-    /// Keeps the duration inside the cap — a Quick Block preset can arrive
-    /// longer than a first-timer is allowed.
+    /// Keeps the duration inside the cap: a preset can arrive longer than a
+    /// first-timer is allowed.
     private func clampDuration() {
-        if duration > maxDuration {
-            duration = maxDuration
-            customHours = min(customHours, maxCustomHours)
-        }
+        if duration > maxDuration { duration = maxDuration }
     }
 
     private func loadSavedDomains() {
@@ -305,7 +297,7 @@ struct CreateBlockView: View {
     }
 
     private func startBlock() {
-        guard !isLocking else { return }
+        guard !isLocking, hasSelection, !tooManySites else { return }
         let settings = UserSettings.current(context: modelContext)
         settings.savedBlockDomains = domains
         try? modelContext.save()
@@ -319,9 +311,11 @@ struct CreateBlockView: View {
                     domains: domains,
                     duration: duration
                 )
+                // The lock is on. Say so, then get out of the way.
+                sealedUntil = SharedBlockState.active?.endsAt ?? Date.now.addingTimeInterval(duration)
+                try? await Task.sleep(for: .seconds(reduceMotion ? 1.4 : 2.0))
                 dismiss()
             } catch {
-                showConfirmation = false
                 startError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
         }

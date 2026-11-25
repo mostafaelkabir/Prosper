@@ -11,6 +11,12 @@ struct NightlyCheckInCard: View {
     @ObservedObject private var center = NightlyCheckInCenter.shared
     /// Reopens tonight's question after it was answered, to fix a mis-tap.
     @State private var changingDay: Date?
+    /// The night that has just been won, while its celebration plays: the
+    /// count rolls up, the flame catches, and that night's cell is ticked
+    /// (UX-30). A "Not today" night never sets this.
+    @State private var justWon: Date?
+    /// The streak before that night was won, which the count rolls up from.
+    @State private var streakBefore = 0
 
     var body: some View {
         // Re-evaluated each minute so the question appears at 6 PM on its own.
@@ -98,9 +104,20 @@ struct NightlyCheckInCard: View {
     }
 
     private func answer(_ outcome: CheckInOutcome, day: Date) {
+        // Only a night that was not already a win is celebrated, so changing
+        // an answer back and forth cannot be farmed for confetti.
+        let isNewWin = outcome == .won && center.history.outcome(on: day) != .won
+        streakBefore = center.history.currentStreak(now: .now)
+        justWon = isNewWin ? day : nil
         withAnimation(.easeOut(duration: 0.2)) {
             center.answer(outcome, for: day)
             changingDay = nil
+        }
+        guard isNewWin else { return }
+        // Long enough for the celebration; after that the card is at rest and
+        // a redraw must not play it again.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if justWon == day { justWon = nil }
         }
     }
 
@@ -111,12 +128,7 @@ struct NightlyCheckInCard: View {
         let today = center.calendar.day(for: now)
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                HStack(spacing: 7) {
-                    Image(systemName: "flame.fill").foregroundStyle(ProsperColor.accent)
-                    Text(current > 0 ? "^[\(current) night](inflect: true) winning streak" : "Winning streak")
-                        .scaledFont(16, weight: .semibold)
-                        .foregroundStyle(ProsperColor.ink)
-                }
+                StreakTitle(current: current, previous: streakBefore, celebrate: justWon != nil)
                 Spacer()
                 if history.outcome(on: today) != nil {
                     Button("Change") { changingDay = today }
@@ -130,7 +142,8 @@ struct NightlyCheckInCard: View {
                 WinStrip.Day(
                     label: day.formatted(.dateTime.weekday(.abbreviated)).uppercased(),
                     outcome: history.outcome(on: day),
-                    isToday: day == today
+                    isToday: day == today,
+                    isJustWon: day == justWon
                 )
             })
             Text(footnote(now: now, today: today, history: history))
@@ -161,33 +174,85 @@ struct NightlyCheckInCard: View {
     }
 }
 
+/// The flame and the streak count. When a night has just been won the count
+/// starts one short and rolls up, and the flame catches with a burst of
+/// sparks: the win is seen being added, not just found there. The beats
+/// follow Duolingo's streak screen
+/// (60fps.design/shots/duolingo-185-day-streak-animation), kept small enough
+/// to live inside a card.
+private struct StreakTitle: View {
+    let current: Int
+    /// The streak before the night that was just won.
+    let previous: Int
+    let celebrate: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The count on screen; behind `current` until the celebration lands.
+    @State private var shown: Int?
+    @State private var lit = true
+    @State private var sparks = 0
+
+    private var count: Int { shown ?? current }
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "flame.fill")
+                .foregroundStyle(lit ? ProsperColor.accent : ProsperColor.unclassified)
+                .symbolEffect(.bounce, value: sparks)
+                .background { SparkBurst(trigger: sparks, radius: 22) }
+            Text(count > 0 ? "^[\(count) night](inflect: true) winning streak" : "Winning streak")
+                .scaledFont(16, weight: .semibold)
+                .foregroundStyle(ProsperColor.ink)
+                .contentTransition(.numericText(value: Double(count)))
+        }
+        .sensoryFeedback(.success, trigger: sparks)
+        .onAppear {
+            guard celebrate, current > 0 else { return }
+            if reduceMotion {
+                AccessibilityNotification.Announcement(announcement).post()
+                return
+            }
+            // Open on the streak as it was, with the flame out.
+            shown = min(previous, current)
+            lit = false
+            // After the night's cell has been ticked (see WinCell).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                withAnimation(.spring(duration: 0.45, bounce: 0.35)) {
+                    shown = nil
+                    lit = true
+                }
+                sparks += 1
+                AccessibilityNotification.Announcement(announcement).post()
+            }
+        }
+        // The streak can change under a count that is still held back.
+        .onChange(of: current) { _, _ in shown = nil }
+    }
+
+    private var announcement: String {
+        current == 1 ? "Won. 1 night winning streak." : "Won. \(current) nights winning streak."
+    }
+}
+
 /// Seven nights: won, not today, or unrecorded.
 struct WinStrip: View {
     struct Day: Identifiable {
         let label: String
         let outcome: CheckInOutcome?
         let isToday: Bool
+        /// Won a moment ago: its cell is ticked in front of the user.
+        var isJustWon = false
         var id: String { label }
     }
 
     let days: [Day]
 
     var body: some View {
+        let celebrating = days.contains(where: \.isJustWon)
         HStack(spacing: 7) {
-            ForEach(days) { day in
+            ForEach(Array(days.enumerated()), id: \.element.id) { index, day in
                 VStack(spacing: 5) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            .fill(day.outcome == .won ? ProsperColor.accent.opacity(0.22) : ProsperColor.surface2)
-                        if day.isToday && day.outcome == nil {
-                            RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                .strokeBorder(ProsperColor.accent, lineWidth: 1.5)
-                        }
-                        Text(symbol(day.outcome))
-                            .scaledFont(14, weight: .semibold)
-                            .foregroundStyle(day.outcome == .won ? ProsperColor.accent : ProsperColor.ink2)
-                    }
-                    .frame(height: 33)
+                    WinCell(day: day, order: index, wave: celebrating)
                     Text(day.label)
                         .scaledFont(10)
                         .foregroundStyle(ProsperColor.ink2)
@@ -199,19 +264,87 @@ struct WinStrip: View {
         }
     }
 
-    private func symbol(_ outcome: CheckInOutcome?) -> String {
-        switch outcome {
-        case .won: "✓"
-        case .notToday: "–"
-        case nil: "·"
-        }
-    }
-
     private func spoken(_ day: Day) -> String {
         switch day.outcome {
         case .won: "won"
         case .notToday: "not today"
         case nil: day.isToday ? "not answered yet" : "not recorded"
+        }
+    }
+}
+
+/// One night's cell. At rest it only shows its outcome. During a celebration
+/// the earlier wins nod in turn, left to right, and the night just won starts
+/// as the empty outlined cell it was a second ago, then fills, takes its tick
+/// with a spring and lets go of a ripple.
+private struct WinCell: View {
+    let day: WinStrip.Day
+    /// Position in the strip, which sets when it nods.
+    let order: Int
+    /// A night elsewhere in the strip has just been won.
+    let wave: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// False only while a just-won cell is still waiting to be ticked.
+    @State private var landed = true
+    @State private var nodding = false
+    /// The ripple is drawn from the moment the tick lands, then let go.
+    @State private var rippleOn = false
+    @State private var rippled = false
+
+    private var isWon: Bool { day.outcome == .won && landed }
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 11, style: .continuous) }
+
+    var body: some View {
+        ZStack {
+            shape.fill(isWon ? ProsperColor.accent.opacity(0.22) : ProsperColor.surface2)
+            if (day.isToday && day.outcome == nil) || !landed {
+                shape.strokeBorder(ProsperColor.accent, lineWidth: 1.5)
+            }
+            if rippleOn {
+                shape
+                    .stroke(ProsperColor.accent, lineWidth: 2)
+                    .scaleEffect(rippled ? 1.7 : 1)
+                    .opacity(rippled ? 0 : 0.8)
+                    .onAppear {
+                        withAnimation(.easeOut(duration: 0.7)) { rippled = true }
+                    }
+            }
+            Text(symbol)
+                .scaledFont(14, weight: .semibold)
+                .foregroundStyle(isWon ? ProsperColor.accent : ProsperColor.ink2)
+                .scaleEffect(day.isJustWon && !landed ? 0.2 : 1)
+        }
+        .frame(height: 33)
+        .scaleEffect(nodding ? 1.12 : 1)
+        .onAppear(perform: play)
+    }
+
+    private var symbol: String {
+        if !landed { return "·" }
+        switch day.outcome {
+        case .won: return "✓"
+        case .notToday: return "–"
+        case nil: return "·"
+        }
+    }
+
+    private func play() {
+        guard wave, !reduceMotion else { return }
+        if day.isJustWon {
+            landed = false
+            // After the nod has run along the cells before it.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 + 0.06 * Double(order)) {
+                withAnimation(.spring(duration: 0.4, bounce: 0.55)) { landed = true }
+                rippleOn = true
+            }
+        } else if day.outcome == .won {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 + 0.06 * Double(order)) {
+                withAnimation(.spring(duration: 0.18, bounce: 0.3)) { nodding = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+                    withAnimation(.spring(duration: 0.3, bounce: 0.4)) { nodding = false }
+                }
+            }
         }
     }
 }
