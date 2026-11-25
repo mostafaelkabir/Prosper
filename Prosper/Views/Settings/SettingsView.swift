@@ -258,14 +258,14 @@ struct SettingsView: View {
     private var classificationSection: some View {
         Section {
             NavigationLink {
-                ClassificationEditorView()
+                LabelDayView()
             } label: {
-                Label("Classify your time", systemImage: "circle.grid.2x2")
+                Label("Label your day", systemImage: "tag")
             }
         } header: {
-            Text("Time classes")
+            Text("Where your time went")
         } footer: {
-            Text("Mark apps and sites as Productive, Distracting or Intentional rest. Your waste list counts as Distracting; the rest stays Unclassified until you decide.")
+            Text("See every app and site you used, and label it Distracting, Productive or Rest. Your block list counts as Distracting; the rest stays unlabelled until you decide.")
         }
     }
 
@@ -277,7 +277,7 @@ struct SettingsView: View {
                 Label("Set up again", systemImage: "sparkles")
             }
         } footer: {
-            Text("Walk through picking waste apps, sites, and notifications again.")
+            Text("Walk through your block list and notifications again.")
         }
     }
 
@@ -310,7 +310,7 @@ struct SettingsView: View {
         } header: {
             Text("About")
         } footer: {
-            Text("Stolen Glance has no account and no server of its own. Your per-app usage never leaves this iPhone. A summary of your locks and warnings is kept in your own iCloud for your other devices.")
+            Text("Stolen Glance has no account and no server of its own. Your per-app usage never leaves this iPhone. A summary of your locks and warnings is kept in your own iCloud for your other devices.\n\nApp and site logos belong to their owners. They are shown only so you can tell what you are locking or labelling.")
         }
     }
 

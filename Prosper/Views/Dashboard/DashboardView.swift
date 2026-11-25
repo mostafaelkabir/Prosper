@@ -56,17 +56,7 @@ struct DashboardView: View {
     /// a fresh `makeConfiguration` that re-reads the snapshot. Derived from the
     /// SwiftData `settings` (updated by the editor via @Query), so it changes
     /// whether the labels were edited from Settings or the Today "Classify" sheet.
-    private var classificationSignature: Int {
-        guard let s = settings else { return 0 }
-        var hasher = Hasher()
-        hasher.combine(s.wasteAppSelectionData)   // distracting apps
-        hasher.combine(s.wasteDomains)            // distracting sites
-        hasher.combine(s.productiveSelectionData)
-        hasher.combine(s.productiveDomains)
-        hasher.combine(s.restSelectionData)
-        hasher.combine(s.restDomains)
-        return hasher.finalize()
-    }
+    private var classificationSignature: Int { settings?.labelSignature ?? 0 }
 
     /// The report day as an id component.
     private var dayKey: Int { Int(reportDay.timeIntervalSince1970) }
@@ -149,7 +139,7 @@ struct DashboardView: View {
                     }
 
                     heroCard
-                    if !hasAnyClassification { classifyCTA }
+                    labelDayRow
 
                     // M7.5: the Mac's day, from the user's iCloud account.
                     ForEach(connected.devices) { device in
@@ -183,7 +173,7 @@ struct DashboardView: View {
             .toolbar(.hidden, for: .navigationBar)
             .tracksReportDay($reportDay)
             .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
-            .sheet(isPresented: $showClassify) { NavigationStack { ClassificationEditorView() } }
+            .sheet(isPresented: $showClassify) { NavigationStack { LabelDayView() } }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
         }
     }
@@ -250,17 +240,22 @@ struct DashboardView: View {
         }
     }
 
-    private var classifyCTA: some View {
+    /// Always under the hero: the ring says how the day split, this opens the
+    /// list behind it and the labels (UX-29). Before anything is labelled it
+    /// is the ask; afterwards it is the way back in.
+    private var labelDayRow: some View {
         Button { showClassify = true } label: {
             HStack(spacing: 12) {
                 Image(systemName: "tag.fill")
                     .scaledFont(15, weight: .semibold)
                     .foregroundStyle(ProsperColor.accent)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Classify your apps")
+                    Text(hasAnyClassification ? "See where the hours went" : "Label your apps")
                         .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
-                    Text("Label what's productive, distracting or rest so the numbers above become yours.")
+                    Text(hasAnyClassification
+                        ? "Every app and site, and whether it was distracting or productive."
+                        : "Say what is distracting and what is productive, so the numbers above become yours.")
                         .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -344,7 +339,7 @@ struct DashboardView: View {
                     Text("Finish setting up")
                         .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
-                    Text("Pick your waste apps and sites so Stolen Glance can watch for you.")
+                    Text("Choose the apps and sites that eat your time, so Stolen Glance can watch for you.")
                         .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                 }

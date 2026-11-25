@@ -1,15 +1,27 @@
 import SwiftUI
 import SwiftData
+import FamilyControls
 
 struct BlockView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var showCreateBlock = false
-    /// Non-nil = New Block sheet opened with a Quick Preset already applied.
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// Non-nil = the lock sheet, opened with the block list and a length.
     @State private var pendingPrefill: BlockPrefill?
-    @State private var showSchedules = false
+    /// Bumped when a schedule is saved or removed, so a lock that has just
+    /// started shows in the header without waiting for the next clock tick.
+    @State private var scheduleRevision = 0
+    /// Draws the ring in when a lock starts (UX-30).
+    @State private var ringDrawn = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showAddToBlock = false
     /// A schedule locking right now, opened for adding from the Lock tab (UX-25).
     @State private var addingToSchedule: ScheduledLock?
+    /// The block list, edited right here on the tab (UX-28). Mirrors the
+    /// stored list; every change is saved as it is made.
+    @State private var listSelection = FamilyActivitySelection()
+    @State private var listDomains: [String] = []
+    /// Sites just added to the list that some schedule lacks (UX-26).
+    @State private var sitesForSchedules: [String] = []
     @Query(sort: \BlockSession.startedAt, order: .reverse) private var sessions: [BlockSession]
 
     /// What the Lock screen shows while a block runs.
@@ -69,9 +81,11 @@ struct BlockView: View {
             .navigationTitle("Lock")
             .navigationBarTitleDisplayMode(activeBlock == nil ? .large : .inline)
             .sensoryFeedback(.selection, trigger: pendingPrefill)
-            .sheet(isPresented: $showCreateBlock) { CreateBlockView() }
             .sheet(item: $pendingPrefill) { CreateBlockView(prefill: $0) }
-            .sheet(isPresented: $showSchedules) { ScheduleListView() }
+            // Reloaded on every appearance: the list is also edited in Label
+            // your day, Settings and setup.
+            .onAppear(perform: loadBlockList)
+            .offeringNewSitesToSchedules($sitesForSchedules)
             .sheet(item: $addingToSchedule) { lock in
                 AddToLockView(
                     lockedSelection: lock.selection,
@@ -79,15 +93,6 @@ struct BlockView: View {
                     until: ScheduledLockService.shared.frozenUntil(lock) ?? .now
                 ) { additions, domains in
                     try ScheduledLockService.shared.add(selection: additions, domains: domains, to: lock)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showSchedules = true
-                    } label: {
-                        Label("Schedules", systemImage: "calendar.badge.clock")
-                    }
                 }
             }
         }
@@ -99,15 +104,22 @@ struct BlockView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let remaining = max(0, session.endTime.timeIntervalSince(context.date))
             let progress = session.duration > 0 ? remaining / session.duration : 0
+            // Held back while the lock sheet is still up, so the sweep is
+            // seen as the sheet leaves and not spent behind it.
+            let drawn = ringDrawn && pendingPrefill == nil
             FitOrScroll { VStack(spacing: 22) {
                 Spacer()
 
                 CountdownRing(
-                    progress: progress,
+                    // Sweeps round once as the lock takes hold, then follows
+                    // the clock. No idle animation after that: this is not a
+                    // screen to sit and watch.
+                    progress: drawn ? progress : 0,
                     centerText: formatTime(remaining),
                     size: 208,
                     emphasize: remaining <= 60
                 )
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.9), value: drawn)
 
                 Text("Set at \(session.startedAt.formatted(date: .omitted, time: .shortened)) · until \(untilText(session.endTime))")
                     .font(.footnote)
@@ -161,36 +173,91 @@ struct BlockView: View {
             )
             }
         }
+        // A turn later, so the ring is first drawn empty and then sweeps.
+        .onAppear { DispatchQueue.main.async { ringDrawn = true } }
+        .onDisappear { ringDrawn = false }
     }
 
     // MARK: - Idle
 
+    /// The list scrolls; the lengths stay pinned above the tab bar, so the
+    /// way to start a lock is on screen however long the list gets (UX-28).
+    /// At accessibility text sizes a pinned bar would take most of the screen,
+    /// so there the lengths scroll with everything else.
     private var idleContent: some View {
-        FitOrScroll { idleStack }
+        let pinsLengths = !typeSize.isAccessibilitySize
+        return ScrollView {
+            VStack(spacing: 20) {
+                TimelineView(.periodic(from: .now, by: 30)) { context in
+                    idleHeader(now: context.date)
+                }
+                .id(scheduleRevision)
+                blockListCard
+                if !pinsLengths { lockForRow }
+                // Under the list a lock is built from: the same list, locked
+                // by the clock instead of by hand (UX-30).
+                SchedulesCard(onChange: { scheduleRevision += 1 })
+                    .padding(.horizontal, 20)
+            }
+            .padding(.top, 8)
+            .padding(.bottom, 20)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if pinsLengths {
+                lockForRow
+                    .padding(.top, 12)
+                    .padding(.bottom, 10)
+                    .background(ProsperColor.ground)
+                    .overlay(alignment: .top) { Divider().overlay(ProsperColor.line) }
+            }
+        }
     }
 
-    private var idleStack: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            TimelineView(.periodic(from: .now, by: 30)) { context in
-                idleHeader(now: context.date)
-            }
-            Spacer()
+    // MARK: - Block list (UX-28)
 
-            quickPresetsRow
+    private var listIsEmpty: Bool {
+        LabelSets.isEmpty(listSelection) && listDomains.isEmpty
+    }
 
-            Button {
-                showCreateBlock = true
-            } label: {
-                Label("New block", systemImage: "lock.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-            }
-            .buttonStyle(.borderedProminent)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 16)
+    /// What a lock covers, built where the lock is started: no trip to
+    /// Settings, one row for apps and one for websites.
+    private var blockListCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("What to lock").labelCaps()
+            AppsPickRow(selection: $listSelection, chipCap: 8, onChange: saveBlockList)
+            Divider().overlay(ProsperColor.line)
+            SitesPickRow(domains: $listDomains, chipCap: 8, onChange: saveBlockList)
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ProsperColor.card)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(ProsperColor.line, lineWidth: 1)
+                .allowsHitTesting(false)
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func loadBlockList() {
+        let settings = UserSettings.current(context: modelContext)
+        listSelection = settings.blockListSelection
+        listDomains = settings.wasteDomains
+    }
+
+    private func saveBlockList() {
+        let settings = UserSettings.current(context: modelContext)
+        // Loading the list also lands here; only a real change is saved.
+        guard listSelection != settings.blockListSelection || listDomains != settings.wasteDomains else { return }
+        let offer = ScheduledLockService.shared.sitesWorthOffering(old: settings.wasteDomains, new: listDomains)
+        if !offer.isEmpty { sitesForSchedules = offer }
+        settings.saveBlockList(selection: listSelection, domains: listDomains, context: modelContext)
+    }
+
+    private func prefill(duration: TimeInterval) -> BlockPrefill {
+        BlockPrefill(selection: listSelection, domains: listDomains, duration: duration)
     }
 
     /// "Nothing is locked", unless a schedule is locking right now (E3.6).
@@ -198,12 +265,12 @@ struct BlockView: View {
         let running = ScheduledLockStore.load().compactMap { lock in
             lock.window(containing: now).map { (lock, $0.end) }
         }
-        return VStack(spacing: 14) {
-            Image(systemName: running.isEmpty ? "lock.open" : "lock.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(running.isEmpty ? ProsperColor.ink3 : ProsperColor.slate)
+        return VStack(spacing: 10) {
             if let first = running.first {
                 let (lock, end) = first
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(ProsperColor.slate)
                 Text("\(lock.name) is locking")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(ProsperColor.ink)
@@ -224,55 +291,91 @@ struct BlockView: View {
                 }
                 .buttonStyle(.bordered)
             } else {
-                Text("Nothing is locked")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(ProsperColor.ink)
-                Text("Lock distracting apps and sites for a set time — with no way to undo.")
-                    .font(.subheadline)
-                    .foregroundStyle(ProsperColor.ink3)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                nothingLocked
             }
         }
     }
 
-    private var quickPresetsRow: some View {
-        let settings = UserSettings.current(context: modelContext)
-        let hasWaste = (settings.wasteAppCount > 0) || !settings.wasteDomains.isEmpty
-        return VStack(alignment: .leading, spacing: 8) {
-            if hasWaste {
-                Text("Focus for").labelCaps().padding(.horizontal, 20)
-                HStack(spacing: 12) {
-                    ForEach(QuickPreset.all) { preset in
-                        Button {
-                            pendingPrefill = preset.prefill(from: settings)
-                        } label: {
-                            VStack(spacing: 3) {
-                                Text(preset.label)
-                                    .font(.headline)
-                                    .foregroundStyle(ProsperColor.ink)
-                                Text("focus").labelCaps()
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(ProsperColor.card)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        }
-                        .buttonStyle(.plain)
+    /// Nothing locked: one quiet line, so the list, the lengths and the
+    /// schedules get the screen (UX-30).
+    private var nothingLocked: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lock.open")
+                .scaledFont(17, weight: .semibold)
+                .foregroundStyle(ProsperColor.ink2)
+                .padding(.top, 1)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Nothing is locked")
+                    .scaledFont(17, weight: .semibold)
+                    .foregroundStyle(ProsperColor.ink)
+                Text("Choose what to lock, then for how long. There is no way to undo it.")
+                    .scaledFont(14)
+                    .foregroundStyle(ProsperColor.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 24)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// How long, as the last step: the list is above, a length starts the
+    /// review. "Other" opens the same sheet for any other length.
+    private var lockForRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Lock for").labelCaps()
+            // Four across; two by two when the text is too large for that.
+            let columns = Array(
+                repeating: GridItem(.flexible(), spacing: 10),
+                count: typeSize.isAccessibilitySize ? 2 : 4
+            )
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(QuickPreset.all) { preset in
+                    lengthTile(preset.label, caption: "lock") {
+                        pendingPrefill = prefill(duration: preset.duration)
                     }
                 }
-                .padding(.horizontal, 20)
-                Text("Locks your Settings waste list for the chosen time. Cannot be undone.")
-                    .font(.footnote)
-                    .foregroundStyle(ProsperColor.ink3)
-                    .padding(.horizontal, 20)
-            } else {
-                Text("Pick waste apps in Settings to unlock one-tap Focus presets.")
-                    .font(.footnote)
-                    .foregroundStyle(ProsperColor.ink3)
-                    .padding(.horizontal, 20)
+                // Opens the same sheet; its dial sets any other length.
+                lengthTile("Other", caption: "length") {
+                    pendingPrefill = prefill(duration: 30 * 60)
+                }
             }
+            .disabled(listIsEmpty)
+            .opacity(listIsEmpty ? 0.45 : 1)
+            Text(listIsEmpty
+                ? "Add an app or a website above, then choose how long."
+                : "One more screen shows the full list and asks for a hold. Once started, it cannot be undone.")
+                .font(.footnote)
+                .foregroundStyle(ProsperColor.ink2)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.horizontal, 20)
+    }
+
+    private func lengthTile(_ label: String, caption: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Text(label)
+                    .font(.headline)
+                    .foregroundStyle(ProsperColor.onAccent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(caption)
+                    .scaledFont(11, weight: .semibold)
+                    .textCase(.uppercase)
+                    .tracking(1.1)
+                    .foregroundStyle(ProsperColor.onAccent.opacity(0.85))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(ProsperColor.accent)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label == "Other" ? "Lock for another length" : "Lock for \(label)")
     }
 
     /// The end time, with the day when it is not today (QA-9).

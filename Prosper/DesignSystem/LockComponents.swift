@@ -37,51 +37,93 @@ struct CountdownRing: View {
 }
 
 /// Press-and-hold control that commits an irreversible action. The fill runs
-/// left-to-right over `duration`; releasing early cancels. Haptics tick during
-/// the hold and confirm on completion (suppressed under Reduce Motion — the
-/// fill itself stays, since it is the affordance).
+/// left-to-right over `duration`; releasing early cancels. Haptics quicken and
+/// strengthen through the hold and confirm on completion (suppressed under
+/// Reduce Motion, along with the press and glow; the fill itself stays, since
+/// it is the affordance).
+///
+/// The lit leading edge and the settle into a checkmark follow Opal's hold to
+/// commit (60fps.design/shots/opal-hold-to-commit-button-interaction): the
+/// hold is the friction, so it should feel like something is being sealed.
 ///
 /// VoiceOver, Voice Control and Switch Control cannot hold, so for them it is
 /// a button whose hint states the consequence; activating it commits (UX-27).
 /// The height grows with Dynamic Type instead of clipping the label.
 struct HoldToLock: View {
     var title: String = "Hold to lock"
+    /// Shown with a checkmark for the moment after the hold completes.
+    var doneTitle: String = "Locked"
+    var symbol: String = "lock.fill"
     var duration: Double = 2.0
+    /// The fill. Violet for a commitment; ember for the rare hold that loosens.
+    var tint: Color = ProsperColor.accent
+    var onTint: Color = ProsperColor.onAccent
+    /// False for a hold that should not lead the screen: it rests as a plain
+    /// tile and only takes colour while it is held.
+    var prominent = true
     /// What happens, spoken after the title. Say it plainly: it cannot be undone.
     var accessibilityHint: String = "Starts the lock now. Nothing can end it early."
     var onComplete: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isEnabled) private var isEnabled
     @State private var progress: Double = 0
     @State private var holding = false
-    @State private var lastTick = 0
+    @State private var done = false
+    @State private var beat = 0
     @State private var timer: Timer?
 
+    /// Where in the hold each tick lands: closer together toward the end.
+    private static let beats: [Double] = [0.1, 0.28, 0.44, 0.58, 0.7, 0.8, 0.88, 0.95]
+
     private var label: String {
-        if progress >= 1 { return "Locked" }
+        if done { return doneTitle }
         return progress > 0 ? "Keep holding…" : title
     }
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "lock.fill")
-            Text(label)
-        }
-        .font(.headline)
-        .multilineTextAlignment(.center)
-        .foregroundStyle(progress > 0.55 ? Color.white : ProsperColor.ink)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 56)
-        .background {
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    ProsperColor.card2
-                    ProsperColor.slate.frame(width: geo.size.width * progress)
+        ZStack {
+            // At rest it is the darkest thing on the screen, unlike every
+            // tap button: this one asks for more than a tap.
+            face(
+                text: prominent ? ProsperColor.background : ProsperColor.ink,
+                icon: prominent ? ProsperColor.background : tint
+            )
+            .background(prominent ? ProsperColor.ink : ProsperColor.surface2)
+            // The same face in the fill's colours, shown only where the fill
+            // has reached, so the words stay readable on both halves.
+            face(text: onTint, icon: onTint)
+                .background(
+                    LinearGradient(
+                        colors: [tint.opacity(0.82), tint],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                )
+                .mask(alignment: .leading) {
+                    GeometryReader { geo in
+                        Rectangle().frame(width: geo.size.width * progress)
+                    }
                 }
-            }
+                .overlay(alignment: .leading) {
+                    // The lit edge of the fill.
+                    GeometryReader { geo in
+                        Capsule()
+                            .fill(Color.white.opacity(0.7))
+                            .frame(width: 8)
+                            .blur(radius: 7)
+                            .offset(x: geo.size.width * progress - 4)
+                            .opacity(progress > 0 && progress < 1 && !reduceMotion ? 1 : 0)
+                    }
+                    .allowsHitTesting(false)
+                }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(
+            color: tint.opacity((prominent ? 0.2 : 0) + (reduceMotion ? 0 : 0.4 * progress)),
+            radius: 6 + 14 * progress, y: 3
+        )
+        .scaleEffect(holding && !reduceMotion ? 0.975 : 1)
+        .opacity(isEnabled ? 1 : 0.4)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
@@ -93,31 +135,53 @@ struct HoldToLock: View {
                 .onEnded { _ in cancel() }
         )
         .animation(.easeOut(duration: 0.2), value: progress == 0)
+        .animation(.spring(duration: 0.25), value: holding)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityHint(accessibilityHint)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction {
-            guard progress < 1 else { return }
+            guard isEnabled, progress < 1 else { return }
             progress = 1
             complete()
         }
     }
 
+    private func face(text: Color, icon: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: done ? "checkmark" : symbol)
+                .foregroundStyle(icon)
+                .contentTransition(.symbolEffect(.replace))
+            Text(label)
+                .foregroundStyle(text)
+                .contentTransition(.opacity)
+        }
+        .font(.headline)
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .animation(.easeOut(duration: 0.18), value: label)
+    }
+
     private func begin() {
+        guard isEnabled, !done else { return }
         holding = true
-        lastTick = 0
-        let step = 0.02
+        beat = 0
+        // Measured against the clock, not counted in ticks: a busy main
+        // thread fires the timer late, and a 2 second hold must stay 2 seconds.
+        let began = Date()
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: step, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
             // scheduledTimer fires on the main run loop, so this really is the main
             // actor; assert it to satisfy Swift 6 concurrency (QA-5).
             MainActor.assumeIsolated {
-                progress = min(1, progress + step / duration)
-                let tick = Int((progress * duration) / 0.5)
-                if tick > lastTick {
-                    lastTick = tick
-                    if !reduceMotion { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+                progress = min(1, Date().timeIntervalSince(began) / duration)
+                if beat < Self.beats.count, progress >= Self.beats[beat] {
+                    beat += 1
+                    if !reduceMotion {
+                        UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.35 + 0.65 * progress)
+                    }
                 }
                 if progress >= 1 { complete() }
             }
@@ -126,11 +190,13 @@ struct HoldToLock: View {
 
     private func complete() {
         timer?.invalidate(); timer = nil
+        done = true
         if !reduceMotion { UINotificationFeedbackGenerator().notificationOccurred(.success) }
         onComplete()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             progress = 0
             holding = false
+            done = false
         }
     }
 
@@ -140,6 +206,109 @@ struct HoldToLock: View {
         holding = false
         if !reduceMotion { UIImpactFeedbackGenerator(style: .rigid).impactOccurred() }
         progress = 0
+    }
+}
+
+/// The moment a lock takes hold, shown over the sheet that started it.
+///
+/// A violet glow draws in to the middle of the screen, the open lock shuts
+/// with a thud in the hand, a ring closes around it and a ripple leaves, and
+/// then it says until when. About a second and a half, once, and the sheet
+/// closes on the countdown. The drawing-in follows Peace Out's start
+/// (60fps.design/shots/peace-out-timer-screen-animation): the screen gathers
+/// to a point, which is what the lock does to the phone.
+///
+/// Under Reduce Motion it is a plain fade to the closed lock and the words.
+struct LockSeal: View {
+    let until: Date
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var gathered = false
+    @State private var closed = false
+    @State private var rippled = false
+    @State private var worded = false
+
+    private var untilText: String {
+        Calendar.current.isDateInToday(until)
+            ? until.formatted(date: .omitted, time: .shortened)
+            : until.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    var body: some View {
+        ZStack {
+            ProsperColor.background.ignoresSafeArea()
+            RadialGradient(
+                colors: [ProsperColor.accent.opacity(0.5), ProsperColor.accent.opacity(0)],
+                center: .center, startRadius: 0, endRadius: 300
+            )
+            .scaleEffect(gathered || reduceMotion ? 0.75 : 1.9)
+            .opacity(gathered ? 1 : 0)
+            .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                ZStack {
+                    if closed && !reduceMotion {
+                        Circle()
+                            .stroke(ProsperColor.accent, lineWidth: 2)
+                            .scaleEffect(rippled ? 2 : 1)
+                            .opacity(rippled ? 0 : 0.7)
+                            .onAppear {
+                                withAnimation(.easeOut(duration: 0.8)) { rippled = true }
+                            }
+                    }
+                    Circle().stroke(ProsperColor.line, lineWidth: 6)
+                    Circle()
+                        .trim(from: 0, to: closed ? 1 : 0)
+                        .stroke(ProsperColor.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    Image(systemName: closed ? "lock.fill" : "lock.open.fill")
+                        // A glyph inside a fixed shape.
+                        .font(.system(size: 46, weight: .semibold))
+                        .foregroundStyle(ProsperColor.accent)
+                        .contentTransition(.symbolEffect(.replace))
+                        .scaleEffect(closed || reduceMotion ? 1 : 1.25)
+                }
+                .frame(width: 132, height: 132)
+
+                VStack(spacing: 6) {
+                    Text("Locked")
+                        .font(ProsperFont.hero(34))
+                        .foregroundStyle(ProsperColor.ink)
+                    Text("until \(untilText)")
+                        .scaledFont(17, weight: .medium)
+                        .foregroundStyle(ProsperColor.ink2)
+                }
+                .modifier(Rise(shown: worded, order: 0, reduceMotion: reduceMotion))
+
+                Text("Nothing can end it early.")
+                    .font(ProsperFont.insight)
+                    .foregroundStyle(ProsperColor.ink)
+                    .multilineTextAlignment(.center)
+                    .modifier(Rise(shown: worded, order: 2, reduceMotion: reduceMotion))
+            }
+            .padding(.horizontal, 32)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Locked until \(untilText). Nothing can end it early.")
+        .onAppear(perform: play)
+    }
+
+    private func play() {
+        AccessibilityNotification.Announcement("Locked until \(untilText)").post()
+        guard !reduceMotion else {
+            withAnimation(.easeOut(duration: 0.3)) {
+                gathered = true
+                closed = true
+                worded = true
+            }
+            return
+        }
+        withAnimation(.easeIn(duration: 0.45)) { gathered = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(duration: 0.5, bounce: 0.45)) { closed = true }
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { worded = true }
     }
 }
 

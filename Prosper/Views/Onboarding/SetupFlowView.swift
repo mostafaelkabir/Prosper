@@ -15,16 +15,32 @@ struct SetupFlowView: View {
     @State private var typedDomains: [String] = []
     @State private var thresholdMinutes: Double = 30
     @State private var loaded = false
+    /// Drives the staggered reveal of a step's content.
+    @State private var revealed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let stepCount = 3
 
     var body: some View {
         NavigationStack {
-            Group {
-                switch step {
-                case 0: wasteStep
-                case 1: notificationsStep
-                default: lockStep
+            VStack(spacing: 0) {
+                progress
+                Group {
+                    switch step {
+                    case 0: wasteStep
+                    case 1: notificationsStep
+                    default: lockStep
+                    }
                 }
+                // Each step slides in from the side it comes from, so three
+                // screens read as one short path with an end (UX-30).
+                .transition(reduceMotion ? .opacity : .asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
+                .id(step)
             }
+            .background(ProsperColor.ground)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -32,8 +48,35 @@ struct SetupFlowView: View {
                     Button("Skip") { skip() }
                 }
             }
-            .onAppear(perform: loadIfNeeded)
+            .onAppear {
+                loadIfNeeded()
+                revealed = true
+            }
         }
+    }
+
+    /// Where you are and how little is left: three short bars.
+    private var progress: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<Self.stepCount, id: \.self) { index in
+                Capsule()
+                    .fill(index <= step ? ProsperColor.accent : ProsperColor.line)
+                    .frame(height: 4)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
+        .animation(.snappy(duration: 0.3), value: step)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Step \(step + 1) of \(Self.stepCount)")
+    }
+
+    private func go(to next: Int) {
+        revealed = false
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.35)) { step = next }
+        // The new step's content rises in once it is on screen.
+        DispatchQueue.main.async { revealed = true }
     }
 
     private var title: String {
@@ -62,84 +105,85 @@ struct SetupFlowView: View {
                 )
             }
             bottomBar {
-                Button {
-                    step = 1
-                } label: {
-                    Text("Continue")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                }
-                .buttonStyle(.borderedProminent)
+                Button("Continue") { go(to: 1) }
+                    .buttonStyle(AuroraButtonStyle())
             }
         }
     }
 
     private var notificationsStep: some View {
-        VStack(spacing: 24) {
+        // Scrolls when large text makes it taller than the screen (UX-27).
+        FitOrScroll { VStack(spacing: 24) {
             Spacer()
-            Image(systemName: "bell.badge.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(.tint)
+            stepMark("bell.badge.fill")
+                .modifier(Rise(shown: revealed, order: 0, reduceMotion: reduceMotion))
             Text("Let a warning reach you")
                 .font(.title2.bold())
-            Text("Notifications arrive inside Instagram or Safari the moment you cross your limit — not buried on a screen you never open.")
+                .foregroundStyle(ProsperColor.ink)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .modifier(Rise(shown: revealed, order: 1, reduceMotion: reduceMotion))
+            Text("Notifications arrive inside Instagram or Safari the moment you cross your limit, not buried on a screen you never open.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(ProsperColor.ink2)
                 .padding(.horizontal, 32)
+                .modifier(Rise(shown: revealed, order: 2, reduceMotion: reduceMotion))
             Spacer()
-            VStack(spacing: 12) {
-                Button {
+            VStack(spacing: 6) {
+                Button("Enable notifications") {
                     Task {
                         _ = await NotificationService.shared.requestPermission()
-                        step = 2
+                        go(to: 2)
                     }
-                } label: {
-                    Text("Enable notifications")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(AuroraButtonStyle())
 
-                Button("Not now") { step = 2 }
+                Button("Not now") { go(to: 2) }
+                    .scaledFont(16, weight: .medium)
+                    .foregroundStyle(ProsperColor.accent)
+                    .frame(maxWidth: .infinity, minHeight: 44)
             }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 24)
-        }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 16)
+        } }
     }
 
     /// The last thing setup says, because it is the thing a user most needs to
     /// have heard before their first block rather than during it: the lock is
     /// real, and the one way out is deleting the app (REL-8).
     private var lockStep: some View {
-        VStack(spacing: 24) {
+        FitOrScroll { VStack(spacing: 24) {
             Spacer()
-            Image(systemName: "lock.shield")
-                .font(.system(size: 56))
-                .foregroundStyle(.tint)
+            stepMark("lock.shield")
+                .modifier(Rise(shown: revealed, order: 0, reduceMotion: reduceMotion))
             Text("A block cannot be canceled")
                 .font(.title2.bold())
+                .foregroundStyle(ProsperColor.ink)
                 .multilineTextAlignment(.center)
+                .modifier(Rise(shown: revealed, order: 1, reduceMotion: reduceMotion))
             Text(LockExitCopy.full)
                 .font(.subheadline)
                 .multilineTextAlignment(.leading)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 28)
+                .modifier(Rise(shown: revealed, order: 2, reduceMotion: reduceMotion))
             Spacer()
-            Button {
-                finish()
-            } label: {
-                Text("Got it")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-            }
-            .buttonStyle(.borderedProminent)
-            .padding(.horizontal, 32)
-            .padding(.bottom, 24)
-        }
+            Button("Got it", action: finish)
+                .buttonStyle(AuroraButtonStyle())
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
+        } }
+    }
+
+    /// The step's symbol on a soft violet disc.
+    private func stepMark(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 40, weight: .semibold))
+            .foregroundStyle(ProsperColor.accent)
+            .frame(width: 96, height: 96)
+            .background(ProsperColor.accent.opacity(0.14))
+            .clipShape(Circle())
+            .accessibilityHidden(true)
     }
 
     private func bottomBar<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {

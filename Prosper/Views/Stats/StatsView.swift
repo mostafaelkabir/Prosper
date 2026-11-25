@@ -21,7 +21,18 @@ struct StatsView: View {
 
     @State private var range: Range = .day
     @State private var sectionIndex = 0
-    @State private var appSort: AppSort = .time
+    /// How the What section is laid out. It opens filed under the labels,
+    /// because "where did it go" is a question about distraction first and
+    /// about app names second (UX-29).
+    enum WhatView: Hashable { case labels, time, pickups }
+    @State private var whatView: WhatView = .labels
+    @State private var showLabelDay = false
+    /// Which way the content moved on the last switch: +1 to a section or
+    /// range to the right, -1 to the left. The incoming report slides in from
+    /// that side, so the screen follows the tap (GrowPal stats,
+    /// 60fps.design/shots/growpal-stats-animation).
+    @State private var travel: CGFloat = 1
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Start of the day the filters were built for; see `ReportDayTracker`.
     @State private var reportDay = Calendar.current.startOfDay(for: .now)
     @Query private var allSettings: [UserSettings]
@@ -34,12 +45,12 @@ struct StatsView: View {
             VStack(spacing: 0) {
                 AuroraSegmented(
                     options: Range.allCases.map { ($0, $0.rawValue) },
-                    selection: $range
+                    selection: rangeSelection
                 )
                 .padding(.horizontal)
                 .padding(.top, 6)
 
-                SectionIndex(sections: Section.allCases.map(\.rawValue), selection: $sectionIndex)
+                SectionIndex(sections: Section.allCases.map(\.rawValue), selection: sectionSelection)
                     .padding(.horizontal)
                     .padding(.vertical, 10)
 
@@ -54,23 +65,60 @@ struct StatsView: View {
 
                 Divider().overlay(ProsperColor.line)
 
-                sectionContent
-                    // A fresh identity per (range, section, sort, day). The hosted
-                    // report is cached by iOS on (context, filter) and, at the same
-                    // identity, a range switch was not reliably re-rendered (PERF-1)
-                    // — the Dashboard keys its embeds the same way. The day keeps a
-                    // tab left open overnight from showing yesterday (QA-9).
-                    .id(reportID)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // A ZStack, so the outgoing and incoming reports overlap for the
+                // moment of the switch instead of stacking.
+                ZStack {
+                    sectionContent
+                        // A fresh identity per (range, section, sort, day). The hosted
+                        // report is cached by iOS on (context, filter) and, at the same
+                        // identity, a range switch was not reliably re-rendered (PERF-1)
+                        // — the Dashboard keys its embeds the same way. The day keeps a
+                        // tab left open overnight from showing yesterday (QA-9).
+                        .id(reportID)
+                        .transition(switchTransition)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .clipped()
             }
             .background(ProsperColor.ground)
             .navigationTitle("Insights")
             .tracksReportDay($reportDay)
+            .sheet(isPresented: $showLabelDay) { NavigationStack { LabelDayView() } }
         }
     }
 
+    /// Sets the direction before the value, in the same animated transaction,
+    /// so the transition knows which side to come from.
+    private var sectionSelection: Binding<Int> {
+        Binding(get: { sectionIndex }, set: { new in
+            travel = new >= sectionIndex ? 1 : -1
+            sectionIndex = new
+        })
+    }
+
+    private var rangeSelection: Binding<Range> {
+        Binding(get: { range }, set: { new in
+            let all = Range.allCases
+            travel = (all.firstIndex(of: new) ?? 0) >= (all.firstIndex(of: range) ?? 0) ? 1 : -1
+            range = new
+        })
+    }
+
+    /// In: a short slide from the side of travel, fading up. Out: a quick
+    /// fade, gone before the new section is half in, so two sections' text
+    /// never sits on top of each other. Under Reduce Motion, a plain fade.
+    private var switchTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .opacity.combined(with: .offset(x: 28 * travel)),
+            removal: .opacity.animation(.easeOut(duration: 0.1))
+        )
+    }
+
+    /// The labels are part of the identity too: the What section shows
+    /// labelled time, and must be rebuilt when a label changes.
     private var reportID: String {
-        "\(range)-\(section)-\(appSort)-\(Int(reportDay.timeIntervalSince1970))"
+        "\(range)-\(section)-\(whatView)-\(allSettings.first?.labelSignature ?? 0)-\(Int(reportDay.timeIntervalSince1970))"
     }
 
     @ViewBuilder
@@ -82,34 +130,45 @@ struct StatsView: View {
             UsageReportView(filter: hourlyFilter, context: .whenHeatmap)
         case .what:
             VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Picker("Sort apps by", selection: $appSort) {
-                        Label("Most time", systemImage: "clock").tag(AppSort.time)
-                        Label("Most pickups", systemImage: "hand.tap").tag(AppSort.pickups)
+                HStack(spacing: 8) {
+                    // The three ways to read the list, all on screen rather
+                    // than behind a menu.
+                    ChipPicker(
+                        options: [(WhatView.labels, "By label"), (.time, "Most time"), (.pickups, "Pickups")],
+                        selection: $whatView
+                    )
+                    Spacer(minLength: 4)
+                    // The same list, filed under labels, with the labels to
+                    // give (UX-29).
+                    Button {
+                        showLabelDay = true
+                    } label: {
+                        Label("Label", systemImage: "tag")
+                            .scaledFont(13, weight: .semibold)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .foregroundStyle(ProsperColor.accent)
+                            .background(ProsperColor.accent.opacity(0.12), in: Capsule())
                     }
-                    .pickerStyle(.menu)
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Label apps and sites")
                 }
                 .padding(.horizontal)
-                .padding(.top, 8)
-                UsageReportView(filter: dailyFilter, context: appSort == .time ? .usageSummary : .usageByPickups)
+                .padding(.top, 12)
+                UsageReportView(filter: dailyFilter, context: whatContext)
             }
         case .patterns:
-            patternsPlaceholder
+            // The ranked insights for the range, all of them. This section
+            // was a placeholder; Today still shows only the strongest (UX-30).
+            UsageReportView(filter: dailyFilter, context: .insightsList)
         }
     }
 
-    private var patternsPlaceholder: some View {
-        VStack {
-            Spacer()
-            ProsperCard {
-                InsightSentence(
-                    text: "Patterns will appear once Stolen Glance has learned your week.",
-                    footnote: "Ranked insights — checking reflex, notification pull, rabbit holes — land with the insight engine."
-                )
-            }
-            .padding()
-            Spacer()
+    private var whatContext: DeviceActivityReport.Context {
+        switch whatView {
+        case .labels: .dayLedger
+        case .time: .usageSummary
+        case .pickups: .usageByPickups
         }
     }
 
@@ -127,6 +186,46 @@ struct StatsView: View {
         case .week: UsageReportFilter.lastSevenDaysHourly()
         case .month: UsageReportFilter.lastThirtyDaysHourly()
         }
+    }
+}
+
+/// A row of small capsule choices for a secondary switch, quieter than
+/// `AuroraSegmented` so it does not compete with the range control above it.
+/// The selected capsule glides between choices.
+struct ChipPicker<T: Hashable>: View {
+    let options: [(value: T, label: String)]
+    @Binding var selection: T
+    @Namespace private var chip
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(options, id: \.value) { option in
+                let selected = option.value == selection
+                Button {
+                    withAnimation(.snappy(duration: 0.26)) { selection = option.value }
+                } label: {
+                    Text(option.label)
+                        .scaledFont(13, weight: selected ? .semibold : .medium)
+                        .lineLimit(1)
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .foregroundStyle(selected ? ProsperColor.ink : ProsperColor.ink2)
+                        .background {
+                            if selected {
+                                Capsule()
+                                    .fill(ProsperColor.surface)
+                                    .overlay(Capsule().strokeBorder(ProsperColor.line, lineWidth: 1))
+                                    .matchedGeometryEffect(id: "chip", in: chip)
+                            }
+                        }
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(3)
+        .background(ProsperColor.surface2, in: Capsule())
     }
 }
 
@@ -149,6 +248,10 @@ struct UsageReportView: View {
                 TodayHeroReportView(snapshot: .sample)
             } else if context == .whenHeatmap {
                 HourlyHeatmapView(usage: .sample(days: sampleDayCount))
+            } else if context == .insightsList {
+                InsightsReportView(cards: InsightCard.samples, limit: InsightsReportView.listLimit, scrolls: true)
+            } else if context == .dayLedger {
+                DayLedgerView(ledger: .sample(days: sampleDayCount))
             } else {
                 // .overview shows total+chart only; the list contexts show lists only.
                 UsageSummaryView(summary: sampleSummary,

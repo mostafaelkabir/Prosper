@@ -21,7 +21,7 @@ struct ConnectedDevicesScreen: View {
                 ProsperCard {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("What this iPhone shares").labelCaps()
-                        Text("Locks and schedules, the Adult Content Guard, warnings, and a marker every 15 minutes of time in your waste list. iOS doesn't let apps send exact per-app minutes anywhere, so your Mac sees \"at least\" figures from this iPhone, while this iPhone sees your Mac's exact ones.")
+                        Text("Locks and schedules, the Adult Content Guard, warnings, and a marker every 15 minutes of time in the apps on your block list. iOS doesn't let apps send exact per-app minutes anywhere, so your Mac sees \"at least\" figures from this iPhone, while this iPhone sees your Mac's exact ones.")
                             .scaledFont(13)
                             .foregroundStyle(ProsperColor.ink2)
                             .fixedSize(horizontal: false, vertical: true)

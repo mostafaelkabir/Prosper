@@ -16,6 +16,8 @@ struct SelectionChips: View {
     var placeholderCount: Int = 0
     /// Maximum chips shown before the rest collapse into a "+N more" chip.
     var cap: Int = 8
+    /// Bigger chips with bigger icons, for the lists a person builds (UX-28).
+    var large = false
 
     private enum Item: Hashable {
         case app(ApplicationToken)
@@ -37,7 +39,7 @@ struct SelectionChips: View {
         let items = items
         if items.isEmpty {
             if placeholderCount > 0 {
-                Chip {
+                Chip(large: large) {
                     Text("\(placeholderCount) selected")
                         .foregroundStyle(.secondary)
                 }
@@ -50,7 +52,7 @@ struct SelectionChips: View {
                     chip(for: item)
                 }
                 if overflow > 0 {
-                    Chip {
+                    Chip(large: large) {
                         Text("+\(overflow) more")
                             .foregroundStyle(.secondary)
                     }
@@ -63,13 +65,19 @@ struct SelectionChips: View {
     private func chip(for item: Item) -> some View {
         switch item {
         case .app(let token):
-            Chip { Label(token).labelStyle(.titleAndIcon) }
+            Chip(large: large) { Label(token).labelStyle(.titleAndIcon) }
         case .category(let token):
-            Chip { Label(token).labelStyle(.titleAndIcon) }
+            Chip(large: large) { Label(token).labelStyle(.titleAndIcon) }
         case .web(let token):
-            Chip { Label(token).labelStyle(.titleAndIcon) }
+            Chip(large: large) { Label(token).labelStyle(.titleAndIcon) }
         case .domain(let domain):
-            Chip { SiteLabel(domain: domain, iconSize: 18) }
+            // The explicit style matters inside a Form: a list row lays a
+            // plain Label out in its own icon column and the name fell
+            // outside the chip.
+            Chip(large: large) {
+                SiteLabel(domain: domain, iconSize: large ? 22 : 18, named: large)
+                    .labelStyle(.titleAndIcon)
+            }
         }
     }
 }
@@ -124,15 +132,25 @@ struct FlowLayout: Layout {
 }
 
 /// A typed website with its icon: the platform's brand tile when the catalog
-/// knows the site (reddit.com, youtu.be…), a globe tile otherwise. iOS gives
+/// knows the site (reddit.com, youtu.be…), a lettered tile otherwise. iOS gives
 /// typed domains no icon of their own, unlike app and web tokens (UX-22).
+///
 struct SiteLabel: View {
     let domain: String
     var iconSize: CGFloat = 22
+    /// Says "YouTube" instead of "youtube.com" for a platform's main address.
+    /// For the lists a person builds; a review of what gets locked keeps the
+    /// exact addresses.
+    var named = false
+
+    private var title: String {
+        guard named else { return domain }
+        return PlatformCatalog.all.first { $0.domains.first == domain }?.name ?? domain
+    }
 
     var body: some View {
         Label {
-            Text(domain)
+            Text(title)
         } icon: {
             SiteIcon(domain: domain, size: iconSize)
         }
@@ -147,14 +165,45 @@ struct SiteIcon: View {
         if let platform = PlatformCatalog.match(domain) {
             BrandMark(platform: platform, size: size)
         } else {
+            // The site's initial on a colour of its own, so a list of typed
+            // sites is told apart at a glance instead of being a row of globes
+            // (UX-28). The app never goes online for a site's real icon.
             RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                .fill(ProsperColor.card2)
+                .fill(SiteTint.color(for: domain))
                 .overlay(
-                    Image(systemName: "globe")
-                        .font(.system(size: size * 0.5, weight: .semibold))
-                        .foregroundStyle(ProsperColor.ink2)
+                    Text(SiteTint.initial(for: domain))
+                        .font(.system(size: size * 0.52, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                 )
                 .frame(width: size, height: size)
+                .accessibilityHidden(true)
         }
+    }
+}
+
+/// The colour and letter drawn for a site the catalog does not know.
+enum SiteTint {
+    /// Dark enough that the white initial stays readable on every one (each
+    /// is at least 4.5:1 against white).
+    static let palette: [UInt] = [0x4F46E5, 0x0F766E, 0xB45309, 0xBE185D, 0x1D4ED8, 0x6D28D9, 0x047857, 0x475569]
+
+    /// Always the same colour for the same site, on every launch and device:
+    /// `Hasher` is seeded per launch, so the sum is done by hand.
+    static func index(for domain: String) -> Int {
+        let sum = domain.lowercased().unicodeScalars.reduce(UInt32(7)) { ($0 &* 31) &+ $1.value }
+        return Int(sum % UInt32(palette.count))
+    }
+
+    static func color(for domain: String) -> Color {
+        let hex = palette[index(for: domain)]
+        return Color(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
+        )
+    }
+
+    static func initial(for domain: String) -> String {
+        domain.first { $0.isLetter || $0.isNumber }.map { String($0).uppercased() } ?? "?"
     }
 }

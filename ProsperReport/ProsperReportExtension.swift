@@ -26,11 +26,19 @@ struct ProsperReportExtension: DeviceActivityReportExtension {
         TodayBalanceScene { snapshot in
             TodayHeroReportView(snapshot: snapshot)
         }
+        DayLedgerScene { ledger in
+            DayLedgerView(ledger: ledger)
+        }
         InsightsScene { cards in
             // Today shows the single strongest insight (glanceable, and a
             // predictable host height — DeviceActivityReport does not self-size,
             // see QA-7). The full ranked list will live in Insights.
             InsightsReportView(cards: cards, limit: 1)
+        }
+        InsightsScene(context: .insightsList) { cards in
+            // The Patterns section: every insight the range supports, ranked.
+            // It fills the screen and scrolls, so no height is reserved.
+            InsightsReportView(cards: cards, limit: InsightsReportView.listLimit, scrolls: true)
         }
     }
 }

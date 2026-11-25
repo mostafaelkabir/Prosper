@@ -80,6 +80,26 @@ Four extension targets embedded in the main app:
 
 Typed domains in a block session are blocked with `ManagedSettingsStore().webContent.blockedByFilter = .specific(...)` (up to 50 domains, Safari and other browsers, this device only). `FamilyActivityPicker` cannot take typed domains. `.auto(domains, except: [])` turns on Apple's adult-content filter and is reserved for the Adult Content Guard's own store (`AdultDomainList.policy`). Sessions and schedules always write `.specific` (`AdultDomainList.sessionPolicy`): stacking `.auto` across stores left an iOS 26.5 iPhone blocking nothing. Keep the guard's named list short; the filter has been seen to stop blocking once roughly 49 domains are in play across stores.
 
+## Block list and labels (UX-28, UX-29)
+
+- The **block list** is the Distracting label: `UserSettings.wasteAppSelectionData` + `wasteDomains`. It is built on the Lock tab (`BlockView`), never only in Settings, and saved with `UserSettings.saveBlockList`. "Waste list" in older code and comments means the same list.
+- Every screen that chooses what a lock covers uses the same two rows, `AppsPickRow` and `SitesPickRow` (`Prosper/Views/Components/LockTargetRows.swift`); websites are picked in `SitePickerSheet`. Apps can only be chosen in Apple's picker. Attach a picker to a row that is always present, not to a `Group`.
+- Website tiles (`BrandMark`, `SiteIcon`) are never downloaded: the app makes no request for a site's icon. The sixteen catalog platforms carry their real mark from `Prosper/DesignSystem/BrandLogos.xcassets`, built from Simple Icons (CC0 files, the owners' trademarks) by `scripts/make-brand-logos.py`; add a platform's mark there and to `BrandLogo.platforms` together. Any other site gets a lettered tile. Real app icons come from Apple's tokens on a device. The Mac still draws SF Symbols.
+- `LabelDayView` hosts the `.dayLedger` report (`DayLedger`, grouped by label) above the label buttons. The report extension cannot pass a tap back to the app, so labels are given in the app. An app, category or site carries one label at a time (`LabelSets`).
+- `DayLedger.assemble` takes its totals from `TodaySnapshot.assemble`, so the ledger and the Today ring always agree; keep it that way.
+
+## Starting a lock and schedules (UX-30)
+
+Good habits get the short path, loosening gets the friction.
+
+- Starting a lock is one sheet, `CreateBlockView`: `DurationDial` (a ruler in 5-minute steps) on top, then everything the lock covers, then `HoldToLock` pinned at the bottom. Do not add a screen between choosing a length and the hold, and do not cap the chips on that sheet: every app, category and site is named on the screen that locks (REL-9).
+- Schedules are on the Lock tab in `SchedulesCard`, not behind a button: one-tap Bedtime and Work focus when there are none, a `DayBand` (the locked hours across a day) per schedule after that. `ScheduleEditorView` redraws its band as the times change.
+- Committing is a hold, and so is anything that loosens or locks at once: removing a schedule, and saving a schedule whose times cover now. Adding is always a tap.
+- `HabitComponents.swift` holds these controls; `LockLength` and `DaySpan` (the arithmetic, kept `nonisolated` so tests can call it off the main actor) are tested in `HabitComponentsTests`. Motion follows named 60fps.design shots (in the comments) and drops out under Reduce Motion (`Rise`, the hold's press and glow).
+- Two moments are marked, once each, and never loop. A lock starting plays `LockSeal` over the sheet (the lock shuts, a ring closes, "Locked until…") before it dismisses onto the countdown, whose ring sweeps in. A night won in the check-in plays in `NightlyCheckInCard`: the night's cell takes its tick, then the flame catches (`SparkBurst`) and the count rolls up. Only a night that was not already a win is celebrated, and "Not today" is never animated. Both fall back to a plain fade or nothing under Reduce Motion, and announce the result to VoiceOver.
+- The Patterns section of Insights is the `.insightsList` report: every ranked insight for the range. `.insights` stays the single card on Today, compact, because its host height is reserved; only Patterns gets the larger `InsightLeadCard` (the card's `figure`, in a `ShareRing` when it is a share).
+- Insights motion is `Prosper/DesignSystem/ChartMotion.swift` (compiled into the report extension too): totals count up (`CountUp`), bars grow from the baseline, cards lift in one after another, heatmap rows fill in, each from a named 60fps shot. It replays on every range or section switch because the hosted report gets a fresh `.id`. Scope each animation to its own effect (`animation(_:body:)`, or `onFirstAppear(_:animation:)` for chart values), never a bare `.animation(_:value:)` inside a card that is itself moving, or bars drift off their tracks mid-reveal.
+
 ## Data Models
 
 - `BlockSession` — one blocking period (apps, sites, duration, start time)

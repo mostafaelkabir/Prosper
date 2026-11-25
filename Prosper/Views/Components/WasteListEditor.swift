@@ -11,18 +11,10 @@ struct WasteListEditor: View {
     /// Called after any edit so the parent can persist and refresh the schedule.
     var onChange: () -> Void
 
-    @State private var domainInput = ""
-    @State private var domainError: String?
-    @State private var isPickerPresented = false
     /// True while a finger is on the threshold slider. Each 5-minute step used
     /// to persist and reinstall the waste monitor, restarting iOS's count for
     /// the day several times per drag; now only where it lands counts (QA-9).
     @State private var isDraggingThreshold = false
-    @FocusState private var domainFieldFocused: Bool
-
-    private var selectedCount: Int {
-        selection.applicationTokens.count + selection.categoryTokens.count
-    }
 
     var body: some View {
         Group {
@@ -30,8 +22,6 @@ struct WasteListEditor: View {
             websitesSection
             thresholdSection
         }
-        .familyActivityPicker(isPresented: $isPickerPresented, selection: $selection)
-        .onChange(of: selection) { _, _ in onChange() }
         .onChange(of: thresholdMinutes) { _, _ in
             // Keyboard and VoiceOver adjustments have no drag to end, so they
             // still persist straight away.
@@ -39,63 +29,22 @@ struct WasteListEditor: View {
         }
     }
 
+    /// The same rows as the Lock tab's block list: it is the same list (UX-28).
     private var appsSection: some View {
         Section {
-            Button {
-                isPickerPresented = true
-            } label: {
-                HStack {
-                    Label("Pick waste apps", systemImage: "hourglass")
-                    Spacer()
-                    Text("\(selectedCount) selected")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            if selectedCount > 0 {
-                Button {
-                    isPickerPresented = true
-                } label: {
-                    SelectionChips(selection: selection, placeholderCount: selectedCount)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.plain)
-            }
+            AppsPickRow(selection: $selection, onChange: onChange)
         } header: {
-            Text("Waste apps")
+            Text("Your block list")
         } footer: {
-            Text("Apps or Screen Time categories that count as waste on this device. Warnings count time in what you pick here.")
+            Text("The apps that eat your time. Warnings count time in the apps and Screen Time categories you pick here, and the Lock tab locks them.")
         }
     }
 
     private var websitesSection: some View {
         Section {
-            HStack {
-                TextField("reddit.com", text: $domainInput)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .keyboardType(.URL)
-                    .textContentType(.URL)
-                    .focused($domainFieldFocused)
-                    .onSubmit(addTypedDomain)
-                Button("Add", action: addTypedDomain)
-                    .disabled(domainInput.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-            if let domainError {
-                Text(domainError)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-            ForEach(typedDomains, id: \.self) { domain in
-                SiteLabel(domain: domain)
-            }
-            .onDelete { offsets in
-                typedDomains.remove(atOffsets: offsets)
-                onChange()
-            }
-        } header: {
-            Text("Waste websites")
+            SitesPickRow(domains: $typedDomains, onChange: onChange)
         } footer: {
-            Text("Used for blocking: these become the default list when you open the New Block sheet. iOS can't measure time on a typed site, so they don't count toward warnings — pick apps and categories above for that.")
+            Text("Locked along with the apps. iOS can't measure time on a typed site, so sites don't count toward warnings.")
         }
     }
 
@@ -119,19 +68,5 @@ struct WasteListEditor: View {
         } footer: {
             Text("Combined time across the apps and categories you picked in a single day before Stolen Glance warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
         }
-    }
-
-    private func addTypedDomain() {
-        guard let normalized = BlockDomain.normalize(domainInput) else {
-            domainError = "Enter a website like reddit.com"
-            return
-        }
-        domainError = nil
-        if !typedDomains.contains(normalized) {
-            typedDomains.append(normalized)
-        }
-        domainInput = ""
-        domainFieldFocused = true
-        onChange()
     }
 }

@@ -3,10 +3,17 @@ import Charts
 
 struct UsageSummaryView: View {
     let summary: UsageSummary
-    /// The Overview section shows the total + by-day chart; the What section
-    /// shows only the ranked lists. Splitting keeps each report view small.
+    /// The Overview section shows the total, the by-day chart and the top
+    /// three; the What section shows only the ranked lists. Splitting keeps
+    /// each report view small.
     var showsHeader: Bool = true
     var showsLists: Bool = true
+
+    /// Drives the reveal: the total counts up, bars grow, sections lift in
+    /// one after another (`ChartMotion`).
+    @State private var shown = false
+    /// Bar heights, flipped inside `withAnimation(ChartMotion.grow)`.
+    @State private var grown = false
 
     /// Largest single-day value on any ranked row, so every row's week strip is
     /// drawn to the same scale and rows stay comparable at a glance.
@@ -19,31 +26,23 @@ struct UsageSummaryView: View {
             if summary.isEmpty {
                 emptyState
             } else {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 28) {
                     if showsHeader {
                         header
+                            .riseIn(shown, order: 0)
                         if summary.days.count > 1 {
                             dailyChart
+                                .riseIn(shown, order: 1)
+                        }
+                        if !showsLists, !summary.products.isEmpty {
+                            topThree
+                                .riseIn(shown, order: 2)
                         }
                     }
                     if showsLists {
-                        if !summary.products.isEmpty {
-                            usageList(
-                                title: "Where your time goes",
-                                subtitle: productSubtitle,
-                                items: summary.products,
-                                showDetails: true,
-                                showStrip: true
-                            )
-                        }
-                        if !summary.apps.isEmpty {
-                            usageList(title: "Apps", subtitle: appsSubtitle, items: summary.apps, showDetails: true)
-                        }
-                        if !summary.sites.isEmpty {
-                            usageList(title: "Websites", subtitle: "Already counted inside the browser above.", items: summary.sites)
-                        }
-                        if !summary.categories.isEmpty {
-                            usageList(title: "Categories", subtitle: nil, items: summary.categories, fallbackSymbol: "square.grid.2x2")
+                        ForEach(Array(lists.enumerated()), id: \.element.title) { index, list in
+                            usageList(list)
+                                .riseIn(shown, order: index)
                         }
                     }
                 }
@@ -51,10 +50,42 @@ struct UsageSummaryView: View {
                 // shrink-wrap and float centred in the scroll view.
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
+                .padding(.top, 16)
                 // Clears the floating tab bar, which overlays the report.
                 .padding(.bottom, 96)
             }
         }
+        .onFirstAppear($shown)
+    }
+
+    // MARK: - The lists, in reading order
+
+    private struct ListSpec {
+        let title: String
+        let subtitle: String?
+        let items: [UsageItem]
+        var showDetails = false
+        var showStrip = false
+        var fallbackSymbol: String? = nil
+    }
+
+    private var lists: [ListSpec] {
+        var lists: [ListSpec] = []
+        if !summary.products.isEmpty {
+            lists.append(ListSpec(title: "Where your time goes", subtitle: productSubtitle,
+                                  items: summary.products, showDetails: true, showStrip: true))
+        }
+        if !summary.apps.isEmpty {
+            lists.append(ListSpec(title: "Apps", subtitle: appsSubtitle, items: summary.apps, showDetails: true))
+        }
+        if !summary.sites.isEmpty {
+            lists.append(ListSpec(title: "Websites", subtitle: "Already counted inside the browser above.", items: summary.sites))
+        }
+        if !summary.categories.isEmpty {
+            lists.append(ListSpec(title: "Categories", subtitle: nil, items: summary.categories,
+                                  fallbackSymbol: "square.grid.2x2"))
+        }
+        return lists
     }
 
     /// Ranked by pickups, the list says what a pickup is: iOS counts the first
@@ -75,87 +106,149 @@ struct UsageSummaryView: View {
             : grouping
     }
 
+    // MARK: - Header: the total, counting up
+
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Screen Time")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(summary.totalDuration.usageFormatted)
-                .font(.system(size: 44, weight: .bold, design: .rounded))
-            Text(headerDetail)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.top, 8)
-    }
-
-    /// "2h 5m a day · 63 pickups total" over a range, "63 pickups" for a single
-    /// day. The time is a daily average but the pickups are the range total, so
-    /// the line says which is which (QA-9).
-    private var headerDetail: String {
-        guard summary.dayCount > 1 else { return "\(summary.totalPickups) pickups" }
-        return "\(summary.perDay.usageFormatted) a day · \(summary.totalPickups) pickups total"
-    }
-
-    private var dailyChart: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("By day")
-                .font(.headline)
-            Chart(summary.days) { day in
-                BarMark(
-                    x: .value("Day", day.day, unit: .day),
-                    y: .value("Minutes", day.duration / 60)
-                )
-                .foregroundStyle(Color.accentColor)
-                .cornerRadius(4)
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(summary.dayCount > 1 ? "Screen time, \(summary.dayCount) days" : "Screen time today")
+                    .labelCaps()
+                CountUp(target: summary.totalDuration) { $0.countingFormatted }
+                    .font(ProsperFont.hero(48))
+                    .foregroundStyle(ProsperColor.ink)
             }
+            HStack(spacing: 10) {
+                if summary.dayCount > 1 {
+                    statChip(value: summary.perDay.usageFormatted, caption: "a day", systemImage: "calendar")
+                }
+                // Over a range the pickups are the range total, and the chip
+                // says so; the time above is the total too (QA-9).
+                statChip(value: "\(summary.totalPickups)",
+                         caption: summary.dayCount > 1 ? "pickups in all" : "pickups",
+                         systemImage: "hand.tap.fill")
+            }
+        }
+    }
+
+    private func statChip(value: String, caption: String, systemImage: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .scaledFont(12, weight: .semibold)
+                .foregroundStyle(ProsperColor.accent)
+                .accessibilityHidden(true)
+            Text(value)
+                .scaledFont(14, weight: .semibold)
+                .monospacedDigit()
+                .foregroundStyle(ProsperColor.ink)
+            Text(caption)
+                .scaledFont(14)
+                .foregroundStyle(ProsperColor.ink2)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(ProsperColor.surface, in: Capsule())
+        .overlay(Capsule().strokeBorder(ProsperColor.line, lineWidth: 1))
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - By day
+
+    /// One bar per day, growing from the baseline on appear (GrowPal stats,
+    /// see `ChartMotion.grow`), with the daily average as a quiet rule. The
+    /// biggest day is the one bar drawn full strength.
+    private var dailyChart: some View {
+        let peak = summary.days.map(\.duration).max() ?? 0
+        let ceiling = max(peak / 60, 1) * 1.1
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("By day").labelCaps()
+                Spacer()
+                Text("average \(summary.perDay.usageFormatted)")
+                    .scaledFont(12)
+                    .foregroundStyle(ProsperColor.ink2)
+            }
+            Chart {
+                ForEach(summary.days) { day in
+                    BarMark(
+                        x: .value("Day", day.day, unit: .day),
+                        y: .value("Minutes", grown ? day.duration / 60 : 0)
+                    )
+                    .foregroundStyle(day.duration == peak ? ProsperColor.accent : ProsperColor.accent.opacity(0.45))
+                    .cornerRadius(5)
+                }
+                RuleMark(y: .value("Average", summary.perDay / 60))
+                    .foregroundStyle(ProsperColor.ink3.opacity(grown ? 0.8 : 0))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 4]))
+            }
+            // A fixed scale, so the bars grow into place instead of the axis
+            // rescaling under them.
+            .chartYScale(domain: 0...ceiling)
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day)) { _ in
-                    AxisValueLabel(format: .dateTime.weekday(.narrow), centered: true)
+                    AxisValueLabel(format: summary.dayCount > 7 ? .dateTime.day() : .dateTime.weekday(.narrow),
+                                   centered: true)
+                        .foregroundStyle(ProsperColor.ink3)
                 }
             }
             .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
+                AxisMarks(values: .automatic(desiredCount: 3)) { value in
+                    AxisGridLine().foregroundStyle(ProsperColor.line)
                     AxisValueLabel {
                         if let minutes = value.as(Double.self) {
                             Text((minutes * 60).usageFormatted)
+                                .foregroundStyle(ProsperColor.ink3)
                         }
                     }
                 }
             }
-            .frame(height: 160)
+            .onFirstAppear($grown, animation: ChartMotion.grow)
+            .frame(height: 170)
+            .accessibilityLabel("Screen time by day")
+            .accessibilityValue("Average \(summary.perDay.usageFormatted) a day")
         }
+        .auroraCard()
     }
 
-    private func usageList(
-        title: String,
-        subtitle: String?,
-        items: [UsageItem],
-        showDetails: Bool = false,
-        showStrip: Bool = false,
-        fallbackSymbol: String? = nil
-    ) -> some View {
+    // MARK: - Top three
+
+    /// Overview's answer to "where did it go", before the full list in What.
+    private var topThree: some View {
+        let items = Array(summary.products.prefix(3))
         let maxDuration = items.map(\.duration).max() ?? 1
         return VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.headline)
-                if let subtitle {
+            Text("Most time").labelCaps()
+            ForEach(items) { item in
+                UsageRow(item: item, maxDuration: maxDuration, dayCount: summary.dayCount)
+            }
+        }
+        .auroraCard()
+    }
+
+    // MARK: - A ranked list
+
+    private func usageList(_ list: ListSpec) -> some View {
+        let maxDuration = list.items.map(\.duration).max() ?? 1
+        return VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(list.title)
+                    .scaledFont(17, weight: .semibold)
+                    .foregroundStyle(ProsperColor.ink)
+                    .accessibilityAddTraits(.isHeader)
+                if let subtitle = list.subtitle {
                     Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .scaledFont(12)
+                        .foregroundStyle(ProsperColor.ink2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            ForEach(items) { item in
+            ForEach(list.items) { item in
                 UsageRow(
                     item: item,
                     maxDuration: maxDuration,
                     dayCount: summary.dayCount,
-                    showDetails: showDetails,
-                    peakDay: showStrip ? peakDay : 0,
-                    fallbackSymbol: fallbackSymbol
+                    showDetails: list.showDetails,
+                    peakDay: list.showStrip ? peakDay : 0,
+                    fallbackSymbol: list.fallbackSymbol
                 )
             }
         }
@@ -164,13 +257,14 @@ struct UsageSummaryView: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "hourglass")
-                .font(.system(size: 40))
-                .foregroundStyle(.secondary)
+                .scaledFont(36)
+                .foregroundStyle(ProsperColor.ink3)
             Text("No usage recorded yet")
-                .font(.headline)
+                .scaledFont(17, weight: .semibold)
+                .foregroundStyle(ProsperColor.ink)
             Text("Usage appears here as you use your iPhone. Apple updates it every few minutes.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .scaledFont(14)
+                .foregroundStyle(ProsperColor.ink2)
                 .multilineTextAlignment(.center)
         }
         .padding(32)
@@ -198,6 +292,9 @@ struct UsageRow: View {
 
     private var showsStrip: Bool { peakDay > 0 && item.days.count > 1 }
 
+    /// The row's bar grows in once, after the card it sits in has lifted.
+    @State private var shown = false
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             UsageIcon(item, size: 38, fallbackSymbol: fallbackSymbol)
@@ -205,11 +302,13 @@ struct UsageRow: View {
                 HStack(spacing: 8) {
                     Text(item.name)
                         .scaledFont(15, weight: .medium)
+                        .foregroundStyle(ProsperColor.ink)
                         .lineLimit(1)
                     Spacer(minLength: 8)
                     Text(item.duration.usageFormatted)
                         .scaledFont(15, weight: .semibold)
                         .monospacedDigit()
+                        .foregroundStyle(ProsperColor.ink)
                 }
                 detailLine
                 if showsStrip {
@@ -219,6 +318,7 @@ struct UsageRow: View {
                 }
             }
         }
+        .onFirstAppear($shown)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibleSummary)
     }
@@ -243,8 +343,8 @@ struct UsageRow: View {
                 }
                 Spacer(minLength: 0)
             }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+            .scaledFont(11)
+            .foregroundStyle(ProsperColor.ink2)
         }
     }
 
@@ -260,24 +360,27 @@ struct UsageRow: View {
     private var proportionBar: some View {
         GeometryReader { geo in
             Capsule()
-                .fill(Color.accentColor.opacity(0.85))
+                .fill(ProsperColor.accent)
                 .frame(width: max(4, geo.size.width * item.duration / max(maxDuration, 1)))
+                .growIn(shown, delay: 0.15)
         }
         .frame(height: 6)
-        .background(Capsule().fill(Color(.systemGray5)))
+        .background(Capsule().fill(ProsperColor.surface2))
     }
 
     /// One bar per day of the range, every row drawn to the same scale, on a
     /// faint full-height track so a quiet day still reads as a day.
     private var weekStrip: some View {
         HStack(alignment: .bottom, spacing: 4) {
-            ForEach(item.days) { day in
+            ForEach(Array(item.days.enumerated()), id: \.element.id) { index, day in
                 ZStack(alignment: .bottom) {
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(Color(.systemGray5))
+                        .fill(ProsperColor.surface2)
                     RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(Color.accentColor.opacity(0.85))
+                        .fill(ProsperColor.accent)
                         .frame(height: max(2, stripHeight * day.duration / max(peakDay, 1)))
+                        // Left to right, a day at a time (GrowPal stats).
+                        .growIn(shown, axis: .vertical, delay: 0.15 + 0.03 * Double(index))
                 }
                 .frame(width: stripBarWidth)
             }
