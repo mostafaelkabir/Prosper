@@ -153,7 +153,7 @@ extension AuthorizationManager.State {
         case .authorized:
             return "Stolen Glance can read your usage and hold your blocks."
         case .notDetermined:
-            return "Stolen Glance reads your usage and enforces your blocks through Apple's Screen Time. It all stays on this iPhone — there is no account and no server to send it to."
+            return "Stolen Glance reads your usage and enforces your blocks through Apple's Screen Time. Your usage numbers stay on this iPhone, and there is no account and no server of ours to send them to."
         case .denied:
             return "Screen Time access was turned off, so Stolen Glance can't read your usage or start a block. You can turn it back on in iOS Settings — open Settings, go to Screen Time, then Apps With Screen Time Access, and switch Stolen Glance on."
         case .restricted:

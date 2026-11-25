@@ -67,8 +67,10 @@ targets:
         # the project/repo name only.
         INFOPLIST_KEY_CFBundleDisplayName: Stolen Glance
         # Export compliance, answered once here instead of per-build in App Store
-        # Connect. Stolen Glance makes no network requests at all — no backend, no
-        # analytics, no third-party SDKs — so it uses no non-exempt encryption.
+        # Connect. Stolen Glance has no backend, no analytics and no third-party
+        # SDKs. Its only network traffic is CloudKit (connected devices, M7),
+        # which uses the system's own encryption, so it uses no non-exempt
+        # encryption of its own.
         # Without this key every upload lands as MISSING_EXPORT_COMPLIANCE and
         # cannot be given to testers until someone clicks through the question.
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
