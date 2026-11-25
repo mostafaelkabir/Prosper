@@ -383,6 +383,13 @@ targets:
           - iCloud.com.mostafa.prosper
         com.apple.developer.icloud-services:
           - CloudKit
+        # Production, not Development. The helper is development-signed,
+        # which would otherwise put it in CloudKit's Development environment,
+        # while the iPhone app from TestFlight or the App Store always uses
+        # Production. Two environments are two separate databases, so the
+        # devices would stop seeing each other. Needs the schema deployed to
+        # Production in the CloudKit Console.
+        com.apple.developer.icloud-container-environment: Production
 
   ProsperMacFilter:
     type: system-extension
