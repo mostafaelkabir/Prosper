@@ -45,6 +45,10 @@ struct TodayView: View {
             }
             .fixedSize(horizontal: false, vertical: true)
 
+            if !model.todayAttention.isEmpty {
+                AttentionTiles(report: model.todayAttention, scope: "today")
+            }
+
             ProsperCard {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("By hour").labelCaps()
@@ -84,6 +88,10 @@ struct TodayView: View {
     }
 
     private var longestRun: (value: String, name: String?) {
+        // The timeline knows where time away split a stretch; older days only have the agent's figure.
+        if let visit = model.todayAttention.longestDistractingVisit, visit.seconds >= 60 {
+            return (visit.seconds.usageFormatted, visit.name)
+        }
         guard let day = model.today.days.first, day.longestDistractingRun >= 60 else { return ("—", nil) }
         return (day.longestDistractingRun.usageFormatted, day.longestDistractingRunName)
     }

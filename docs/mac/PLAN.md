@@ -404,6 +404,14 @@ carry forward.
 - **M3.5 — Insight parity from exact data.** When heatmap (E7.1), checking
   reflex (E7.2), rituals (E7.3), rabbit hole (E7.5), drift (E7.6) — all
   computable exactly on the Mac via `InsightEngine`. Size M.
+- **M3.7 — Attention insights from an ordered timeline.** `UsageDay.timeline`
+  records every unbroken stretch on one app or site (present time only), and
+  `Attention.report` derives from it: context switches an hour (apps and
+  sites), most scattered hour, typical time on one thing, focus blocks and
+  deep work (25 min+, interruptions under a fifth; messaging and meetings are
+  shallow work), escape routes from work to distraction, checking (visits
+  under two minutes), first distraction after sitting down, the day's opener,
+  late-night time. Sentences in `AttentionInsights`. Size M.
 - **M3.6 — Screen Time cross-check and history import (spike).** With Full
   Disk Access granted by the user, read `knowledgeC.db`'s `/app/usage` and
   `/app/webUsage` read-only to (a) score SC3 automatically and (b) optionally

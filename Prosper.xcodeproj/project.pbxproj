@@ -60,6 +60,7 @@
 		40D4513C43B9F4003B3376F5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F279C7E3F46842EF9E6B27C /* SettingsView.swift */; };
 		419BBC0853202CC60CCEAD04 /* PlatformCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE1515CE25AA74966B1AA1F /* PlatformCatalog.swift */; };
 		41C610CDBF9CCFFD670BC46C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFACE2278EF03B1040757C49 /* main.swift */; };
+		42415CD7FD620E661356AF40 /* AttentionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5057E61AF97D452708F1345C /* AttentionViews.swift */; };
 		428114169845C3BD1F42D13F /* ProsperShieldConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F846C2B43899A6F1E4B4582 /* ProsperShieldConfiguration.swift */; };
 		42C5F5D370C260000DA0D6AA /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB85F3DB073AD1A1260242F /* Components.swift */; };
 		43C54EF4DE40026B1F26D20B /* PersistenceConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24BB3FFB5573A0715BC77E1A /* PersistenceConfig.swift */; };
@@ -396,6 +397,7 @@
 		4D3EA14CE9B819D67F0F57E0 /* ScheduleEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEditorView.swift; sourceTree = "<group>"; };
 		4EE3998A79E6D9D942968FA2 /* AddToLockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToLockView.swift; sourceTree = "<group>"; };
 		4F3A201724CAEB52AFAA4F43 /* DayLedgerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayLedgerTests.swift; sourceTree = "<group>"; };
+		5057E61AF97D452708F1345C /* AttentionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionViews.swift; sourceTree = "<group>"; };
 		553A77A8345BE07979522611 /* PhoneSyncBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSyncBuilder.swift; sourceTree = "<group>"; };
 		5960C99504B61FC8D5D189CC /* DayLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayLedger.swift; sourceTree = "<group>"; };
 		598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = BrandLogos.xcassets; sourceTree = "<group>"; };
@@ -613,6 +615,7 @@
 		15D9D77527EBF9C7D3DB825F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5057E61AF97D452708F1345C /* AttentionViews.swift */,
 				7FB85F3DB073AD1A1260242F /* Components.swift */,
 				49A2F944B0B3CA07ED895231 /* InsightsView.swift */,
 				12967D80A138F5D3F8C20F05 /* LockView.swift */,
@@ -1532,6 +1535,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				72AA96292B78C93B203D6EBE /* AppModel.swift in Sources */,
+				42415CD7FD620E661356AF40 /* AttentionViews.swift in Sources */,
 				C60DAC22F6BABC82563F25D9 /* AuroraComponents.swift in Sources */,
 				42C5F5D370C260000DA0D6AA /* Components.swift in Sources */,
 				B04B824C75671EDD7F2E65FD /* ConnectedComponents.swift in Sources */,
@@ -1717,7 +1721,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacFilter/ProsperMacFilter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ProsperMacFilter/Info.plist;
@@ -1857,7 +1861,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacFilter/ProsperMacFilter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ProsperMacFilter/Info.plist;
@@ -1958,7 +1962,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
@@ -1986,7 +1990,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacAgent/ProsperMacAgent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance Agent";
@@ -2133,7 +2137,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMac/ProsperMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
@@ -2161,7 +2165,7 @@
 				CODE_SIGN_ENTITLEMENTS = ProsperMacAgent/ProsperMacAgent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance Agent";
