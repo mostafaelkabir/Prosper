@@ -321,7 +321,7 @@ targets:
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 4
+        CURRENT_PROJECT_VERSION: 5
         MARKETING_VERSION: 0.1
     entitlements:
       path: ProsperMac/ProsperMac.entitlements
@@ -363,7 +363,7 @@ targets:
         INFOPLIST_KEY_NSAppleEventsUsageDescription: Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 4
+        CURRENT_PROJECT_VERSION: 5
         MARKETING_VERSION: 0.1
         SKIP_INSTALL: YES
     entitlements:
@@ -399,7 +399,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
-        CURRENT_PROJECT_VERSION: 4
+        CURRENT_PROJECT_VERSION: 5
         MARKETING_VERSION: 0.1
         SKIP_INSTALL: YES
     entitlements:

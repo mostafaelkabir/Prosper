@@ -12,6 +12,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var today: UsageSummary = .build(days: [], classifier: MacClassifier())
     @Published private(set) var week: UsageSummary = .build(days: [], classifier: MacClassifier())
     @Published private(set) var weekDays: [DayEntry] = []
+    /// How attention moved (M3.7), from the agent's timeline.
+    @Published private(set) var todayAttention: AttentionReport = Attention.report(days: [], classifier: MacClassifier())
+    @Published private(set) var weekAttention: AttentionReport = Attention.report(days: [], classifier: MacClassifier())
     @Published private(set) var status: AgentStatus?
     @Published private(set) var events: [MacEvent] = []
     @Published private(set) var now = Date()
@@ -86,6 +89,8 @@ final class AppModel: ObservableObject {
             let days = MacStore.loadDays(endingAt: t, count: 7)
             set(\.today, .build(days: days.filter { $0.day == UsageDay.key(for: t) }, classifier: classifier))
             set(\.week, .build(days: days, classifier: classifier))
+            set(\.todayAttention, Attention.report(days: days.filter { $0.day == UsageDay.key(for: t) }, classifier: classifier))
+            set(\.weekAttention, Attention.report(days: days, classifier: classifier))
             set(\.weekDays, (0..<7).reversed().compactMap { offset in
                 guard let date = Calendar.current.date(byAdding: .day, value: -offset, to: t) else { return nil }
                 let key = UsageDay.key(for: date)
@@ -267,30 +272,20 @@ final class AppModel: ObservableObject {
                                     locksStarted: [LockLine(startedAt: now.addingTimeInterval(-900), endsAt: now.addingTimeInterval(2700), itemCount: 3)])]
         )]
         var days: [UsageDay] = []
+        let classifier = MacClassifier()
         for offset in (0..<7).reversed() {
             let date = cal.date(byAdding: .day, value: -offset, to: now)!
             var day = UsageDay(day: UsageDay.key(for: date))
-            let scale = 0.6 + Double((offset * 37) % 10) / 10
-            day.apps["com.apple.dt.Xcode"] = AppUsage(name: "Xcode", seconds: 9000 * scale, opens: 14, category: "public.app-category.developer-tools")
-            day.apps["com.google.Chrome"] = AppUsage(name: "Google Chrome", seconds: 7200 * scale, opens: 40, isBrowser: true)
-            day.apps["com.tinyspeck.slackmacgap"] = AppUsage(name: "Slack", seconds: 2400 * scale, opens: 30)
-            day.apps["com.apple.MobileSMS"] = AppUsage(name: "Messages", seconds: 900 * scale, opens: 12)
-            day.sites["youtube.com"] = SiteUsage(seconds: 3600 * scale, visits: 9)
-            day.sites["reddit.com"] = SiteUsage(seconds: 1500 * scale, visits: 6)
-            day.sites["github.com"] = SiteUsage(seconds: 1200 * scale, visits: 8)
-            for h in 8..<23 {
-                day.hourly[h] = 1500 * scale
-                day.hourlyDistracting[h] = (h >= 20 || h == 13) ? 1100 * scale : 150 * scale
-            }
+            Self.snapshotTimeline(into: &day, date: date, seed: UInt64(offset + 1), classifier: classifier, calendar: cal)
             day.unlocks = 23
-            day.firstActive = cal.date(bySettingHour: 7, minute: 42, second: 0, of: date)
-            day.longestDistractingRun = 2900 * scale
+            day.longestDistractingRun = Attention.report(days: [day], classifier: classifier, calendar: cal).longestDistractingVisit?.seconds ?? 0
             day.longestDistractingRunName = "youtube.com"
             days.append(day)
         }
-        let classifier = MacClassifier()
         today = .build(days: [days.last!], classifier: classifier)
         week = .build(days: days, classifier: classifier)
+        todayAttention = Attention.report(days: [days.last!], classifier: classifier)
+        weekAttention = Attention.report(days: days, classifier: classifier)
         weekDays = days.enumerated().map { DayEntry(date: cal.date(byAdding: .day, value: $0.offset - 6, to: now)!, day: $0.element) }
         heartbeat = now
         var r = RulesBook.enablingGuard(.empty, now: now.addingTimeInterval(-86_400 * 3))
@@ -302,6 +297,64 @@ final class AppModel: ObservableObject {
                              filter: FilterStatus(filterStartedAt: now.addingTimeInterval(-7200), dnsStartedAt: now.addingTimeInterval(-7200), rulesRevision: 4, guardOn: true, activeLocks: 1, blockedToday: 37, unnamedToday: 3, safeSearchRewritesToday: 112, day: UsageDay.key(for: now)),
                              browserAccess: ["com.google.Chrome": true, "com.apple.Safari": false], screenGuard: .running)
         events = (0..<5).map { MacEvent(at: now.addingTimeInterval(Double(-$0 * 900)), kind: .siteBlocked, subject: $0 % 2 == 0 ? "youtube.com" : "Slack") }
+    }
+
+    /// A plausible working day, 8 AM to 11 PM, booked through
+    /// `UsageDay.record` the way the agent books it: work sittings with
+    /// Slack checks, escapes to YouTube and Reddit, an evening of video.
+    /// Seeded, so every render shows the same sample.
+    private static func snapshotTimeline(into day: inout UsageDay, date: Date, seed: UInt64, classifier: MacClassifier, calendar cal: Calendar) {
+        var state = seed &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+        func next(_ range: ClosedRange<Double>) -> Double {
+            state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return range.lowerBound + Double(state >> 11) / Double(1 << 53) * (range.upperBound - range.lowerBound)
+        }
+        let apps: [String: AppUsage] = [
+            "com.apple.dt.Xcode": AppUsage(name: "Xcode", category: "public.app-category.developer-tools"),
+            "com.apple.Terminal": AppUsage(name: "Terminal"),
+            "com.google.Chrome": AppUsage(name: "Google Chrome", isBrowser: true),
+            "com.tinyspeck.slackmacgap": AppUsage(name: "Slack"),
+            "com.apple.MobileSMS": AppUsage(name: "Messages"),
+        ]
+        var t = cal.date(bySettingHour: 7, minute: 40 + Int(next(0...20)), second: 0, of: date)!
+        func book(_ id: String, _ site: String?, _ seconds: Double) {
+            let info = apps[id]!
+            let timeClass = site.flatMap { classifier.timeClass(site: $0) } ?? classifier.timeClass(bundleID: id, name: info.name, category: info.category)
+            day.record(bundleID: id, app: info, site: site, from: t, to: t + seconds, timeClass: timeClass, calendar: cal)
+            day.recordOpen(bundleID: id, app: info)
+            if let site { day.recordVisit(site: site) }
+            t += seconds
+        }
+        let end = cal.date(bySettingHour: 23, minute: 10, second: 0, of: date)!
+        book("com.tinyspeck.slackmacgap", nil, next(60...240))
+        while t < end {
+            let hour = cal.component(.hour, from: t)
+            let roll = next(0...1)
+            if hour >= 20 {
+                book("com.google.Chrome", roll < 0.7 ? "youtube.com" : "reddit.com", next(120...900))
+                if roll > 0.8 { book("com.apple.MobileSMS", nil, next(20...90)) }
+            } else if roll < 0.03 {
+                // A deep stretch: long Xcode spells, the odd Terminal hop.
+                let blockEnd = t + next(1500...3000)
+                while t < blockEnd { book(next(0...1) < 0.8 ? "com.apple.dt.Xcode" : "com.apple.Terminal", nil, next(120...600)) }
+            } else if roll < 0.45 {
+                book("com.apple.dt.Xcode", nil, next(15...150))
+            } else if roll < 0.6 {
+                book("com.tinyspeck.slackmacgap", nil, next(5...45))
+            } else if roll < 0.72 {
+                book("com.google.Chrome", "github.com", next(10...120))
+            } else if roll < 0.8 {
+                book("com.apple.Terminal", nil, next(10...120))
+            } else if roll < 0.88 {
+                book("com.google.Chrome", "youtube.com", next(20...300))
+            } else if roll < 0.94 {
+                book("com.google.Chrome", "reddit.com", next(15...150))
+            } else if roll < 0.97 {
+                book("com.apple.MobileSMS", nil, next(10...60))
+            } else {
+                t += next(400...2400)   // away from the keyboard
+            }
+        }
     }
     #endif
 }

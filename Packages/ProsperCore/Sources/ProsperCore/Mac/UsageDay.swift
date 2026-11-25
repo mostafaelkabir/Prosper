@@ -22,6 +22,11 @@ public struct UsageDay: Codable, Equatable, Sendable {
     /// Longest unbroken stretch on one distracting app or site, in seconds.
     public var longestDistractingRun: Double
     public var longestDistractingRunName: String?
+    /// What was in front, in order (M3.7): one entry per unbroken stretch on
+    /// one app or site while the user was present. Every attention insight
+    /// (switches, focus blocks, checking) is derived from this, so new ones
+    /// need no new recording. Empty for days recorded before it existed.
+    public var timeline: [Stint]
 
     public init(day: String) {
         self.day = day
@@ -33,6 +38,23 @@ public struct UsageDay: Codable, Equatable, Sendable {
         firstActive = nil
         longestDistractingRun = 0
         longestDistractingRunName = nil
+        timeline = []
+    }
+
+    /// Files written before a field existed still load: the newer fields
+    /// default to empty.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        day = try c.decode(String.self, forKey: .day)
+        apps = try c.decodeIfPresent([String: AppUsage].self, forKey: .apps) ?? [:]
+        sites = try c.decodeIfPresent([String: SiteUsage].self, forKey: .sites) ?? [:]
+        hourly = try c.decodeIfPresent([Double].self, forKey: .hourly) ?? Array(repeating: 0, count: 24)
+        hourlyDistracting = try c.decodeIfPresent([Double].self, forKey: .hourlyDistracting) ?? Array(repeating: 0, count: 24)
+        unlocks = try c.decodeIfPresent(Int.self, forKey: .unlocks) ?? 0
+        firstActive = try c.decodeIfPresent(Date.self, forKey: .firstActive)
+        longestDistractingRun = try c.decodeIfPresent(Double.self, forKey: .longestDistractingRun) ?? 0
+        longestDistractingRunName = try c.decodeIfPresent(String.self, forKey: .longestDistractingRunName)
+        timeline = try c.decodeIfPresent([Stint].self, forKey: .timeline) ?? []
     }
 
     public var totalSeconds: Double { apps.values.reduce(0) { $0 + $1.seconds } }
@@ -99,6 +121,7 @@ public extension UsageDay {
             sites[site] = s
         }
         if firstActive == nil || start < firstActive! { firstActive = start }
+        appendStint(app: bundleID, site: site, from: start, to: end)
 
         var cursor = start
         while cursor < end {
@@ -112,6 +135,23 @@ public extension UsageDay {
             cursor = hourEnd
         }
     }
+
+    /// Extends the last stint when this time continues it (the sampler books
+    /// an open stretch every 30 s), otherwise starts a new one.
+    mutating func appendStint(app: String, site: String?, from start: Date, to end: Date) {
+        guard end > start else { return }
+        let seconds = end.timeIntervalSince(start)
+        if let i = timeline.indices.last, timeline[i].app == app, timeline[i].site == site,
+           abs(start.timeIntervalSince(timeline[i].end)) < 1 {
+            timeline[i].seconds += seconds
+            return
+        }
+        guard timeline.count < Self.maxStints else { return }
+        timeline.append(Stint(start: start, seconds: seconds, app: app, site: site))
+    }
+
+    /// A day has at most one change a second; this only stops a runaway file.
+    static let maxStints = 20_000
 
     mutating func recordOpen(bundleID: String, app: AppUsage) {
         var entry = apps[bundleID] ?? AppUsage(name: app.name, isBrowser: app.isBrowser, category: app.category)
