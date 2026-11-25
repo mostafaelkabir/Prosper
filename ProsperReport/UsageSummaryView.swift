@@ -14,6 +14,9 @@ struct UsageSummaryView: View {
     @State private var shown = false
     /// Bar heights, flipped inside `withAnimation(ChartMotion.grow)`.
     @State private var grown = false
+    /// The labels, read once per build of this view, so each row can show
+    /// what it is filed under (tap to label).
+    @State private var labels = SharedClassification.load()
 
     /// Largest single-day value on any ranked row, so every row's week strip is
     /// drawn to the same scale and rows stay comparable at a glance.
@@ -67,6 +70,9 @@ struct UsageSummaryView: View {
         var showDetails = false
         var showStrip = false
         var fallbackSymbol: String? = nil
+        /// Rows carry a label pill. Not categories: a category is labelled
+        /// in Apple's list.
+        var labelable = true
     }
 
     private var lists: [ListSpec] {
@@ -83,7 +89,7 @@ struct UsageSummaryView: View {
         }
         if !summary.categories.isEmpty {
             lists.append(ListSpec(title: "Categories", subtitle: nil, items: summary.categories,
-                                  fallbackSymbol: "square.grid.2x2"))
+                                  fallbackSymbol: "square.grid.2x2", labelable: false))
         }
         return lists
     }
@@ -218,7 +224,8 @@ struct UsageSummaryView: View {
         return VStack(alignment: .leading, spacing: 14) {
             Text("Most time").labelCaps()
             ForEach(items) { item in
-                UsageRow(item: item, maxDuration: maxDuration, dayCount: summary.dayCount)
+                UsageRow(item: item, maxDuration: maxDuration, dayCount: summary.dayCount,
+                         labels: labels)
             }
         }
         .auroraCard()
@@ -248,7 +255,8 @@ struct UsageSummaryView: View {
                     dayCount: summary.dayCount,
                     showDetails: list.showDetails,
                     peakDay: list.showStrip ? peakDay : 0,
-                    fallbackSymbol: list.fallbackSymbol
+                    fallbackSymbol: list.fallbackSymbol,
+                    labels: list.labelable ? labels : nil
                 )
             }
         }
@@ -289,6 +297,11 @@ struct UsageRow: View {
     var peakDay: TimeInterval = 0
     /// Glyph for rows that are not an app or platform (categories).
     var fallbackSymbol: String? = nil
+    /// The saved labels; when given, the row ends in a label pill that opens
+    /// the app's one-tap label sheet.
+    var labels: SharedClassification.Snapshot? = nil
+
+    private var labelTarget: LabelTarget? { labels == nil ? nil : LabelTarget(item: item) }
 
     private var showsStrip: Bool { peakDay > 0 && item.days.count > 1 }
 
@@ -296,6 +309,15 @@ struct UsageRow: View {
     @State private var shown = false
 
     var body: some View {
+        HStack(alignment: .center, spacing: 6) {
+            rowContent
+            if let target = labelTarget, let labels {
+                LabelPill(target: target, current: target.currentClass(in: labels))
+            }
+        }
+    }
+
+    private var rowContent: some View {
         HStack(alignment: .center, spacing: 12) {
             UsageIcon(item, size: 38, fallbackSymbol: fallbackSymbol)
             VStack(alignment: .leading, spacing: 5) {
