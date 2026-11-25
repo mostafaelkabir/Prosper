@@ -3,118 +3,132 @@ import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
 
-// Prosper app icon master (REL-3), built from the approved Aurora palette in
-// Prosper/DesignSystem/ProsperColor.swift. Deep Aurora night field, a ring
-// sweeping violet -> cyan -> mint (the brand accent and two of the four time
-// classes), and a lock at the centre: the ring is the time, the lock is the
-// promise. No alpha, sRGB, square — App Store Connect rejects anything else.
+// Stolen Glance app icon (DS-10; replaces the REL-3 ring and padlock). The mark
+// comes from Prosper/DesignSystem/GlanceGeometry.swift, compiled alongside, so
+// the icon is the exact mark the app draws: Aurora night field, a soft violet
+// glow, the eye with its lowered lid and the keyhole pupil.
+//
+//   swiftc -parse-as-library scripts/make-app-icon.swift \
+//     Prosper/DesignSystem/GlanceGeometry.swift -o "$TMPDIR/make-app-icon"
+//   "$TMPDIR/make-app-icon" ios Prosper/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+//   "$TMPDIR/make-app-icon" mac "$TMPDIR/mac.png"
+//   for s in 16 32 64 128 256 512 1024; do
+//     sips -z $s $s "$TMPDIR/mac.png" --out ProsperMac/Assets.xcassets/AppIcon.appiconset/icon_$s.png
+//   done
+//
+// ios: full-bleed square, no alpha, sRGB (App Store Connect rejects anything
+// else; iOS rounds the corners). mac: the same art on the macOS rounded tile,
+// 824 of 1024 with transparent margins.
 
-let S: CGFloat = 1024
-let space = CGColorSpace(name: CGColorSpace.sRGB)!
+@main
+struct MakeAppIcon {
+    static let S: CGFloat = 1024
+    static let space = CGColorSpace(name: CGColorSpace.sRGB)!
 
-func rgb(_ hex: UInt, _ a: CGFloat = 1) -> CGColor {
-    CGColor(colorSpace: space, components: [
-        CGFloat((hex >> 16) & 0xFF) / 255,
-        CGFloat((hex >> 8) & 0xFF) / 255,
-        CGFloat(hex & 0xFF) / 255, a,
-    ])!
+    static func rgb(_ hex: UInt, _ a: CGFloat = 1) -> CGColor {
+        CGColor(colorSpace: space, components: [
+            CGFloat((hex >> 16) & 0xFF) / 255,
+            CGFloat((hex >> 8) & 0xFF) / 255,
+            CGFloat(hex & 0xFF) / 255, a,
+        ])!
+    }
+
+    // Aurora tokens (dark), from ProsperColor.swift
+    static let night = rgb(0x090D18)
+    static let nightMid = rgb(0x0E1424)
+    static let nightLift = rgb(0x1F2A48)
+    static let accent = rgb(0xA58AFF)
+    static let rest = rgb(0x64CBE6)
+    static let productive = rgb(0x58E4B3)
+    static let ink = rgb(0xF0F3FF)
+
+    static func main() {
+        let args = CommandLine.arguments
+        guard args.count == 3, ["ios", "mac"].contains(args[1]) else {
+            print("usage: make-app-icon ios|mac <out.png>"); exit(2)
+        }
+        let mac = args[1] == "mac"
+        let alpha: CGImageAlphaInfo = mac ? .premultipliedLast : .noneSkipLast
+        guard let ctx = CGContext(data: nil, width: Int(S), height: Int(S), bitsPerComponent: 8,
+                                  bytesPerRow: 0, space: space, bitmapInfo: alpha.rawValue)
+        else { fatalError("context") }
+
+        // Top-left origin, like the mark's geometry.
+        ctx.translateBy(x: 0, y: S)
+        ctx.scaleBy(x: 1, y: -1)
+
+        if mac {
+            // macOS tile: 824 pt square with 100 pt margins.
+            let tile = CGRect(x: 100, y: 100, width: 824, height: 824)
+            ctx.addPath(CGPath(roundedRect: tile, cornerWidth: 185, cornerHeight: 185, transform: nil))
+            ctx.clip()
+            ctx.translateBy(x: 100, y: 100)
+            ctx.scaleBy(x: 824 / S, y: 824 / S)
+        }
+        drawArt(ctx)
+
+        guard let image = ctx.makeImage() else { fatalError("image") }
+        let out = URL(fileURLWithPath: args[2])
+        guard let dest = CGImageDestinationCreateWithURL(out as CFURL, UTType.png.identifier as CFString, 1, nil)
+        else { fatalError("dest") }
+        CGImageDestinationAddImage(dest, image, nil)
+        guard CGImageDestinationFinalize(dest) else { fatalError("write") }
+        print("wrote \(out.path)")
+    }
+
+    static func drawArt(_ ctx: CGContext) {
+        let full = CGRect(x: 0, y: 0, width: S, height: S)
+
+        // 1. Night field with a lift above centre, so the square is not flat.
+        ctx.setFillColor(night)
+        ctx.fill(full)
+        let field = CGGradient(colorsSpace: space, colors: [nightLift, nightMid, night] as CFArray,
+                               locations: [0, 0.62, 1])!
+        ctx.drawRadialGradient(field, startCenter: CGPoint(x: 512, y: 430), startRadius: 0,
+                               endCenter: CGPoint(x: 512, y: 430), endRadius: 760,
+                               options: [.drawsAfterEndLocation])
+
+        // 2. A soft violet glow behind the iris.
+        let glow = CGGradient(colorsSpace: space, colors: [rgb(0xA58AFF, 0.28), rgb(0xA58AFF, 0)] as CFArray,
+                              locations: [0, 1])!
+        ctx.drawRadialGradient(glow, startCenter: CGPoint(x: 512, y: 540), startRadius: 0,
+                               endCenter: CGPoint(x: 512, y: 540), endRadius: 320, options: [])
+
+        // 3. The mark: its 200-unit box at 870 pt, centred.
+        ctx.saveGState()
+        ctx.translateBy(x: 77, y: 72)
+        ctx.scaleBy(x: 870 / GlanceGeometry.box, y: 870 / GlanceGeometry.box)
+        drawMark(ctx, GlanceState.rest)
+        ctx.restoreGState()
+    }
+
+    static func drawMark(_ ctx: CGContext, _ s: GlanceState) {
+        // Iris, clipped to the opening, with the keyhole cleared out of it.
+        ctx.saveGState()
+        ctx.beginTransparencyLayer(auxiliaryInfo: nil)
+        ctx.addPath(GlanceGeometry.opening(s.lid))
+        ctx.clip()
+        var ball = GlanceGeometry.eyeball(s)
+        let r = GlanceGeometry.irisRadius
+        ctx.setFillColor(ink)
+        ctx.addPath(CGPath(ellipseIn: CGRect(x: 100 - r, y: 100 - r, width: r * 2, height: r * 2), transform: &ball))
+        ctx.fillPath()
+        ctx.setBlendMode(.clear)
+        ctx.addPath(CGPath(ellipseIn: GlanceGeometry.pupil(key: s.key), transform: &ball))
+        ctx.addPath(GlanceGeometry.stem(key: s.key).copy(using: &ball)!)
+        ctx.fillPath()
+        ctx.endTransparencyLayer()
+        ctx.restoreGState()
+
+        // Lids, filled with the violet -> cyan -> mint gradient.
+        ctx.saveGState()
+        ctx.addPath(GlanceGeometry.lowerLid)
+        ctx.addPath(GlanceGeometry.upperLid(s.lid))
+        ctx.clip()
+        let lids = CGGradient(colorsSpace: space, colors: [accent, rest, productive] as CFArray,
+                              locations: GlanceGeometry.gradientStops)!
+        ctx.drawLinearGradient(lids, start: GlanceGeometry.gradientStart, end: GlanceGeometry.gradientEnd,
+                               options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
+        ctx.restoreGState()
+    }
 }
-
-// Aurora tokens
-let night      = rgb(0x090D18)   // background (dark)
-let nightLift  = rgb(0x1C2740)   // surface2 (dark)
-let accent     = rgb(0xA58AFF)   // accent (dark)
-let rest       = rgb(0x64CBE6)   // rest (dark)
-let productive = rgb(0x58E4B3)   // productive (dark)
-let inkLight   = rgb(0xF0F3FF)   // ink (dark)
-
-guard let ctx = CGContext(
-    data: nil, width: Int(S), height: Int(S), bitsPerComponent: 8,
-    bytesPerRow: 0, space: space,
-    bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
-) else { fatalError("context") }
-
-let full = CGRect(x: 0, y: 0, width: S, height: S)
-let centre = CGPoint(x: S / 2, y: S / 2)
-
-// 1. Field: a soft radial lift so the square is not flat black.
-ctx.setFillColor(night)
-ctx.fill(full)
-if let bg = CGGradient(colorsSpace: space, colors: [nightLift, night] as CFArray,
-                       locations: [0, 1]) {
-    ctx.drawRadialGradient(
-        bg,
-        startCenter: CGPoint(x: S * 0.5, y: S * 0.62), startRadius: 0,
-        endCenter: centre, endRadius: S * 0.72,
-        options: [.drawsAfterEndLocation]
-    )
-}
-
-// 2. The ring, drawn as short arc segments so the colour can sweep between the
-//    three stops the way a conic gradient would.
-func lerp(_ a: CGColor, _ b: CGColor, _ t: CGFloat) -> CGColor {
-    let ac = a.components!, bc = b.components!
-    return CGColor(colorSpace: space, components: (0..<4).map { ac[$0] + (bc[$0] - ac[$0]) * t })!
-}
-
-let stops: [CGColor] = [accent, rest, productive, accent]
-let radius = S * 0.30
-let ringWidth = S * 0.085
-// Leave a gap at the bottom: the ring is time still running, not a closed loop.
-let gap: CGFloat = 52 * .pi / 180
-let start = -.pi / 2 + gap / 2
-let sweep = 2 * .pi - gap
-let segments = 360
-
-ctx.setLineCap(.round)
-ctx.setLineWidth(ringWidth)
-for i in 0..<segments {
-    let t0 = CGFloat(i) / CGFloat(segments)
-    let t1 = CGFloat(i + 1) / CGFloat(segments)
-    let scaled = t0 * CGFloat(stops.count - 1)
-    let index = min(Int(scaled), stops.count - 2)
-    ctx.setStrokeColor(lerp(stops[index], stops[index + 1], scaled - CGFloat(index)))
-    ctx.beginPath()
-    ctx.addArc(center: centre, radius: radius,
-               startAngle: start + sweep * t0,
-               endAngle: start + sweep * t1 + 0.004,
-               clockwise: false)
-    ctx.strokePath()
-}
-
-// 3. The lock, centred inside the ring.
-let bodyW = S * 0.235
-let bodyH = S * 0.185
-let bodyRect = CGRect(x: centre.x - bodyW / 2, y: centre.y - bodyH / 2 - S * 0.035,
-                      width: bodyW, height: bodyH)
-ctx.setFillColor(inkLight)
-ctx.addPath(CGPath(roundedRect: bodyRect, cornerWidth: S * 0.045, cornerHeight: S * 0.045,
-                   transform: nil))
-ctx.fillPath()
-
-// Shackle: a half-circle rising out of the body.
-let shackleR = bodyW * 0.32
-let shackleY = bodyRect.maxY
-ctx.setStrokeColor(inkLight)
-ctx.setLineWidth(S * 0.043)
-ctx.setLineCap(.butt)
-ctx.beginPath()
-ctx.addArc(center: CGPoint(x: centre.x, y: shackleY), radius: shackleR,
-           startAngle: 0, endAngle: .pi, clockwise: false)
-ctx.strokePath()
-
-// Keyhole, punched in the field colour so the lock reads as solid.
-ctx.setFillColor(night)
-let keyR = S * 0.026
-ctx.fillEllipse(in: CGRect(x: centre.x - keyR, y: bodyRect.midY - keyR * 0.2,
-                           width: keyR * 2, height: keyR * 2))
-ctx.fill(CGRect(x: centre.x - keyR * 0.46, y: bodyRect.midY - S * 0.042,
-                width: keyR * 0.92, height: S * 0.05))
-
-guard let image = ctx.makeImage() else { fatalError("image") }
-let out = URL(fileURLWithPath: CommandLine.arguments[1])
-guard let dest = CGImageDestinationCreateWithURL(out as CFURL, UTType.png.identifier as CFString, 1, nil)
-else { fatalError("dest") }
-CGImageDestinationAddImage(dest, image, nil)
-guard CGImageDestinationFinalize(dest) else { fatalError("write") }
-print("wrote \(out.path)")
