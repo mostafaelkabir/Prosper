@@ -194,7 +194,7 @@ struct DashboardView: View {
         HStack {
             // The shipping name, as on the home screen and in the store.
             // "Prosper" is only the project/repo name (QA-9, REL-14).
-            Text("STOLENEYES")
+            Text("STOLEN GLANCE")
                 .scaledFont(12, weight: .semibold)
                 .tracking(2)
                 .foregroundStyle(ProsperColor.ink)
@@ -344,7 +344,7 @@ struct DashboardView: View {
                     Text("Finish setting up")
                         .scaledFont(15, weight: .semibold)
                         .foregroundStyle(ProsperColor.ink)
-                    Text("Pick your waste apps and sites so StolenEyes can watch for you.")
+                    Text("Pick your waste apps and sites so Stolen Glance can watch for you.")
                         .scaledFont(12)
                         .foregroundStyle(ProsperColor.ink2)
                 }

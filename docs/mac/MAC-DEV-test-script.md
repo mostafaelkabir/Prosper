@@ -22,7 +22,7 @@ bash scripts/install-mac.sh --without-filter # app + helper only
 |---|---|---|
 | 0.1 | Run the script. | `/Applications/StolenEyes.app` opens; eye icon in the menu bar. |
 | 0.2 | Today → **Set up now**. | macOS: "Background item added". Settings → Protection: **Background helper — On**. |
-| 0.3 🔌 | Approve the extension: System Settings → General → Login Items & Extensions → Network Extensions → StolenEyes on. | Settings → **Network filter extension — On**. Then macOS asks to allow content filtering, then DNS proxy: **Allow** both. |
+| 0.3 🔌 | Approve the extension: System Settings → General → Login Items & Extensions → Network Extensions → Stolen Glance on. | Settings → **Network filter extension — On**. Then macOS asks to allow content filtering, then DNS proxy: **Allow** both. |
 | 0.4 🔌 | `systemextensionsctl list` | `com.mostafa.prosper.mac.filter … [activated enabled]`. |
 | 0.5 🔌 | Settings → Protection | Content filter and DNS proxy show **Running since …**; no red rows. |
 
@@ -33,11 +33,11 @@ bash scripts/install-mac.sh --without-filter # app + helper only
 | 1.1 ⏱ | Lock **Calculator** + **example.com** for 15 min (Lock → choose → hold). | Calculator quits within ¼ s when opened; shield shows the countdown. 🔌 example.com fails to load in Safari, Chrome, Brave and `curl -m5 https://example.com`. |
 | 1.2 | During 1.1, edit `~/Library/Application Support/StolenEyes/rules.json` and delete the session. | Within 2 s the file has the session again; Calculator still quits. (Verified 2026-11-08.) |
 | 1.3 | During 1.1, `kill -9` the `StolenEyesAgent` process. | It is back within ~1 s (`pgrep -x StolenEyesAgent`); the lock still applies. (Verified 2026-11-08.) |
-| 1.4 | During 1.1, quit the StolenEyes window and the menu bar. | Lock still enforced. |
+| 1.4 | During 1.1, quit the Stolen Glance window and the menu bar. | Lock still enforced. |
 | 1.5 ⏱ | At the end time. | Calculator opens again within 60 s; "Lock finished" notification; the session leaves `rules.json`. (Verified 2026-11-08 for the app part.) |
 | 1.6 ⏱ 🔌 | Lock youtube.com 30 min; log out and back in; then reboot. | Still blocked after each, without opening the app. |
 | 1.7 🔌 | During a lock: System Settings → Network → change DNS servers to 1.1.1.1; toggle Wi-Fi. | Still blocked. |
-| 1.8 🔌 | During a lock: delete StolenEyes from Applications (macOS asks to remove the extension). | Every lock and the filter go at once. This is the documented exit; it must work. |
+| 1.8 🔌 | During a lock: delete Stolen Glance from Applications (macOS asks to remove the extension). | Every lock and the filter go at once. This is the documented exit; it must work. |
 | 1.9 | Try every way in the UI to end a lock early: Lock tab, menu bar, Settings. | There is none. "Make it longer" only adds time. |
 | 1.10 | Create a schedule whose window is open now; try to remove it. | No Remove button while it is on; removable once it is off. |
 
@@ -63,7 +63,7 @@ Turn it on in Settings (hold 3 s). There is no way back: do this on purpose.
 | # | Do | Expect |
 |---|---|---|
 | 3.1 | Use the Mac for an hour across a few apps and sites; check Today. | Per-app minutes plausible; sites listed under their platform (YouTube, Reddit…); browser row excludes site time. |
-| 3.2 | First time in each browser. | macOS asks to let **StolenEyes Agent** control it. Allow → sites counted. Refuse → Settings → Websites per browser says so in red. |
+| 3.2 | First time in each browser. | macOS asks to let **Stolen Glance Agent** control it. Allow → sites counted. Refuse → Settings → Websites per browser says so in red. |
 | 3.3 | Leave the Mac idle 5 min (no video). | That time is not counted. |
 | 3.4 | Watch a 10-min video without touching the Mac. | Counted (the player keeps the display awake). |
 | 3.5 | Lock the screen, unlock it. | Unlocks +1; locked time not counted. |

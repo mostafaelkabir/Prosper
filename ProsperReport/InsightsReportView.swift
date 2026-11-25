@@ -36,7 +36,7 @@ struct InsightsReportView: View {
         VStack(alignment: .leading, spacing: 6) {
             // Range-neutral: the same view serves Today and the 7-day range (QA-9).
             Text("Still learning").labelCaps()
-            Text("Insights appear once StolenEyes has enough usage in this range to say something true.")
+            Text("Insights appear once Stolen Glance has enough usage in this range to say something true.")
                 .scaledFont(13)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)

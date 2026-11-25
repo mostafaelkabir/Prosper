@@ -1,6 +1,6 @@
 <div align="center">
 
-# StolenEyes
+# Stolen Glance
 
 **See where your time goes. Lock what steals it, and mean it.**
 
@@ -15,20 +15,20 @@ and its adult content guard has no off switch.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/mac-today-dark.png">
-  <img src="docs/screenshots/mac-today.png" alt="StolenEyes for Mac, Today: time split into productive, distracting, rest and unclassified, a running lock, the iPhone's day, and where the time went" width="760">
+  <img src="docs/screenshots/mac-today.png" alt="Stolen Glance for Mac, Today: time split into productive, distracting, rest and unclassified, a running lock, the iPhone's day, and where the time went" width="760">
 </picture>
 
 </div>
 
 ---
 
-## Why StolenEyes
+## Why Stolen Glance
 
 Screen Time tells you that you spent four hours on your phone. Then it offers an "Ignore limit"
 button, and you press it. Every blocker you have tried has the same flaw: the person it is
 protecting you from also knows the password.
 
-StolenEyes is built on a different promise:
+Stolen Glance is built on a different promise:
 
 - **A lock ends when its timer ends.** No cancel, no "15 more minutes", no passcode. Not in the
   app, not in the menu bar, not by restarting.
@@ -94,7 +94,7 @@ All screenshots are rendered from built-in sample data (`StolenEyes --render-sna
 
 ## Privacy
 
-- **No account, no StolenEyes server, no analytics, no ads.**
+- **No account, no Stolen Glance server, no analytics, no ads.**
 - On iPhone, per-app usage stays inside Apple's Screen Time report extension. Even the app
   itself never sees the raw numbers.
 - Connected devices sync through your own private iCloud database. The iPhone shares
@@ -103,7 +103,7 @@ All screenshots are rendered from built-in sample data (`StolenEyes --render-sna
 
 ## Status
 
-StolenEyes is in **active development**. It is not on the App
+Stolen Glance is in **active development**. It is not on the App
 Store or TestFlight yet. The Family Controls distribution entitlement is granted, and the App
 Store listing is still being set up. The Mac app is development-signed. Until there's a public build,
 the way to use it is to build it yourself. It takes about ten minutes, and the steps are below.
@@ -165,7 +165,7 @@ Everything runs on the device. There is no backend.
 
 ## Contributing
 
-StolenEyes is for anyone who has lost an evening to a feed and wants a tool that won't
+Stolen Glance is for anyone who has lost an evening to a feed and wants a tool that won't
 negotiate. Contributions are very welcome: code, design, copy, testing on real devices, and
 honest bug reports.
 
@@ -175,7 +175,7 @@ end a lock early or switch the guard off.**
 
 ## License
 
-StolenEyes is free software under the [GNU General Public License v3.0](LICENSE). You can use,
+Stolen Glance is free software under the [GNU General Public License v3.0](LICENSE). You can use,
 study, change and share it. If you distribute a modified version, it must stay open under the
 same license.
 

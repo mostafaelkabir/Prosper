@@ -50,7 +50,7 @@ struct SetupFlowView: View {
         VStack(spacing: 0) {
             Form {
                 Section {
-                    Text("Pick the apps that eat your time and StolenEyes warns you when today's total crosses your threshold. Add sites too — they join your one-tap Focus block, though iOS can't time them for warnings.")
+                    Text("Pick the apps that eat your time and Stolen Glance warns you when today's total crosses your threshold. Add sites too — they join your one-tap Focus block, though iOS can't time them for warnings.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

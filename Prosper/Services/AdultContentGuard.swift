@@ -17,7 +17,7 @@ import ManagedSettings
 ///
 /// 1. **There is no off.** This type has no `disable`, `clear` or `remove`,
 ///    `SharedGuardState` has none, and nothing in the app may grow one. The
-///    only way to lift the guard is the way out of every StolenEyes lock:
+///    only way to lift the guard is the way out of every Stolen Glance lock:
 ///    deleting the app (see `LockExitCopy`).
 /// 2. **Its own store.** The guard lives in `ManagedSettingsStore(named:
 ///    "adultContentGuard")`, never the default store that block sessions use.

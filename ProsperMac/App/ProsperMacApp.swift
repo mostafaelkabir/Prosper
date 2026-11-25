@@ -12,7 +12,7 @@ struct ProsperMacApp: App {
     }
 
     var body: some Scene {
-        Window("StolenEyes", id: "main") {
+        Window("Stolen Glance", id: "main") {
             RootView()
                 .environmentObject(model)
                 .onAppear {

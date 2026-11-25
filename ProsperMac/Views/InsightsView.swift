@@ -87,7 +87,7 @@ struct InsightsView: View {
         .navigationTitle("Insights")
     }
 
-    /// Days with any measurement, so averages are not diluted by days before StolenEyes was installed.
+    /// Days with any measurement, so averages are not diluted by days before Stolen Glance was installed.
     private var measuredDays: Int { max(1, model.weekDays.filter { $0.day != nil }.count) }
 
     private var blocked: [(String, Int)] {

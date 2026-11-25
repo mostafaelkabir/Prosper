@@ -2,9 +2,9 @@ import Foundation
 
 /// The one honest sentence about how a block can actually end (REL-8).
 ///
-/// The promise of StolenEyes is that a block has no cancel button, and that stays true:
+/// The promise of Stolen Glance is that a block has no cancel button, and that stays true:
 /// nothing in this app ends one early. But the promise is enforced by iOS
-/// applying restrictions on its behalf, and removing StolenEyes removes them.
+/// applying restrictions on its behalf, and removing Stolen Glance removes them.
 /// That escape hatch exists whether or not it is mentioned, so the only choice
 /// is whether the user hears it from us or discovers it at the worst moment.
 ///
@@ -19,44 +19,44 @@ import Foundation
 public enum LockExitCopy {
     /// Settings and onboarding: the full explanation.
     public static let full = """
-    A block has no cancel button. Once you start one, nothing in StolenEyes will \
+    A block has no cancel button. Once you start one, nothing in Stolen Glance will \
     end it early — not settings, not deleting your data, not reinstalling your \
     lists. That is the whole point.
 
     There is one way out, and you should hear it from us rather than find it \
-    at your worst moment: deleting StolenEyes removes the block. Your blocks are \
+    at your worst moment: deleting Stolen Glance removes the block. Your blocks are \
     applied by iOS on its behalf, so removing the app removes them. It \
     also throws away your history and your streak, which is the price.
     """
 
     /// One line, for places with no room for the full version.
-    public static let short = "Deleting StolenEyes ends any block. Nothing else does."
+    public static let short = "Deleting Stolen Glance ends any block. Nothing else does."
 
     /// The shield screen, where the user is at their least patient. Phrased so
     /// it reads as the closed door it is rather than as a suggestion.
-    public static let shield = "Deleting StolenEyes would end this block. Nothing else will."
+    public static let shield = "Deleting Stolen Glance would end this block. Nothing else will."
 
     /// The Adult Content Guard (E9) has no timer either. Same exit, said for
     /// something that is meant to last.
     public static let guardFull = """
     The guard has no off switch. Not in Settings, not by deleting your data, \
-    not by setting StolenEyes up again. That is the whole point: it was decided \
+    not by setting Stolen Glance up again. That is the whole point: it was decided \
     once, with a clear head, and it stays decided.
 
-    One way out, said plainly: deleting StolenEyes removes the guard, because \
+    One way out, said plainly: deleting Stolen Glance removes the guard, because \
     iOS applies it on the app's behalf. That also throws away your history and \
     your streak, which is the price.
     """
 
     /// The shield for something behind the guard.
-    public static let guardShield = "Deleting StolenEyes would remove this guard. Nothing else will."
+    public static let guardShield = "Deleting Stolen Glance would remove this guard. Nothing else will."
 
     /// For the App Store / TestFlight description.
     public static let storeDescription = """
-    StolenEyes blocks cannot be canceled. There is no override, no "just five \
+    Stolen Glance blocks cannot be canceled. There is no override, no "just five \
     more minutes", no hidden setting. A block ends when its timer ends.
 
-    One exception, stated plainly: deleting StolenEyes ends any block, because the \
+    One exception, stated plainly: deleting Stolen Glance ends any block, because the \
     restrictions are applied by iOS on its behalf and go away with the \
     app. You are never locked out of your own phone.
     """

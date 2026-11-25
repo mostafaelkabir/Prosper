@@ -120,13 +120,13 @@ final class AuthorizationManager: ObservableObject {
             // device. Only one can, so this is not something Prosper can win.
             return .unavailable(reason: "Another app is already managing Screen Time on this iPhone. iOS allows only one at a time — remove that app's access in Settings ▸ Screen Time ▸ Apps With Screen Time Access, then try again.")
         case .networkError:
-            return .unavailable(reason: "StolenEyes could not reach Apple to confirm Screen Time access. Check your connection and try again.")
+            return .unavailable(reason: "Stolen Glance could not reach Apple to confirm Screen Time access. Check your connection and try again.")
         case .unavailable:
             return .unavailable(reason: "Screen Time is not available on this device.")
         case .authenticationMethodUnavailable:
-            return .unavailable(reason: "This device cannot complete the Screen Time sign-in StolenEyes needs.")
+            return .unavailable(reason: "This device cannot complete the Screen Time sign-in Stolen Glance needs.")
         case .invalidArgument:
-            return .unavailable(reason: "Screen Time refused the request. Reinstalling StolenEyes usually clears this.")
+            return .unavailable(reason: "Screen Time refused the request. Reinstalling Stolen Glance usually clears this.")
         @unknown default:
             return .unavailable(reason: familyError.localizedDescription)
         }
@@ -139,7 +139,7 @@ extension AuthorizationManager.State {
     var title: String {
         switch self {
         case .authorized: "Screen Time access granted"
-        case .notDetermined: "StolenEyes needs Screen Time"
+        case .notDetermined: "Stolen Glance needs Screen Time"
         case .denied: "Screen Time access is off"
         case .restricted: "This account can't grant Screen Time"
         case .unavailable: "Screen Time is unavailable"
@@ -151,13 +151,13 @@ extension AuthorizationManager.State {
     var explanation: String {
         switch self {
         case .authorized:
-            return "StolenEyes can read your usage and hold your blocks."
+            return "Stolen Glance can read your usage and hold your blocks."
         case .notDetermined:
-            return "StolenEyes reads your usage and enforces your blocks through Apple's Screen Time. It all stays on this iPhone — there is no account and no server to send it to."
+            return "Stolen Glance reads your usage and enforces your blocks through Apple's Screen Time. It all stays on this iPhone — there is no account and no server to send it to."
         case .denied:
-            return "Screen Time access was turned off, so StolenEyes can't read your usage or start a block. You can turn it back on in iOS Settings — open Settings, go to Screen Time, then Apps With Screen Time Access, and switch StolenEyes on."
+            return "Screen Time access was turned off, so Stolen Glance can't read your usage or start a block. You can turn it back on in iOS Settings — open Settings, go to Screen Time, then Apps With Screen Time Access, and switch Stolen Glance on."
         case .restricted:
-            return "Apple only lets an Apple Account manage its own Screen Time. If this account is under 18 and part of a Family Sharing group, its Screen Time belongs to the family organizer, and StolenEyes can't take it over. The same applies on a device managed by an employer or school. StolenEyes won't work on this account."
+            return "Apple only lets an Apple Account manage its own Screen Time. If this account is under 18 and part of a Family Sharing group, its Screen Time belongs to the family organizer, and Stolen Glance can't take it over. The same applies on a device managed by an employer or school. Stolen Glance won't work on this account."
         case .unavailable(let reason):
             return reason
         }
@@ -171,7 +171,7 @@ extension AuthorizationManager.State {
         case .authorized, .notDetermined:
             return nil
         case .denied, .restricted, .unavailable:
-            return "Your blocks are applied by iOS, not by StolenEyes itself. Without Screen Time access StolenEyes can't hold a block, so anything running may already have lifted."
+            return "Your blocks are applied by iOS, not by Stolen Glance itself. Without Screen Time access Stolen Glance can't hold a block, so anything running may already have lifted."
         }
     }
 

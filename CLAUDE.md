@@ -2,6 +2,13 @@
 
 Personal iOS app for phone usage tracking, hard-lock app/site blocking, and distraction warnings.
 
+## Names
+
+The product ships as **Stolen Glance** (store name `Stolen Glance: App Blocker`; from Ghafir 40:19, the furtive glance). Use that in everything a user reads. Two older names survive as identifiers only, and must not be "fixed":
+
+- **Prosper**: the repo, targets, bundle IDs (`com.mostafa.prosper…`), App Group, iCloud container and `Prosper.store`.
+- **StolenEyes** (the shipping name until REL-19): the Mac bundle and binaries (`StolenEyes.app`, `StolenEyesAgent`), `~/Library/Application Support/StolenEyes`, and the saved network filter's description. Renaming those needs an on-device install test, and must not orphan rules, a running lock or the guard.
+
 ## Workflow — Basira first (mandatory)
 
 All tickets for this project live in **Basira**, Mostafa's local life-OS app: http://localhost:8001 → Work → company **Prosper** (linked to the "Prosper" project goal). Not GitHub issues, not ClickUp. A SessionStart hook (`scripts/basira-board.sh`, wired in `.claude/settings.json`) prints the board at the start of every Claude Code session.

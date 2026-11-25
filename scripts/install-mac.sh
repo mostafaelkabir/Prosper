@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds StolenEyes for Mac and installs it in /Applications (PLAN.md §8).
+# Builds Stolen Glance for Mac and installs it in /Applications (PLAN.md §8).
 #
 #   bash scripts/install-mac.sh                 # full build: app + helper + network filter
 #   bash scripts/install-mac.sh --without-filter

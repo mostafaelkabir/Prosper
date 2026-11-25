@@ -98,7 +98,7 @@ struct SettingsView: View {
                 save { $0.level3PhraseRequired = value }
             }
             .confirmationDialog(
-                "Delete everything StolenEyes has stored?",
+                "Delete everything Stolen Glance has stored?",
                 isPresented: $showDeleteConfirmation,
                 titleVisibility: .visible
             ) {
@@ -112,7 +112,7 @@ struct SettingsView: View {
                     title: Text("Data deleted"),
                     message: Text(result.keptActiveBlock
                         ? "Everything stored on this iPhone is gone. Your running block is untouched and still ends at its own time."
-                        : "Everything StolenEyes had stored on this iPhone is gone."),
+                        : "Everything Stolen Glance had stored on this iPhone is gone."),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -207,7 +207,7 @@ struct SettingsView: View {
                     .foregroundStyle(.orange)
             }
         } footer: {
-            Text("StolenEyes watches the apps and categories you pick below and pings you when today's total goes past the threshold.")
+            Text("Stolen Glance watches the apps and categories you pick below and pings you when today's total goes past the threshold.")
         }
     }
 
@@ -217,7 +217,7 @@ struct SettingsView: View {
         } header: {
             Text("Third warning")
         } footer: {
-            Text("At three times your threshold StolenEyes takes over the screen instead of sending another notification. With this on, \u{201C}Keep going anyway\u{201D} only lights up once you have typed \u{201C}\(InterventionView.phrase)\u{201D}. You can always close the screen either way — the friction is a choice, not a lock.")
+            Text("At three times your threshold Stolen Glance takes over the screen instead of sending another notification. With this on, \u{201C}Keep going anyway\u{201D} only lights up once you have typed \u{201C}\(InterventionView.phrase)\u{201D}. You can always close the screen either way — the friction is a choice, not a lock.")
         }
     }
 
@@ -310,7 +310,7 @@ struct SettingsView: View {
         } header: {
             Text("About")
         } footer: {
-            Text("StolenEyes has no account and no server. Nothing you do here leaves this iPhone.")
+            Text("Stolen Glance has no account and no server. Nothing you do here leaves this iPhone.")
         }
     }
 

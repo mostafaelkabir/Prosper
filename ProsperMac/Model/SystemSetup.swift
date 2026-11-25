@@ -35,7 +35,7 @@ final class SystemSetup: NSObject, ObservableObject {
         return FileManager.default.fileExists(atPath: url.path)
     }
 
-    static let noFilterMessage = "This copy of StolenEyes was installed without its network filter, because the full build could not be signed yet. Apps are locked and browser tabs on locked or adult sites are closed, but nothing is blocked at the network level until the full build is installed."
+    static let noFilterMessage = "This copy of Stolen Glance was installed without its network filter, because the full build could not be signed yet. Apps are locked and browser tabs on locked or adult sites are closed, but nothing is blocked at the network level until the full build is installed."
 
     /// Reads the current state of everything without changing anything.
     func refresh() {
@@ -97,7 +97,7 @@ final class SystemSetup: NSObject, ObservableObject {
     private func refreshAgent() {
         switch SMAppService.agent(plistName: Self.agentPlist).status {
         case .enabled: agentState = .on
-        case .requiresApproval: agentState = .needsApproval("Allow StolenEyes in System Settings → General → Login Items & Extensions.")
+        case .requiresApproval: agentState = .needsApproval("Allow Stolen Glance in System Settings → General → Login Items & Extensions.")
         case .notRegistered: agentState = .off
         case .notFound: agentState = .failed("The agent is missing from the app bundle.")
         @unknown default: agentState = .unknown
@@ -112,7 +112,7 @@ final class SystemSetup: NSObject, ObservableObject {
 
     func activateExtension() {
         guard Bundle.main.bundlePath.hasPrefix("/Applications/") else {
-            extensionState = .failed("Move StolenEyes to the Applications folder first. macOS only loads its network filter from there.")
+            extensionState = .failed("Move Stolen Glance to the Applications folder first. macOS only loads its network filter from there.")
             return
         }
         extensionState = .working
@@ -152,6 +152,8 @@ final class SystemSetup: NSObject, ObservableObject {
                     config.filterDataProviderBundleIdentifier = Self.extensionID
                     manager.providerConfiguration = config
                 }
+                // Still the earlier name: renaming a saved filter configuration needs an
+                // on-device install test first, with the Mac bundle rename (REL-19).
                 manager.localizedDescription = "StolenEyes"
                 manager.isEnabled = true
                 self.filterState = .working
@@ -184,6 +186,8 @@ final class SystemSetup: NSObject, ObservableObject {
                     proto.providerBundleIdentifier = Self.extensionID
                     manager.providerProtocol = proto
                 }
+                // Still the earlier name: renaming a saved filter configuration needs an
+                // on-device install test first, with the Mac bundle rename (REL-19).
                 manager.localizedDescription = "StolenEyes"
                 manager.isEnabled = true
                 self.dnsState = .working
@@ -217,7 +221,7 @@ extension SystemSetup: OSSystemExtensionRequestDelegate {
 
     nonisolated func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
         Task { @MainActor in
-            self.extensionState = .needsApproval("Open System Settings → General → Login Items & Extensions → Network Extensions and switch StolenEyes on.")
+            self.extensionState = .needsApproval("Open System Settings → General → Login Items & Extensions → Network Extensions and switch Stolen Glance on.")
         }
     }
 

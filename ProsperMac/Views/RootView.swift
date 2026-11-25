@@ -65,10 +65,10 @@ struct MenuBarView: View {
         if model.guardOn { Text("Adult Content Guard on") }
         if !model.agentRunning { Text("⚠︎ Helper not running") }
         Divider()
-        Button("Open StolenEyes") { open(.today) }
+        Button("Open Stolen Glance") { open(.today) }
         Button("Lock now…") { open(.lock) }
         Divider()
-        Button("Quit StolenEyes window") { NSApp.terminate(nil) }
+        Button("Quit Stolen Glance window") { NSApp.terminate(nil) }
             .help("Quitting the window never ends a lock: the helper and the network filter keep running.")
     }
 

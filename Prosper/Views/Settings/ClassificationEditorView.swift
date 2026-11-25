@@ -76,7 +76,7 @@ struct ClassificationEditorView: View {
     // MARK: - Intro
 
     private var intro: some View {
-        Text("Tell StolenEyes what each platform, app and site means to you. A platform is one thing however you reach it — Facebook is Facebook in the app or in Safari — so tag it once below. Anything you don't classify stays Unclassified; nothing is assumed productive.")
+        Text("Tell Stolen Glance what each platform, app and site means to you. A platform is one thing however you reach it — Facebook is Facebook in the app or in Safari — so tag it once below. Anything you don't classify stays Unclassified; nothing is assumed productive.")
             .scaledFont(13)
             .foregroundStyle(ProsperColor.ink2)
             .fixedSize(horizontal: false, vertical: true)

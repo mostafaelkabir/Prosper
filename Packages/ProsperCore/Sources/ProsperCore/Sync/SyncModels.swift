@@ -293,8 +293,8 @@ public struct SyncStatus: Codable, Equatable, Sendable {
         switch account {
         case .noAccount: "Not signed in to iCloud. Sign in with your Apple Account in System Settings (Mac) or Settings (iPhone) to connect your devices."
         case .restricted: "iCloud is restricted on this device (Screen Time or device management), so it can't connect to your other devices."
-        case .temporarilyUnavailable: "iCloud is temporarily unavailable. StolenEyes will connect again on its own."
-        case .notInThisBuild: "This copy of StolenEyes was built without iCloud, so it can't connect to your other devices. Install the full build to connect them."
+        case .temporarilyUnavailable: "iCloud is temporarily unavailable. Stolen Glance will connect again on its own."
+        case .notInThisBuild: "This copy of Stolen Glance was built without iCloud, so it can't connect to your other devices. Install the full build to connect them."
         case .unknown: "Checking iCloud…"
         case .available:
             if let lastError { "Connected to iCloud, but the last sync failed: \(lastError)" } else { "Connected through your iCloud account. Only your devices can read this data." }

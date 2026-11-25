@@ -17,15 +17,22 @@ Bundle ID: com.mostafa.prosper    SKU: 100
 Created: 2026-09-20    Version 1.0 — PREPARE_FOR_SUBMISSION
 ```
 
-"Prosper" was taken on the App Store, so the shipping name is **StolenEyes** —
-the phone stealing your eyes. "Prosper" survives as the project and repository
-name only, which is why the GitHub and Pages URLs still say Prosper. Do not
-create a second record; fill in the one above.
+The record still carries the app's earlier name. **Rename it to
+`Stolen Glance: App Blocker` in App Store Connect** (App Information → Name; it
+is editable while version 1.0 is in Prepare for Submission). Do not create a
+second record.
+
+The name was decided on 2026-11-24 (REL-19). It comes from Ghafir 40:19, the
+furtive glance taken when no one is watching; "to steal a glance" is the
+English idiom for it. No app on the US App Store used "Stolen Glance" when
+checked that day. "Prosper" was taken on the App Store and survives as the
+project and repository name only, which is why the GitHub and Pages URLs still
+say Prosper.
 
 | Field | Value |
 |---|---|
-| Name | `StolenEyes` |
-| Subtitle | `Blocks you can't talk yourself out of` |
+| Name | `Stolen Glance: App Blocker` (26 of 30 characters) |
+| Subtitle | `Locks with no cancel button` (27 of 30 characters) |
 | Bundle ID | `com.mostafa.prosper` |
 | SKU | `100` (already set on the existing record; not editable) |
 | Primary category | Health & Fitness |
@@ -52,7 +59,7 @@ upload is flagged, so do not hand-wave this one.
 ## Description
 
 ```
-StolenEyes is for the gap between knowing you're on your phone too much and
+Stolen Glance is for the gap between knowing you're on your phone too much and
 actually doing something about it.
 
 SEE WHERE IT GOES
@@ -71,7 +78,7 @@ full-screen stop at three times. Always dismissible — the numbers are the
 argument, not a trap.
 
 ONE EXCEPTION, STATED PLAINLY
-Deleting StolenEyes ends any block, because the restrictions are applied by iOS on
+Deleting Stolen Glance ends any block, because the restrictions are applied by iOS on
 its behalf and go away with the app. You are never locked out of your own
 phone. It also throws away your history and your streak, which is the price.
 
@@ -80,7 +87,7 @@ No account. No server. No analytics. No third-party SDKs. No network requests at
 all. Your Screen Time data is read inside a sandboxed Apple extension that
 cannot send it anywhere, and the app itself never sees the raw numbers.
 
-StolenEyes requires Screen Time access and works on the Apple Account that manages
+Stolen Glance requires Screen Time access and works on the Apple Account that manages
 its own Screen Time. Accounts under 18 in a Family Sharing group cannot grant
 it.
 ```
@@ -106,7 +113,7 @@ External testing needs Beta App Review, which needs all three of these.
 
 **Beta app description**
 ```
-StolenEyes tracks where your phone time goes and lets you block distracting apps
+Stolen Glance tracks where your phone time goes and lets you block distracting apps
 and websites for a fixed period that cannot be cancelled early. Test the Lock
 tab (pick apps or type a site, choose a length, hold to lock), the Today and
 Insights tabs for usage, and the warning ladder in Settings.
@@ -118,7 +125,7 @@ purpose; the in-app support link points at GitHub issues instead (REL-13).
 **Beta App Review notes — this one matters. Paste verbatim:**
 ```
 WHAT THE APP DOES
-StolenEyes is a personal digital wellbeing app. It uses Family Controls with
+Stolen Glance is a personal digital wellbeing app. It uses Family Controls with
 .individual authorization only — the user authorizes their own Apple Account. It
 is not a parental control app and does not manage anyone else's device.
 
