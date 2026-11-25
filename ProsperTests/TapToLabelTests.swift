@@ -2,30 +2,9 @@ import Testing
 import Foundation
 @testable import Prosper
 
-/// Tap to label: a usage row links into the app, and one tap files the thing
-/// under one label. A link the app cannot read is a dead tap; a label that
-/// lands in two lists counts the same time twice.
+/// Labelling (UX-31): which thing a usage row is, and one tap files it under
+/// one label. A label that lands in two lists counts the same time twice.
 struct TapToLabelTests {
-
-    // MARK: The link
-
-    @Test func platformLinkRoundTrips() throws {
-        let url = try #require(LabelTarget.platform("youtube").url)
-        #expect(url.absoluteString == "stolenglance://label?platform=youtube")
-        #expect(LabelTarget(url: url) == .platform("youtube"))
-    }
-
-    @Test func siteLinkRoundTrips() throws {
-        let url = try #require(LabelTarget.site("news.com").url)
-        #expect(LabelTarget(url: url) == .site("news.com"))
-    }
-
-    @Test func linksFromElsewhereAreIgnored() {
-        #expect(LabelTarget(url: URL(string: "https://label?platform=youtube")!) == nil)
-        #expect(LabelTarget(url: URL(string: "stolenglance://lock?platform=youtube")!) == nil)
-        #expect(LabelTarget(url: URL(string: "stolenglance://label?platform=nope")!) == nil)
-        #expect(LabelTarget(url: URL(string: "stolenglance://label?app=notatoken")!) == nil)
-    }
 
     // MARK: Which thing a row labels
 
@@ -44,7 +23,7 @@ struct TapToLabelTests {
         #expect(LabelTarget(item: row) == .site("news.com"))
     }
 
-    @Test func unnamedAppWithoutTokenHasNoPill() {
+    @Test func unnamedAppWithoutTokenHasNoTarget() {
         let row = UsageItem(id: "mail", name: "Mail", duration: 60, pickups: 0)
         #expect(LabelTarget(item: row) == nil)
     }

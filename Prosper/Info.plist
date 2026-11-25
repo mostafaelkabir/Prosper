@@ -15,19 +15,6 @@
 	<array>
 		<string>fetch</string>
 	</array>
-	<!-- Tap to label: a usage row in the report extension opens
-	     stolenglance://label?… and the app shows the label sheet. -->
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.mostafa.prosper.label</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>stolenglance</string>
-			</array>
-		</dict>
-	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.mostafa.prosper.sync</string>

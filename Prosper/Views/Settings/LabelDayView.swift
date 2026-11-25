@@ -88,17 +88,14 @@ struct LabelDayView: View {
         .tracksReportDay($reportDay)
         .onAppear(perform: loadIfNeeded)
         .offeringNewSitesToSchedules($sitesForSchedules)
-        // Rows above link to the one-tap label sheet; this screen is a sheet
-        // itself, so it presents that one.
-        .quickLabelSheet(isOverlay: true)
-        .onChange(of: QuickLabelRouter.shared.revision) { _, _ in reload() }
+
     }
 
     // MARK: - Label buttons
 
     private var labelBar: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Label many apps at once").labelCaps()
+            Text("Label apps as").labelCaps()
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 8) { labelButtons }
                 VStack(spacing: 8) { labelButtons }
@@ -124,7 +121,7 @@ struct LabelDayView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .buttonStyle(.plain)
-            Text("Tap any app or site above to label it. To label many apps at once, tap a label and tick them in Apple's list.")
+            Text("Tap a label, then tick its apps in Apple's list; it has a search field. Websites and platforms take one tap each.")
                 .scaledFont(12)
                 .foregroundStyle(ProsperColor.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -227,7 +224,7 @@ struct LabelDayView: View {
                                 .foregroundStyle(ProsperColor.distracting)
                         }
                         if taggedSites.isEmpty {
-                            Text("A site you add starts as Distracting. Change it with its label.")
+                            Text("A site you add starts as Distracting. Tap another label to change it; press and hold to remove it.")
                                 .scaledFont(13)
                                 .foregroundStyle(ProsperColor.ink2)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -255,39 +252,51 @@ struct LabelDayView: View {
         }
     }
 
+    /// A platform: its mark, its name, and its three labels as chips, one
+    /// tap each. A long press offers "No label" when it has no usual one.
     private func platformRow(_ platform: Platform) -> some View {
         let chosen = platformClass(platform)
-        return HStack(spacing: 12) {
+        // What the day is filed under: the person's own label, or the
+        // built-in one for the obvious cases (UX-20).
+        let shown = chosen ?? platform.defaultClass.map { TimeClass($0) }
+        return labelRow(current: shown) {
             BrandMark(platform: platform, size: 34)
             Text(platform.name)
                 .scaledFont(15, weight: .medium)
                 .foregroundStyle(ProsperColor.ink)
                 .lineLimit(1)
-            Spacer(minLength: 8)
-            LabelMenu(
-                // What the day is actually filed under: the person's own
-                // label, or the built-in one for the obvious cases (UX-20).
-                current: chosen ?? platform.defaultClass.map { TimeClass($0) },
-                // A built-in label cannot be cleared, only replaced.
-                clearTitle: chosen != nil && platform.defaultClass == nil ? "No label" : nil
-            ) { setPlatform(platform, to: $0) }
+        } onSelect: { setPlatform(platform, to: $0) }
+        .contextMenu {
+            // A built-in label cannot be cleared, only replaced.
+            if chosen != nil, platform.defaultClass == nil {
+                Button("No label") { setPlatform(platform, to: nil) }
+            }
         }
-        .frame(minHeight: 48)
     }
 
     private func siteRow(_ domain: String, current: TimeClass) -> some View {
-        HStack(spacing: 12) {
+        labelRow(current: current) {
             SiteIcon(domain: domain, size: 34)
             Text(domain)
                 .scaledFont(15)
                 .foregroundStyle(ProsperColor.ink)
                 .lineLimit(1)
-            Spacer(minLength: 8)
-            LabelMenu(current: current, clearTitle: "Remove site") { label in
-                if let label { setClass(domain: domain, to: label) } else { removeDomain(domain) }
-            }
+        } onSelect: { setClass(domain: domain, to: $0) }
+        .contextMenu {
+            Button("Remove site", role: .destructive) { removeDomain(domain) }
         }
-        .frame(minHeight: 48)
+    }
+
+    private func labelRow<Title: View>(
+        current: TimeClass?,
+        @ViewBuilder title: () -> Title,
+        onSelect: @escaping (TimeClass) -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) { title() }
+            LabelChips(current: current, onSelect: onSelect)
+        }
+        .padding(.vertical, 8)
     }
 
     // MARK: - Website model helpers
@@ -443,64 +452,71 @@ struct LabelDayView: View {
         if !offer.isEmpty { sitesForSchedules = offer }
         revision += 1
     }
-
-    /// A row labelled through the one-tap sheet: take the saved labels back in.
-    private func reload() {
-        loaded = false
-        loadIfNeeded()
-        revision += 1
-    }
 }
 
-/// The label on a website or platform row: says what it is now, in words,
-/// and opens the three choices.
-private struct LabelMenu: View {
+/// The three labels as chips, one tap each (UX-31). The chosen one's tint
+/// slides across to a new choice, the way Superlist's list pill morphs into
+/// the one picked (60fps.design/shots/superlist-task-to-list-switch). No
+/// slide under Reduce Motion.
+private struct LabelChips: View {
     let current: TimeClass?
-    /// The extra, last choice ("No label", "Remove site"); nil hides it.
-    var clearTitle: String?
-    let onSelect: (TimeClass?) -> Void
+    let onSelect: (TimeClass) -> Void
 
-    private var tint: Color { current?.color ?? ProsperColor.accent }
+    @Namespace private var tint
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var taps = 0
 
     var body: some View {
-        Menu {
-            ForEach(LabelDayView.labels, id: \.self) { label in
-                Button {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) { chips }
+            VStack(alignment: .leading, spacing: 6) { chips }
+        }
+        .sensoryFeedback(.selection, trigger: taps)
+    }
+
+    @ViewBuilder
+    private var chips: some View {
+        ForEach(LabelDayView.labels, id: \.self) { label in
+            let selected = label == current
+            Button {
+                guard !selected else { return }
+                taps += 1
+                withAnimation(reduceMotion ? nil : .spring(duration: 0.32, bounce: 0.22)) {
                     onSelect(label)
-                } label: {
-                    if label == current {
-                        Label(label.ledgerTitle, systemImage: "checkmark")
+                }
+            } label: {
+                HStack(spacing: 5) {
+                    if selected {
+                        Image(systemName: "checkmark")
+                            .scaledFont(11, weight: .bold)
+                            .transition(reduceMotion ? .opacity : .scale(scale: 0.4).combined(with: .opacity))
                     } else {
-                        Text(label.ledgerTitle)
+                        Circle().fill(label.color).frame(width: 7, height: 7)
+                    }
+                    Text(label.shortTitle)
+                        .scaledFont(13, weight: .semibold)
+                        .lineLimit(1)
+                }
+                .foregroundStyle(selected ? label.color : ProsperColor.ink2)
+                .padding(.horizontal, 12)
+                .frame(minHeight: 36)
+                .background {
+                    ZStack {
+                        Capsule().fill(ProsperColor.surface2)
+                        if selected {
+                            Capsule()
+                                .fill(label.color.opacity(0.16))
+                                .overlay(Capsule().strokeBorder(label.color.opacity(0.55), lineWidth: 1.5))
+                                .matchedGeometryEffect(id: "chosen", in: tint)
+                        }
                     }
                 }
+                .frame(minHeight: 44)
+                .contentShape(Capsule())
             }
-            if let clearTitle {
-                Divider()
-                Button(clearTitle, role: .destructive) { onSelect(nil) }
-            }
-        } label: {
-            HStack(spacing: 6) {
-                if current != nil {
-                    Circle().fill(tint).frame(width: 8, height: 8)
-                }
-                Text(current?.ledgerTitle ?? "Label")
-                    .scaledFont(14, weight: .semibold)
-                    .foregroundStyle(current == nil ? ProsperColor.accent : ProsperColor.ink)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(ProsperColor.ink2)
-            }
-            // The label keeps its width; a long name beside it shortens instead.
-            .fixedSize()
-            .padding(.horizontal, 12)
-            .frame(minHeight: 36)
-            .background(tint.opacity(0.14))
-            .clipShape(Capsule())
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityLabel(label.shortTitle)
+            .accessibilityAddTraits(selected ? .isSelected : [])
         }
-        .accessibilityLabel("Label")
-        .accessibilityValue(current?.ledgerTitle ?? "None")
     }
 }
