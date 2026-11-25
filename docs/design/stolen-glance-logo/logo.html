@@ -1,0 +1,412 @@
+<title>Stolen Glance Logo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a night stage that plays the reveal, then a quiet spec sheet below it. */
+:root {
+  --bg: #F3F2FC; --surface: #FFFFFF; --surface2: #ECEAF9; --ink: #1C2440; --muted: #555E80; --line: rgba(28,36,64,.12);
+  --lid-a: #6144DE; --lid-b: #187290; --lid-c: #08765C; --iris: #1C2440; --accent: #6144DE;
+  /* The stage is always night: the mark's home is the app's dark field. */
+  --night: #090D18; --night-lift: #1C2740; --night-ink: #F0F3FF; --night-muted: #9AA3C2;
+  --night-a: #A58AFF; --night-b: #64CBE6; --night-c: #58E4B3;
+  --display: "Sora", "SF Pro Display", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #090D18; --surface: #141B2B; --surface2: #1C2740; --ink: #F0F3FF; --muted: #9AA3C2; --line: rgba(240,243,255,.12);
+  --lid-a: #A58AFF; --lid-b: #64CBE6; --lid-c: #58E4B3; --iris: #F0F3FF; --accent: #A58AFF; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #090D18; --surface: #141B2B; --surface2: #1C2740; --ink: #F0F3FF; --muted: #9AA3C2; --line: rgba(240,243,255,.12);
+  --lid-a: #A58AFF; --lid-b: #64CBE6; --lid-c: #58E4B3; --iris: #F0F3FF; --accent: #A58AFF; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body); -webkit-font-smoothing: antialiased }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.02em }
+h2 { font-size: clamp(24px, 3.2vw, 32px); font-weight: 600 }
+h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em }
+p { margin: 0; max-width: 62ch }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+a { color: var(--accent); text-underline-offset: 3px }
+section { padding-block: 72px 8px; display: grid; gap: 28px }
+.lede { display: grid; gap: 12px }
+.lede p { color: var(--muted) }
+
+/* Stage */
+.stage-band { background: radial-gradient(120% 90% at 50% 38%, var(--night-lift), var(--night) 70%); color: var(--night-ink);
+  --lid-a: var(--night-a); --lid-b: var(--night-b); --lid-c: var(--night-c); --iris: var(--night-ink) }
+.stage-inner { padding-block: 40px 28px; display: grid; gap: 20px; justify-items: center }
+.stage-top { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap }
+.stage-top .eyebrow { color: var(--night-muted) }
+.stage { position: relative; width: 100%; height: clamp(260px, 40vw, 400px); display: grid; place-items: center; overflow: hidden; touch-action: none }
+.lockup { display: flex; align-items: center; gap: clamp(10px, 2vw, 22px); will-change: transform }
+.lockup .mark-slot { width: clamp(96px, 15vw, 168px); aspect-ratio: 1; cursor: pointer; flex: none }
+.lockup .mark-slot svg { width: 100%; height: 100%; display: block; overflow: visible }
+.word { font: 600 clamp(30px, 6.2vw, 64px)/1 var(--display); letter-spacing: -0.035em; white-space: nowrap; display: flex }
+.word span { display: inline-block; will-change: transform, opacity, filter }
+.word .sp { width: .26em }
+.tag { font: 400 clamp(13px, 1.6vw, 15px)/1.4 var(--body); color: var(--night-muted); text-align: center; min-height: 1.4em }
+.controls { display: flex; gap: 8px; flex-wrap: wrap }
+.btn { font: 500 13px/1 var(--body); color: var(--night-ink); background: rgba(240,243,255,.08); border: 1px solid rgba(240,243,255,.16);
+  border-radius: 999px; padding: 9px 14px; cursor: pointer }
+.btn:hover { background: rgba(240,243,255,.14) }
+.btn[aria-pressed="true"] { background: var(--night-ink); color: var(--night) }
+.btn:focus-visible, .mark-slot:focus-visible { outline: 2px solid var(--night-b); outline-offset: 3px }
+.scrub { width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; font: 400 12px/1 var(--mono); color: var(--night-muted) }
+.scrub input { width: 100%; accent-color: var(--night-a) }
+.scrub output { font-variant-numeric: tabular-nums; min-width: 5.5ch; text-align: right }
+
+/* Storyboard */
+.board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px }
+.frame { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; align-content: start }
+.frame .art { aspect-ratio: 1; display: grid; place-items: center }
+.frame .art svg { width: 82%; height: auto }
+.frame .t { font: 500 11px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums }
+.frame p { font-size: 14px; line-height: 1.45; color: var(--muted) }
+.frame h3 { font-size: 15px }
+.verse { font: 400 clamp(19px, 2.4vw, 24px)/1.4 var(--display); letter-spacing: -0.01em; max-width: 34ch }
+.verse cite { display: block; font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 12px; font-style: normal }
+
+/* Marks */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
+.tile { border-radius: 14px; aspect-ratio: 1; display: grid; place-items: center; position: relative; border: 1px solid var(--line) }
+.tile svg { width: 62% }
+.tile .lab { position: absolute; left: 12px; bottom: 10px; font: 500 11px/1 var(--mono); letter-spacing: .04em }
+.t-night { background: #090D18; color: #9AA3C2 }
+.t-day { background: #F3F2FC; color: #555E80 }
+.t-white { background: #FFFFFF; color: #555E80 }
+.t-violet { background: #6144DE; color: #ECE7FF }
+
+/* Icon */
+.icons { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: center }
+.icon-hero svg { width: 100%; height: auto; border-radius: 22.37%; display: block; box-shadow: 0 30px 60px -30px rgba(9,13,24,.6) }
+.icon-row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap }
+.icon-row figure { margin: 0; display: grid; gap: 8px; justify-items: center; font: 500 11px/1 var(--mono); color: var(--muted) }
+.icon-row svg { display: block; border-radius: 22.37% }
+.home { background: linear-gradient(160deg, #2A2350, #0F3B4A); border-radius: 22px; padding: 22px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 14px; justify-items: center }
+.home .app { display: grid; gap: 6px; justify-items: center; font: 500 11px/1.2 var(--body); color: #F0F3FF; text-align: center }
+.home .ph { width: 100%; max-width: 60px; aspect-ratio: 1; border-radius: 22.37%; background: rgba(240,243,255,.14) }
+.home svg { width: 100%; max-width: 60px; height: auto; border-radius: 22.37% }
+
+/* Lockups */
+.lockups { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px }
+.lk { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 36px 20px; display: grid; place-items: center; min-height: 200px }
+.lk .row { display: flex; align-items: center; gap: 14px }
+.lk .row svg { width: 64px }
+.lk .col { display: grid; justify-items: center; gap: 10px }
+.lk .col svg { width: 84px }
+.lk .w { font: 600 clamp(24px, 3vw, 34px)/1 var(--display); letter-spacing: -0.035em }
+.lk .col .w { font-size: 24px }
+.clear { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--muted) }
+
+/* Spec table */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface) }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px }
+th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font: 500 11px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface2) }
+tr:last-child td { border-bottom: 0 }
+td.num { font: 400 13px/1.4 var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums }
+td .sub { color: var(--muted); font-size: 13px }
+.files { display: grid; gap: 6px; font: 400 13px/1.5 var(--mono); color: var(--muted) }
+.files b { color: var(--ink); font-weight: 500 }
+footer { padding-block: 56px 64px; color: var(--muted); font-size: 13px }
+
+@media (max-width: 860px) {
+  .board { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .icons, .lockups { grid-template-columns: minmax(0, 1fr) }
+}
+@media (max-width: 420px) { .home { padding: 16px; gap: 14px 10px } }
+</style>
+
+<div class="stage-band">
+  <div class="wrap stage-inner">
+    <div class="stage-top">
+      <span class="eyebrow">Stolen Glance · launch reveal · 2.8 s</span>
+      <div class="controls" role="group" aria-label="Playback">
+        <button class="btn" id="replay" type="button">Replay</button>
+        <button class="btn" id="slow" type="button" aria-pressed="false">Slow motion</button>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <div class="lockup" id="lockup">
+        <div class="mark-slot" id="heroMark" tabindex="0" role="button" aria-label="Stolen Glance mark. Press to blink."></div>
+        <div class="word" id="word" aria-label="Stolen Glance"></div>
+      </div>
+    </div>
+    <div class="tag" id="tag">The look you didn't mean to take, locked away.</div>
+    <label class="scrub" for="scrub"><span>Scrub</span><input id="scrub" type="range" min="0" max="2800" step="10" value="2800"><output id="scrubOut" for="scrub">2800 ms</output></label>
+  </div>
+</div>
+
+<main class="wrap">
+  <section>
+    <div class="lede">
+      <span class="eyebrow">The idea</span>
+      <h2>An eye that lowers its gaze, and a pupil that turns into a lock.</h2>
+      <p>The name comes from a verse about the glance you steal when you think no one sees. The mark tells that story in five beats: the eye opens, the glance slips sideways, the lid comes down, and when it opens again the pupil is a keyhole. The lids are drawn like a pen stroke, thick in the middle and sharp at the corners. At rest the upper lid sits low and the iris looks a little down.</p>
+    </div>
+    <blockquote class="verse" style="margin:0">“He knows the stolen glance of the eyes.”<cite>Ghafir 40:19</cite></blockquote>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section>
+    <div class="lede">
+      <span class="eyebrow">The mark</span>
+      <h2>Four surfaces, one shape</h2>
+      <p>Aurora gradient on night and day, and single-colour versions for print, stamps and the shield screen. The keyhole is cut out, so the background always shows through it.</p>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <div class="lede">
+      <span class="eyebrow">App icon</span>
+      <h2>Built to read at 29 points</h2>
+      <p>The eye fills 70% of the tile, so the keyhole is still a keyhole on Settings rows and Spotlight. A soft violet glow sits behind the iris, the same lift the current icon uses.</p>
+    </div>
+    <div class="icons">
+      <div class="icon-hero" id="iconHero"></div>
+      <div style="display:grid;gap:24px;min-width:0">
+        <div class="icon-row" id="iconRow"></div>
+        <div class="home" id="home" aria-label="Home screen preview"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="lede">
+      <span class="eyebrow">Lockups</span>
+      <h2>With the name</h2>
+      <p>The wordmark is Sora Semibold with tight tracking. Keep clear space of one keyhole height around the lockup, and never set the name without the eye in a place where the eye would fit.</p>
+    </div>
+    <div class="lockups">
+      <div class="lk"><div class="row"><span id="lkRow"></span><span class="w">Stolen Glance</span></div></div>
+      <div class="lk"><div class="col"><span id="lkCol"></span><span class="w">Stolen Glance</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="lede">
+      <span class="eyebrow">Motion spec</span>
+      <h2>Every beat, timed</h2>
+      <p>Each beat is built from a named 60fps shot. Under Reduce Motion the whole reveal becomes a 300 ms fade to the resting mark. It plays once on launch and never loops.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Beat</th><th>Time</th><th>Motion</th><th>60fps reference</th></tr></thead>
+        <tbody>
+          <tr><td><b>Seed</b><div class="sub">A dot appears where the lids will meet and draws outward into a closed eye.</div></td><td class="num">0 to 560 ms</td><td>Reveal from the middle, ease-out cubic. Blur 6 to 0 as it draws.</td><td><a href="https://60fps.design/shots/tiimo-splash-logo-animation" target="_blank" rel="noopener">Tiimo Splash Logo Animation</a>, a dot that draws into an arc. <a href="https://60fps.design/shots/apple-arcade-splash-logo-animation" target="_blank" rel="noopener">Apple Arcade Splash</a>, the blur that resolves.</td></tr>
+          <tr><td><b>Open</b><div class="sub">The upper lid lifts and the iris rises in behind it.</div></td><td class="num">640 to 1120 ms</td><td>Spring, about 15% overshoot. Iris scales 0.7 to 1.</td><td><a href="https://60fps.design/shots/clearpro-splash" target="_blank" rel="noopener">ClearPro Splash</a>, a drawn stroke then a subtle spring.</td></tr>
+          <tr><td><b>The glance</b><div class="sub">The pupil darts left, then right. The stolen look.</div></td><td class="num">1220 to 1660 ms</td><td>Two darts, 140 ms and 160 ms, ease-out quart, with holds between.</td><td>Our own beat. It is the name.</td></tr>
+          <tr><td><b>Caught</b><div class="sub">The lid drops shut. Behind it, the gaze resets to centre.</div></td><td class="num">1780 to 2180 ms</td><td>110 ms ease-in close, spring reopen to the lowered rest.</td><td>Same spring as Open, so the eye feels like one material.</td></tr>
+          <tr><td><b>Locked</b><div class="sub">The pupil becomes a keyhole and one halo leaves the eye.</div></td><td class="num">1950 to 2700 ms</td><td>Keyhole stem grows on a spring. Halo scales 1.24 to 1 and fades, once.</td><td>Echoes <code>LockSeal</code> in the app, where a ring closes when a lock starts.</td></tr>
+          <tr><td><b>Name</b><div class="sub">The eye slides left and the name unmasks to its right.</div></td><td class="num">2150 to 2800 ms</td><td>Mask reveal to the right, letters stagger 22 ms with blur 4 to 0.</td><td><a href="https://60fps.design/shots/apple-arcade-splash-logo-animation" target="_blank" rel="noopener">Apple Arcade Splash</a>, the mask reveal. <a href="https://60fps.design/shots/emphasis-get-started-splash-animation" target="_blank" rel="noopener">Emphasis Get Started</a>, the stagger.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="lede">
+      <span class="eyebrow">Files</span>
+      <h2>In the repo</h2>
+      <p>Everything is generated from one file, so the icon, the static marks and this animation can never drift apart.</p>
+    </div>
+    <div class="files">
+      <div><b>docs/design/stolen-glance-logo/mark.js</b> · geometry, palettes, the live animation handle</div>
+      <div><b>mark-dark.svg · mark-light.svg · mark-mono-black.svg · mark-mono-white.svg</b></div>
+      <div><b>app-icon.svg · app-icon-1024.png</b> · sRGB, no alpha, ready for the asset catalog</div>
+    </div>
+  </section>
+</main>
+<footer class="wrap">Stolen Glance · DS-10 · motion references from 60fps.design</footer>
+
+<script src="mark.js"></script>
+<script>
+(() => {
+  const M = window.StolenGlanceMark;
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
+  // ---------- easing ----------
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const prog = (t, a, b) => clamp((t - a) / (b - a));
+  const outCubic = (p) => 1 - Math.pow(1 - p, 3);
+  const outQuart = (p) => 1 - Math.pow(1 - p, 4);
+  const inQuad = (p) => p * p;
+  const outBack = (p) => { const c = 1.6; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+  // Damped spring, about 15% overshoot, settled by p = 1.
+  const spring = (p) => p >= 1 ? 1 : 1 - Math.exp(-6.2 * p) * Math.cos(10 * p);
+
+  const REST = M.FINAL.lid;
+  const END = 2800;
+
+  // ---------- the timeline: one pure function of time ----------
+  function at(t) {
+    const s = { draw: 1, blur: 0, lid: REST, iris: 1, gx: 0, gy: M.FINAL.gy, key: 1, halo: 0, word: 1, tag: 1 };
+    const d = outCubic(prog(t, 0, 560));
+    s.draw = d; s.blur = 6 * (1 - d);
+
+    // Open: from shut to wide.
+    const o = prog(t, 640, 1120);
+    s.lid = t < 640 ? -1 : lerp(-1, 1, spring(o));
+    s.iris = t < 640 ? 0.7 : lerp(0.7, 1, outBack(o));
+
+    // The glance: left, then right.
+    const gl = outQuart(prog(t, 1220, 1360)), gr = outQuart(prog(t, 1500, 1660));
+    s.gx = t < 1500 ? -22 * gl : lerp(-22, 22, gr);
+    s.gy = 0;
+
+    // Caught: shut fast, reopen to the lowered rest. Gaze resets while shut.
+    if (t >= 1780) {
+      const c = inQuad(prog(t, 1780, 1890));
+      const r = spring(prog(t, 1890, 2180));
+      s.lid = t < 1890 ? lerp(1, -0.96, c) : lerp(-0.96, REST, r);
+      if (t >= 1890) { s.gx = 0; s.gy = M.FINAL.gy; }
+    }
+
+    // Locked: the pupil becomes a keyhole.
+    s.key = t < 1950 ? 0 : spring(prog(t, 1950, 2300));
+    const h = prog(t, 2050, 2700);
+    s.halo = t < 2050 ? 0 : 1 - outCubic(h);
+
+    s.word = outCubic(prog(t, 2150, 2800));
+    s.tag = prog(t, 2500, 2800);
+    return s;
+  }
+
+  // ---------- hero ----------
+  const hero = M.mount($('heroMark'), M.THEMED, { idPrefix: 'hero' });
+  const word = $('word'), lockup = $('lockup'), tag = $('tag');
+  const letters = [];
+  'Stolen Glance'.split('').forEach((ch) => {
+    const sp = document.createElement('span');
+    if (ch === ' ') sp.className = 'sp'; else sp.textContent = ch;
+    sp.setAttribute('aria-hidden', 'true');
+    word.appendChild(sp); letters.push(sp);
+  });
+
+  let shift = 0;
+  function measure() {
+    const gap = parseFloat(getComputedStyle(lockup).columnGap) || 0;
+    shift = (word.offsetWidth + gap) / 2;
+  }
+
+  function paint(t) {
+    const s = at(t);
+    hero.update(s);
+    const w = s.word;
+    lockup.style.transform = `translateX(${(shift * (1 - w)).toFixed(2)}px)`;
+    word.style.clipPath = `inset(-20% ${((1 - w) * 100).toFixed(2)}% -20% 0)`;
+    const n = letters.length;
+    letters.forEach((el, i) => {
+      const p = clamp((t - 2150 - i * 22) / 420);
+      const e = outCubic(p);
+      el.style.opacity = e.toFixed(3);
+      el.style.transform = `translateX(${(-14 * (1 - e)).toFixed(2)}px)`;
+      el.style.filter = p < 1 ? `blur(${(4 * (1 - e)).toFixed(2)}px)` : 'none';
+    });
+    tag.style.opacity = s.tag.toFixed(3);
+    tag.style.transform = `translateY(${(6 * (1 - s.tag)).toFixed(2)}px)`;
+    $('scrub').value = Math.round(t);
+    $('scrubOut').value = `${Math.round(t)} ms`;
+  }
+
+  let raf = 0, start = 0, speed = 1, idle = true;
+  function play() {
+    cancelAnimationFrame(raf); idle = false; measure();
+    if (reduce.matches) {
+      paint(END);
+      const st = $('stage'); st.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
+      idle = true; return;
+    }
+    start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(END, (now - start) * speed);
+      paint(t);
+      if (t < END) raf = requestAnimationFrame(tick); else idle = true;
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  $('replay').addEventListener('click', play);
+  $('slow').addEventListener('click', (e) => {
+    speed = speed === 1 ? 0.25 : 1;
+    e.currentTarget.setAttribute('aria-pressed', String(speed !== 1));
+    play();
+  });
+  $('scrub').addEventListener('input', (e) => { cancelAnimationFrame(raf); idle = true; measure(); paint(+e.target.value); });
+  addEventListener('resize', () => { measure(); if (idle) paint(+$('scrub').value); });
+
+  // ---------- after the reveal: the eye follows you, press to blink ----------
+  let look = { x: 0, y: M.FINAL.gy }, aim = { x: 0, y: M.FINAL.gy }, followRaf = 0, blinkAt = -1;
+  function followLoop(now) {
+    look.x += (aim.x - look.x) * 0.16; look.y += (aim.y - look.y) * 0.16;
+    let lid = REST;
+    if (blinkAt >= 0) {
+      const t = now - blinkAt;
+      lid = t < 110 ? lerp(REST, -0.96, inQuad(t / 110)) : lerp(-0.96, REST, spring(clamp((t - 110) / 290)));
+      if (t > 400) blinkAt = -1;
+    }
+    hero.update({ gx: look.x, gy: look.y, lid });
+    const moving = Math.abs(aim.x - look.x) > 0.05 || Math.abs(aim.y - look.y) > 0.05 || blinkAt >= 0;
+    followRaf = moving ? requestAnimationFrame(followLoop) : 0;
+  }
+  function kick() { if (!followRaf) followRaf = requestAnimationFrame(followLoop); }
+  $('stage').addEventListener('pointermove', (e) => {
+    if (!idle || reduce.matches || +$('scrub').value !== END) return;
+    const r = $('heroMark').getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    const dist = Math.hypot(dx, dy) || 1, k = Math.min(1, dist / 260);
+    aim = { x: (dx / dist) * 20 * k, y: M.FINAL.gy + (dy / dist) * 6 * k };
+    kick();
+  });
+  $('stage').addEventListener('pointerleave', () => { aim = { x: 0, y: M.FINAL.gy }; kick(); });
+  function blink() { if (!idle || reduce.matches) return; blinkAt = performance.now(); kick(); }
+  $('heroMark').addEventListener('click', blink);
+  $('heroMark').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); blink(); } });
+
+  // ---------- storyboard ----------
+  const beats = [
+    { t: 280, h: 'Seed', p: 'A dot draws outward into a closed eye.' },
+    { t: 1000, h: 'Open', p: 'The lid lifts on a spring.' },
+    { t: 1420, h: 'The glance', p: 'The pupil slips to the side.' },
+    { t: 1888, h: 'Caught', p: 'The lid comes down.' },
+    { t: END, h: 'Locked', p: 'It opens on a keyhole, gaze lowered.' },
+  ];
+  $('board').innerHTML = beats.map((b) => {
+    const s = at(b.t);
+    return `<div class="frame"><div class="art">${M.markup(s, M.THEMED, { title: false })}</div><span class="t">${b.t} ms</span><h3>${b.h}</h3><p>${b.p}</p></div>`;
+  }).join('');
+
+  // ---------- tiles ----------
+  const tiles = [
+    { c: 't-night', pal: M.DARK, l: 'Night' },
+    { c: 't-day', pal: M.LIGHT, l: 'Day' },
+    { c: 't-white', pal: { mono: '#1C2440' }, l: 'Ink' },
+    { c: 't-violet', pal: { mono: '#FFFFFF' }, l: 'Reversed' },
+  ];
+  $('tiles').innerHTML = tiles.map((x) => `<div class="tile ${x.c}">${M.markup({}, x.pal, { title: false })}<span class="lab">${x.l}</span></div>`).join('');
+
+  // ---------- icon ----------
+  $('iconHero').innerHTML = M.icon(1024).replace('width="1024" height="1024"', 'role="img" aria-label="App icon"');
+  $('iconRow').innerHTML = [[120, '60 pt'], [80, '40 pt'], [58, '29 pt']]
+    .map(([px, l]) => `<figure>${M.icon(px)}<figcaption>${l}</figcaption></figure>`).join('');
+  const apps = ['Notes', 'Stolen Glance', 'Weather', 'Books', 'Maps', 'Fitness', 'Podcasts', 'Calendar'];
+  $('home').innerHTML = apps.map((a) => a === 'Stolen Glance'
+    ? `<div class="app">${M.icon(60)}<span>Stolen<br>Glance</span></div>`
+    : `<div class="app"><div class="ph"></div><span>${a}</span></div>`).join('');
+
+  // ---------- lockups ----------
+  $('lkRow').innerHTML = M.markup({}, M.THEMED, { title: false });
+  $('lkCol').innerHTML = M.markup({}, M.THEMED, { title: false });
+
+  // Fonts change the word's width, so measure after they load, then play.
+  paint(END);
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { measure(); play(); });
+})();
+</script>

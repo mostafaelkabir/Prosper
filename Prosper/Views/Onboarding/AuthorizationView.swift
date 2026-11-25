@@ -16,19 +16,19 @@ struct AuthorizationView: View {
                 Spacer(minLength: 48)
 
                 VStack(spacing: 16) {
-                    Image(systemName: icon)
-                        .font(.system(size: 56))
-                        .foregroundStyle(iconTint)
-                        .accessibilityHidden(true)
+                    // First sight of the brand: the mark plays its reveal once (DS-10).
+                    GlanceReveal()
+                        .padding(.bottom, 4)
 
-                    Text("Stolen Glance")
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(ProsperColor.ink)
-
-                    Text(state.title)
-                        .font(.headline)
-                        .foregroundStyle(ProsperColor.ink)
-                        .multilineTextAlignment(.center)
+                    Label {
+                        Text(state.title)
+                    } icon: {
+                        Image(systemName: icon)
+                            .foregroundStyle(iconTint)
+                    }
+                    .font(.headline)
+                    .foregroundStyle(ProsperColor.ink)
+                    .multilineTextAlignment(.center)
 
                     Text(state.explanation)
                         .font(.body)
