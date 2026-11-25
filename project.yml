@@ -241,7 +241,7 @@ targets:
     sources:
       - path: ProsperReport
       - path: Prosper/Extensions/ReportContext.swift
-      # Rows link into the app to be labelled (tap to label).
+      # Rows show the label they are filed under.
       - path: Prosper/Extensions/LabelLink.swift
       - path: Prosper/DesignSystem
         # The report shows this iPhone only; it cannot reach iCloud anyway.
