@@ -211,7 +211,7 @@ struct GuardSection: View {
         .sheet(isPresented: $showAdd) {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Add to the guard").font(.system(size: 18, weight: .bold, design: .rounded))
-                Text("These stay blocked for as long as StolenEyes is installed. Nothing can be taken out.")
+                Text("These stay blocked for as long as Stolen Glance is installed. Nothing can be taken out.")
                     .font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
                 ScrollView { LockItemsPicker(selection: $selection, showPlatforms: false) }
                 HStack {
@@ -238,8 +238,8 @@ extension GuardSection {
         switch model.status?.screenGuard ?? .off {
         case .running: .on
         case .off: model.agentRunning ? .working : .failed("The background helper is not running.")
-        case .needsScreenRecording: .needsApproval("Allow StolenEyes Agent in System Settings → Privacy & Security → Screen & System Audio Recording.")
-        case .sensitiveContentWarningOff: .needsApproval("Turn on System Settings → Privacy & Security → Sensitive Content Warning. It is the one setting StolenEyes cannot switch on for you; Apple's classifier only runs while it is on.")
+        case .needsScreenRecording: .needsApproval("Allow Stolen Glance Agent in System Settings → Privacy & Security → Screen & System Audio Recording.")
+        case .sensitiveContentWarningOff: .needsApproval("Turn on System Settings → Privacy & Security → Sensitive Content Warning. It is the one setting Stolen Glance cannot switch on for you; Apple's classifier only runs while it is on.")
         case .unavailable: .failed("This build is signed without Apple's Sensitive Content Analysis capability. It arrives with the full build (network filter included).")
         }
     }
@@ -262,7 +262,7 @@ struct BrowserSection: View {
                     HStack {
                         Text(InstalledApps.named(id).name).font(.system(size: 13)).foregroundStyle(ProsperColor.ink)
                         Spacer()
-                        Text(access[id] == true ? "Allowed" : "Not allowed: switch on StolenEyes under \(InstalledApps.named(id).name) in Automation settings")
+                        Text(access[id] == true ? "Allowed" : "Not allowed: switch on Stolen Glance under \(InstalledApps.named(id).name) in Automation settings")
                             .font(.system(size: 12)).foregroundStyle(access[id] == true ? ProsperColor.productive : ProsperColor.distracting)
                     }
                 }

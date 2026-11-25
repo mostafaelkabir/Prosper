@@ -1,6 +1,6 @@
-# Contributing to StolenEyes
+# Contributing to Stolen Glance
 
-Thank you for being here. StolenEyes exists because the usual screen-time tools give way the
+Thank you for being here. Stolen Glance exists because the usual screen-time tools give way the
 moment you push on them. If you have been there too, your eyes on this code are worth a lot.
 
 You don't need to be a Swift expert to help. Useful contributions include:

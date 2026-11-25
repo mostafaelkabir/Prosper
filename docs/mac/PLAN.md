@@ -109,7 +109,7 @@ Environment facts that shape the plan:
 ## 2. The product on the Mac
 
 Same four pillars, same tabs, same copy, same Aurora tokens
-(`docs/design/approved-prosper/HANDOFF.md`). The display name is **StolenEyes**,
+(`docs/design/approved-prosper/HANDOFF.md`). The display name is **Stolen Glance**,
 like the App Store build.
 
 - **Main window** with a sidebar: Today · Insights · Lock · Settings. The
@@ -657,7 +657,7 @@ that needs the real OS.
    delete-the-app exit for the guard (deleting removes everything), while
    making "delete and reinstall to skip a lock" not work. If Mostafa prefers
    the pure iOS behaviour, M6.3 is skipped; nothing else depends on it.
-10. **Display name StolenEyes** on the Mac too.
+10. **Display name Stolen Glance** on the Mac too.
 
 ---
 

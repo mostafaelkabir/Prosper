@@ -60,14 +60,17 @@ targets:
         # but nothing here has been designed or tested on iPad, and shipping an
         # untested iPad build is worse than not shipping one (REL-17).
         TARGETED_DEVICE_FAMILY: "1"
-        # The App Store listing is StolenEyes ("Prosper" was taken), so the home
-        # screen says StolenEyes too. A device name that disagrees with the store
-        # name confuses users and risks Apple's metadata rules. "Prosper" stays
-        # as the project/repo name only.
-        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes
+        # The App Store listing is "Stolen Glance: App Blocker" (REL-19; it was
+        # StolenEyes before, and "Prosper" was taken), so the home screen says
+        # Stolen Glance too. A device name that disagrees with the store name
+        # confuses users and risks Apple's metadata rules. "Prosper" stays as
+        # the project/repo name only.
+        INFOPLIST_KEY_CFBundleDisplayName: Stolen Glance
         # Export compliance, answered once here instead of per-build in App Store
-        # Connect. StolenEyes makes no network requests at all — no backend, no
-        # analytics, no third-party SDKs — so it uses no non-exempt encryption.
+        # Connect. Stolen Glance has no backend, no analytics and no third-party
+        # SDKs. Its only network traffic is CloudKit (connected devices, M7),
+        # which uses the system's own encryption, so it uses no non-exempt
+        # encryption of its own.
         # Without this key every upload lands as MISSING_EXPORT_COMPLIANCE and
         # cannot be given to testers until someone clicks through the question.
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
@@ -155,7 +158,7 @@ targets:
     info:
       path: ProsperMonitor/Info.plist
       properties:
-        CFBundleDisplayName: StolenEyes
+        CFBundleDisplayName: Stolen Glance
         NSExtension:
           NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperDeviceActivityMonitor
@@ -191,7 +194,7 @@ targets:
     info:
       path: ProsperShield/Info.plist
       properties:
-        CFBundleDisplayName: StolenEyes
+        CFBundleDisplayName: Stolen Glance
         NSExtension:
           NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperShieldConfiguration
@@ -225,7 +228,7 @@ targets:
     info:
       path: ProsperShieldAction/Info.plist
       properties:
-        CFBundleDisplayName: StolenEyes
+        CFBundleDisplayName: Stolen Glance
         NSExtension:
           NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ProsperShieldActionExtension
@@ -264,7 +267,7 @@ targets:
       properties:
         # Required by App Store validation for this extension; without it the
         # upload is rejected with 90360 (REL-17).
-        CFBundleDisplayName: StolenEyes
+        CFBundleDisplayName: Stolen Glance
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.deviceactivityui.report-extension
 
@@ -308,13 +311,13 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes
+        INFOPLIST_KEY_CFBundleDisplayName: Stolen Glance
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         # macOS holds the app responsible for the helper it launches, so the
         # consent prompts for the helper's Apple Events and screen capture are
         # checked against these too. Without them Chrome refused silently.
-        INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
-        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
@@ -353,11 +356,11 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.mostafa.prosper.mac.agent
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: StolenEyes Agent
+        INFOPLIST_KEY_CFBundleDisplayName: Stolen Glance Agent
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
-        INFOPLIST_KEY_NSAppleEventsUsageDescription: StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
         CURRENT_PROJECT_VERSION: 4
@@ -415,14 +418,14 @@ targets:
     info:
       path: ProsperMacFilter/Info.plist
       properties:
-        CFBundleDisplayName: StolenEyes Filter
+        CFBundleDisplayName: Stolen Glance Filter
         CFBundleExecutable: $(EXECUTABLE_NAME)
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleName: $(PRODUCT_NAME)
         CFBundlePackageType: SYSX
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        NSSystemExtensionUsageDescription: StolenEyes uses this to block the websites you choose and adult content, in every browser.
+        NSSystemExtensionUsageDescription: Stolen Glance uses this to block the websites you choose and adult content, in every browser.
         NetworkExtension:
           NEMachServiceName: V9WJ9X99FX.com.mostafa.prosper.mac.filter
           NEProviderClasses:

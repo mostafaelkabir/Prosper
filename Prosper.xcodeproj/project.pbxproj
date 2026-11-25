@@ -1919,11 +1919,11 @@
 				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1947,10 +1947,10 @@
 				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "StolenEyes Agent";
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance Agent";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
-				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2067,7 +2067,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Prosper/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -2094,11 +2094,11 @@
 				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2122,10 +2122,10 @@
 				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "StolenEyes Agent";
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance Agent";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "StolenEyes reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
-				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, StolenEyes checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Stolen Glance reads the address of the browser tab you are on to count time per website and to close a tab on a blocked site. Only the site name is kept, never the page.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "While the Adult Content Guard is on, Stolen Glance checks the window in front for explicit images on this Mac, with Apple's on-device classifier. Frames are never saved or sent anywhere.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2149,7 +2149,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Prosper/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = StolenEyes;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stolen Glance";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

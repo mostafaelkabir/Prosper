@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StolenEyes — Privacy Policy</title>
+<title>Stolen Glance — Privacy Policy</title>
 <style>
   :root {
     --bg: #F3F2FC; --surface: #FFFFFF; --ink: #1C2440; --ink2: #5C6680;
@@ -42,24 +42,29 @@
 </head>
 <body>
 <main>
-  <h1>StolenEyes — Privacy Policy</h1>
-  <p class="updated">Last updated 22 September 2026</p>
+  <h1>Stolen Glance — Privacy Policy</h1>
+  <p class="updated">Last updated 24 November 2026</p>
 
-  <p class="lede">StolenEyes does not collect your data. There is no account to
-  create, no server to send anything to, no analytics, and no third-party SDKs.
-  Everything StolenEyes knows about you stays on your iPhone.</p>
+  <p class="lede">Stolen Glance does not collect your data. There is no account to
+  create, no Stolen Glance server, no analytics, and no third-party SDKs. What it
+  knows about you stays on your iPhone, with one exception: a short summary kept
+  in your own private iCloud, so your other devices can show it.</p>
 
   <div class="card">
-    <p><strong>The short version.</strong> StolenEyes has no backend. Nothing you do
-    in the app is transmitted anywhere. Your Screen Time data is never seen by
-    the app itself — it is read inside a sandboxed Apple extension that can draw
-    charts but cannot send anything out. Deleting StolenEyes deletes everything.</p>
+    <p><strong>The short version.</strong> Stolen Glance has no backend, and its
+    author cannot see anything you do in it. Your Screen Time data is never seen
+    by the app itself — it is read inside a sandboxed Apple extension that can
+    draw charts but cannot send anything out. If you are signed in to iCloud, a
+    summary of your locks, warnings and guard is saved to your own private iCloud
+    database so Stolen Glance on your other devices can show it. Apple stores it
+    under your Apple Account; nobody else, including us, can read it.</p>
   </div>
 
-  <h2>What StolenEyes stores, and where</h2>
-  <p>All of this lives in the app's own storage on your device, shared between
-  the app and its extensions through an Apple App Group. None of it is backed up
-  to a server we control, because there isn't one.</p>
+  <h2>What Stolen Glance stores, and where</h2>
+  <p>This policy covers Stolen Glance for iPhone. All of this lives in the app's
+  own storage on your device, shared between the app and its extensions through
+  an Apple App Group. None of it is sent to a server we control, because there
+  isn't one.</p>
   <ul>
     <li><strong>Your block history</strong> — when a block started, how long it
     ran, how many apps and sites it covered, and any website addresses you typed.</li>
@@ -68,55 +73,89 @@
     your notification preferences.</li>
     <li><strong>Your warning history</strong> — which warnings fired and whether
     you acknowledged them.</li>
+    <li><strong>Your schedules, guard and install window</strong> — the hours you
+    set, when you switched the Adult Content Guard on, and the sites and apps
+    you added to it.</li>
+    <li><strong>Your nightly check-in</strong> — the answer you gave each day.</li>
   </ul>
 
   <h2>Screen Time data</h2>
-  <p>StolenEyes uses Apple's Screen Time APIs (Family Controls, Device Activity and
+  <p>Stolen Glance uses Apple's Screen Time APIs (Family Controls, Device Activity and
   Managed Settings) with your explicit permission. This part is worth being
   precise about, because it is the most sensitive data involved:</p>
   <ul>
     <li>Your per-app and per-website usage is only ever read inside Apple's
     <strong>Device Activity Report extension</strong>. Apple designed this
     extension so that it can display your usage but cannot pass it back to the
-    app or send it over the network. The StolenEyes app itself never receives your
+    app or send it over the network. The Stolen Glance app itself never receives your
     raw usage numbers.</li>
     <li>The apps and websites you choose to block or classify are handled as
     opaque tokens issued by iOS. These tokens are meaningless outside your
     device and cannot be turned back into a list of apps by anyone else.</li>
-    <li>Blocks are enforced by iOS on its behalf. StolenEyes asks the system
+    <li>Blocks are enforced by iOS on its behalf. Stolen Glance asks the system
     to shield an app; the system does the rest.</li>
   </ul>
 
-  <h2>What StolenEyes does not do</h2>
+  <h2>Connected devices and iCloud</h2>
+  <p>If your iPhone is signed in to iCloud, Stolen Glance saves a summary to the
+  private database of <em>your own</em> iCloud account, and reads the summary
+  your Mac saved there, so each device can show the other. There is no separate
+  sign-in and nothing to set up: iCloud is the account.</p>
+  <p>What the iPhone saves there:</p>
+  <ul>
+    <li>The iPhone's name and the app version.</li>
+    <li>The lock running now and the locks of the last two days: when each
+    started and ends, any website addresses you typed, and how many apps it
+    covers.</li>
+    <li>Your schedules (name, hours and days), and whether the Adult Content
+    Guard is on and since when.</li>
+    <li>The warnings of the last two days: their level, text and time.</li>
+    <li>Fifteen-minute markers for your waste list, such as "reached 45 minutes
+    at 3:10 PM".</li>
+  </ul>
+  <p>What it never saves there: your per-app or per-website minutes. The app does
+  not have them to give. (Stolen Glance for Mac, which measures time itself,
+  saves its own daily totals and top apps and sites to the same private
+  database.)</p>
+  <p>This data is stored by Apple under your Apple Account and handled under
+  Apple's privacy policy. A private iCloud database can be read only by devices
+  signed in to your account; the developer of an app has no access to it. To
+  stop it, turn Stolen Glance off in iOS Settings ▸ your name ▸ iCloud ▸ Saved
+  to iCloud. Nothing in this sync can end a lock or switch off a guard.</p>
+
+  <h2>What Stolen Glance does not do</h2>
   <ul>
     <li>No accounts, sign-in, or email address.</li>
     <li>No analytics, crash reporting, telemetry, or usage tracking of any kind.</li>
     <li>No advertising, and no advertising identifiers.</li>
     <li>No third-party SDKs.</li>
-    <li>No network requests. StolenEyes does not talk to any server, including ours.</li>
+    <li>No server of our own. The only network traffic is to Apple's iCloud, for
+    the connected-devices summary described above.</li>
     <li>No selling, sharing or disclosing of your information, because none of it
     reaches us to begin with.</li>
   </ul>
 
   <h2>Notifications</h2>
-  <p>If you allow notifications, StolenEyes sends them locally from your own device
+  <p>If you allow notifications, Stolen Glance sends them locally from your own device
   — a warning when you cross your threshold, and a note when a block ends. They
   are composed on your iPhone and never routed through a push server.</p>
 
   <h2>Deleting your data</h2>
   <p>Settings ▸ Your data ▸ <strong>Delete my data</strong> erases everything
-  StolenEyes has stored on your iPhone. One deliberate exception: if a block is
+  Stolen Glance has stored on your iPhone. One deliberate exception: if a block is
   currently running, its record is kept so that deleting your data cannot be used
   to cancel a block early. The block still ends at its own time.</p>
-  <p>Deleting the StolenEyes app removes all of its data, and also lifts any block
-  that is running, because the restrictions are applied by iOS on its
-  behalf and go away with the app.</p>
+  <p>Deleting the Stolen Glance app removes all of its data from your iPhone, and
+  also lifts any block that is running, because the restrictions are applied by
+  iOS on its behalf and go away with the app.</p>
+  <p>Neither of these erases the summary in your iCloud. To remove that, open iOS
+  Settings ▸ your name ▸ iCloud ▸ Storage ▸ Stolen Glance and delete its data.</p>
 
   <h2>Children</h2>
-  <p>StolenEyes requests individual Screen Time authorization, which Apple only
+  <p>Stolen Glance requests individual Screen Time authorization, which Apple only
   grants to an Apple Account managing its own Screen Time. Accounts under 18 in a
-  Family Sharing group cannot grant it, and StolenEyes will tell you so rather than
-  leaving you at a wall. StolenEyes is not directed at children and collects no
+  Family Sharing group cannot grant it, and Stolen Glance will tell you so rather than
+  leaving you at a wall. Stolen Glance is not directed at children and collects no
   information from anyone.</p>
 
   <h2>Changes</h2>
@@ -127,7 +166,7 @@
   <p>Questions, or something here that does not match what you observe?
   <a href="https://github.com/mostafaelkabir/Prosper/issues">Open an issue</a>.</p>
 
-  <footer>StolenEyes is a personal project. It has no company behind it and no
+  <footer>Stolen Glance is a personal project. It has no company behind it and no
   business model that depends on your attention.</footer>
 </main>
 </body>

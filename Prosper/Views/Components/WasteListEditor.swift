@@ -117,7 +117,7 @@ struct WasteListEditor: View {
         } header: {
             Text("Threshold")
         } footer: {
-            Text("Combined time across the apps and categories you picked in a single day before StolenEyes warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
+            Text("Combined time across the apps and categories you picked in a single day before Stolen Glance warns you, then keeps warning: \(WarningLevel.ladderText(base: Int(thresholdMinutes)))")
         }
     }
 

@@ -30,11 +30,11 @@ enum PersistenceHealth: String, Sendable {
         case .healthy:
             return nil
         case .recoveredFreshStore:
-            return "StolenEyes could not read its saved history, so it started a fresh one. Your past sessions and warnings are gone. Any block that is running is unaffected — it is enforced by iOS, not by this file."
+            return "Stolen Glance could not read its saved history, so it started a fresh one. Your past sessions and warnings are gone. Any block that is running is unaffected — it is enforced by iOS, not by this file."
         case .fellBackToLocalStore:
-            return "StolenEyes could not reach its shared storage this launch, so history may look incomplete until you reopen the app. Any block that is running is unaffected."
+            return "Stolen Glance could not reach its shared storage this launch, so history may look incomplete until you reopen the app. Any block that is running is unaffected."
         case .inMemoryOnly:
-            return "StolenEyes could not open its storage at all, so nothing recorded this session will be kept. Any block that is running is unaffected. Reinstalling the app usually fixes this — note that reinstalling also ends any active block."
+            return "Stolen Glance could not open its storage at all, so nothing recorded this session will be kept. Any block that is running is unaffected. Reinstalling the app usually fixes this — note that reinstalling also ends any active block."
         }
     }
 }

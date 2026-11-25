@@ -6,6 +6,9 @@ import Foundation
 /// that is always the same path for both. The system extension runs as root in
 /// its own sandbox and never reads this folder: it gets its rules over XPC.
 public enum MacStore {
+    /// The app's earlier name, kept on purpose after the rename to Stolen Glance
+    /// (REL-19). Changing it would leave the rules, running locks and history
+    /// behind in the old folder.
     public static let folderName = "StolenEyes"
 
     public static var directory: URL {

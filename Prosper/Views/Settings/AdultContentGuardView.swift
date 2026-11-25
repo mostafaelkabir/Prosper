@@ -191,7 +191,7 @@ struct AdultContentGuardView: View {
             .padding(.vertical, 2)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Close the last exit")
-                Text("Deleting StolenEyes is the one way to remove the guard. To close that door too, ask someone you trust to set a Screen Time passcode you don't know and turn off Deleting Apps: Settings ▸ Screen Time ▸ Content & Privacy Restrictions ▸ iTunes & App Store Purchases ▸ Deleting Apps ▸ Don't Allow.")
+                Text("Deleting Stolen Glance is the one way to remove the guard. To close that door too, ask someone you trust to set a Screen Time passcode you don't know and turn off Deleting Apps: Settings ▸ Screen Time ▸ Content & Privacy Restrictions ▸ iTunes & App Store Purchases ▸ Deleting Apps ▸ Don't Allow.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -199,7 +199,7 @@ struct AdultContentGuardView: View {
         } header: {
             Text("Finish it in iOS")
         } footer: {
-            Text("Two settings StolenEyes cannot switch for you. Both take a minute.")
+            Text("Two settings Stolen Glance cannot switch for you. Both take a minute.")
         }
     }
 
