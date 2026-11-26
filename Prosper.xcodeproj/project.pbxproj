@@ -108,7 +108,6 @@
 		733FFE56124EA7481251B14A /* WarningService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E6B811AC6801D9D1952ACD /* WarningService.swift */; };
 		746556C59E16C145CEE3F081 /* GlanceMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6E1C4157117DC9C33485B /* GlanceMark.swift */; };
 		74A891C2EDBD5F8BD8BB0AA8 /* SharedBlockState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3117ABCA17D288AC92D620 /* SharedBlockState.swift */; };
-		76D366D0BEA004824DDA2BB0 /* QuickLabelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */; };
 		77A96AFCC54C9F57E8EF44C5 /* AdultContentGuardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD12A34E4E10988A8385B8E7 /* AdultContentGuardView.swift */; };
 		77E262FD264A66F661B908A0 /* UsageSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F221AF796B8A18A571B9B2F0 /* UsageSummary.swift */; };
 		7891767EED6D7739734576F0 /* InstallWindowService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D0304E40C6D3D2B2E06FD1 /* InstallWindowService.swift */; };
@@ -465,7 +464,6 @@
 		A3678B823AB6BEC5CE18E98B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A4E6B811AC6801D9D1952ACD /* WarningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningService.swift; sourceTree = "<group>"; };
 		A632709C4CC649D29F82481B /* BlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockView.swift; sourceTree = "<group>"; };
-		A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLabelSheet.swift; sourceTree = "<group>"; };
 		A8638C190118F7D4F78AEC1A /* ProsperDeviceActivityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProsperDeviceActivityMonitor.swift; sourceTree = "<group>"; };
 		AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferToSchedules.swift; sourceTree = "<group>"; };
 		AB3332376609E00896D14B23 /* InsightsReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsReportView.swift; sourceTree = "<group>"; };
@@ -866,7 +864,6 @@
 			children = (
 				E39020E26FBCAFBBFF3D9AC5 /* LockTargetRows.swift */,
 				AA69D8738643FA951B8746F2 /* OfferToSchedules.swift */,
-				A713B3F58D84B6DCBE685244 /* QuickLabelSheet.swift */,
 				FCE86A244991500CE0C12F76 /* SelectionChips.swift */,
 				49DF880999A6B64D78F34EFA /* SitePickerSheet.swift */,
 				00B4ABC1CFA6F0C70DAC220D /* WasteListEditor.swift */,
@@ -1468,7 +1465,6 @@
 				32F7CF502ECEFE5B265CE1E6 /* ProsperComponents.swift in Sources */,
 				39C3CFEE9E67E66B2197924F /* ProsperType.swift in Sources */,
 				8740C945501EABFDD0A67F6C /* QuickBlockPresets.swift in Sources */,
-				76D366D0BEA004824DDA2BB0 /* QuickLabelSheet.swift in Sources */,
 				2D78E82C5DECF068101ED8D6 /* ReportContext.swift in Sources */,
 				A8E26A302954CD921C63853C /* ReportDay.swift in Sources */,
 				16330937FCCEBE5EA6222849 /* ScheduleEditorView.swift in Sources */,

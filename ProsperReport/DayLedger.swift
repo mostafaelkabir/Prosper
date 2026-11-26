@@ -51,7 +51,7 @@ struct ClassifiedDay {
                             id: host ?? "site",
                             name: host,
                             duration: site.totalActivityDuration,
-                            timeClass: classification.timeClass(domain: host),
+                            timeClass: classification.timeClass(domain: host, webToken: site.webDomain.token),
                             webToken: site.webDomain.token
                         ))
                     }

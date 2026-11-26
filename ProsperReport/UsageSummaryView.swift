@@ -15,7 +15,7 @@ struct UsageSummaryView: View {
     /// Bar heights, flipped inside `withAnimation(ChartMotion.grow)`.
     @State private var grown = false
     /// The labels, read once per build of this view, so each row can show
-    /// what it is filed under (tap to label).
+    /// what it is filed under.
     @State private var labels = SharedClassification.load()
 
     /// Largest single-day value on any ranked row, so every row's week strip is
@@ -70,8 +70,8 @@ struct UsageSummaryView: View {
         var showDetails = false
         var showStrip = false
         var fallbackSymbol: String? = nil
-        /// Rows carry a label pill. Not categories: a category is labelled
-        /// in Apple's list.
+        /// Rows carry a label badge. Not categories, which have no name to
+        /// match a label by.
         var labelable = true
     }
 
@@ -297,11 +297,18 @@ struct UsageRow: View {
     var peakDay: TimeInterval = 0
     /// Glyph for rows that are not an app or platform (categories).
     var fallbackSymbol: String? = nil
-    /// The saved labels; when given, the row ends in a label pill that opens
-    /// the app's one-tap label sheet.
+    /// The saved labels; when given, the row ends in a badge naming its label.
     var labels: SharedClassification.Snapshot? = nil
 
     private var labelTarget: LabelTarget? { labels == nil ? nil : LabelTarget(item: item) }
+
+    /// A website may be labelled by name or, from Apple's list, by token.
+    private func badgeClass(_ target: LabelTarget, _ labels: SharedClassification.Snapshot) -> TimeClass {
+        if case .site = target, let token = item.webToken {
+            return TimeClass(labels.timeClass(domain: item.name, webToken: token))
+        }
+        return target.currentClass(in: labels)
+    }
 
     private var showsStrip: Bool { peakDay > 0 && item.days.count > 1 }
 
@@ -312,7 +319,7 @@ struct UsageRow: View {
         HStack(alignment: .center, spacing: 6) {
             rowContent
             if let target = labelTarget, let labels {
-                LabelPill(target: target, current: target.currentClass(in: labels))
+                LabelBadge(current: badgeClass(target, labels))
             }
         }
     }

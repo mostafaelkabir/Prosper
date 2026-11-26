@@ -45,6 +45,8 @@ struct LabelBook: Equatable {
             return classOf(domain: platform.primaryDomain) != nil
         case .app(let token, _):
             return [productive, distracting, rest].contains { $0.applicationTokens.contains(token) }
+        case .web(let token):
+            return [productive, distracting, rest].contains { $0.webDomainTokens.contains(token) }
         case .site(let domain):
             return classOf(domain: domain) != nil
         }
@@ -66,6 +68,16 @@ struct LabelBook: Equatable {
             case .productive: productive.applicationTokens.insert(token)
             case .distracting: distracting.applicationTokens.insert(token)
             case .rest: rest.applicationTokens.insert(token)
+            case .unclassified, nil: break
+            }
+        case .web(let token):
+            productive.webDomainTokens.remove(token)
+            distracting.webDomainTokens.remove(token)
+            rest.webDomainTokens.remove(token)
+            switch label {
+            case .productive: productive.webDomainTokens.insert(token)
+            case .distracting: distracting.webDomainTokens.insert(token)
+            case .rest: rest.webDomainTokens.insert(token)
             case .unclassified, nil: break
             }
         case .site(let domain):
@@ -127,6 +139,34 @@ enum LabelStore {
             thresholdMinutes: s.wasteWarningThresholdMinutes
         )
         return offer
+    }
+
+    // MARK: - Every app the app has been shown
+
+    private static let knownKey = "labels.knownItems"
+
+    /// Apps and websites handed over by Apple's list for labelling (UX-31),
+    /// plus everything already labelled. Kept on this iPhone only.
+    static func knownItems(adding selections: [FamilyActivitySelection] = []) -> FamilyActivitySelection {
+        var known = FamilyActivitySelection()
+        if let data = UserDefaults.standard.data(forKey: knownKey),
+           let saved = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
+            known = saved
+        }
+        for selection in selections {
+            known.applicationTokens.formUnion(selection.applicationTokens)
+            known.webDomainTokens.formUnion(selection.webDomainTokens)
+        }
+        return known
+    }
+
+    static func remember(_ picked: FamilyActivitySelection) {
+        var known = knownItems()
+        known.applicationTokens.formUnion(picked.applicationTokens)
+        known.webDomainTokens.formUnion(picked.webDomainTokens)
+        if let data = try? JSONEncoder().encode(known) {
+            UserDefaults.standard.set(data, forKey: knownKey)
+        }
     }
 
     /// One label for one thing, saved.
