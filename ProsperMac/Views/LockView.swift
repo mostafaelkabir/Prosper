@@ -155,10 +155,14 @@ struct FlowChips: View {
 struct LockView: View {
     @EnvironmentObject var model: AppModel
     @State private var selection = LockSelection()
-    @State private var minutes = 60
+    @State private var length: TimeInterval = 3600
     @State private var addingTo: MacLockSession?
     @State private var showSchedule = false
-    @State private var justLocked = false
+    /// Set when a lock has just started: `LockSeal` plays over the screen,
+    /// once, then gives way to the running lock.
+    @State private var sealUntil: Date?
+
+    private var minutes: Int { LockLength.minutes(length) }
 
     static let durations = [15, 30, 60, 120, 240, 480]
 
@@ -176,7 +180,7 @@ struct LockView: View {
                 }
             }
 
-            RegularLockCard(justLocked: $justLocked)
+            RegularLockCard(onLocked: { sealUntil = $0 })
 
             ProsperCard(padding: 20) {
                 VStack(alignment: .leading, spacing: 18) {
@@ -184,18 +188,16 @@ struct LockView: View {
                         Text("New lock").font(.system(size: 20, weight: .bold, design: .rounded)).foregroundStyle(ProsperColor.ink)
                         Text(MacCopy.lockExitShort).font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
                     }
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("For").labelCaps()
-                        AuroraSegmented(options: Self.durations.map { ($0, Self.label($0)) }, selection: $minutes)
-                    }
+                    // The length, the time it ends and the control are one thing (UX-30).
+                    DurationDial(duration: $length, maximum: TimeInterval(Self.durations.last! * 60))
                     LockItemsPicker(selection: $selection, remembered: model.settings.rememberedDomains)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(selection.isEmpty ? "Choose platforms, sites or apps to lock." : "\(selection.summary) until \(Date().addingTimeInterval(Double(minutes * 60)).formatted(date: .omitted, time: .shortened))")
+                        Text(selection.isEmpty ? "Choose platforms, sites or apps to lock." : selection.summary)
                             .font(.system(size: 13, weight: .medium)).foregroundStyle(ProsperColor.ink)
                         HoldToConfirmButton(title: "Hold to lock for \(Self.label(minutes))", enabled: !selection.isEmpty) {
                             if model.startLock(minutes: minutes, domains: selection.domains, apps: Array(selection.apps), platformIDs: Array(selection.platformIDs)) {
                                 selection = LockSelection()
-                                justLocked = true
+                                sealUntil = Date().addingTimeInterval(TimeInterval(minutes * 60))
                             }
                         }
                         if let error = model.lastError {
@@ -227,10 +229,16 @@ struct LockView: View {
             AddToLockSheet(session: session)
         }
         .sheet(isPresented: $showSchedule) { NewScheduleSheet() }
-        .alert("Locked", isPresented: $justLocked) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("It ends when its timer does. \(MacCopy.lockExitShort)")
+        .overlay {
+            if let sealUntil {
+                LockSeal(until: sealUntil)
+                    .transition(.opacity)
+                    .task(id: sealUntil) {
+                        // As on the iPhone: about two seconds, then the countdown.
+                        try? await Task.sleep(for: .seconds(2.2))
+                        withAnimation(.easeOut(duration: 0.35)) { self.sealUntil = nil }
+                    }
+            }
         }
     }
 
@@ -246,13 +254,19 @@ struct SessionCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: "lock.fill").foregroundStyle(ProsperColor.accent)
-                Text("Until \(session.endsAt.formatted(date: .omitted, time: .shortened))").font(.system(size: 15, weight: .semibold)).foregroundStyle(ProsperColor.ink)
-                Spacer()
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(DurationText.countdown(session.endsAt.timeIntervalSince(context.date)))
-                        .font(.system(size: 24, weight: .semibold, design: .rounded)).monospacedDigit().foregroundStyle(ProsperColor.ink)
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                let left = session.endsAt.timeIntervalSince(context.date)
+                let total = max(1, session.endsAt.timeIntervalSince(session.startedAt))
+                HStack(spacing: 12) {
+                    // The iPhone's countdown ring: what is left of the lock,
+                    // ember for the last minute.
+                    CountdownRing(progress: left / total, centerText: "", caption: nil, size: 40, lineWidth: 4, emphasize: left < 60)
+                        .overlay(Image(systemName: "lock.fill").font(.system(size: 14, weight: .semibold)).foregroundStyle(ProsperColor.accent))
+                    Text("Until \(session.endsAt.formatted(date: .omitted, time: .shortened))").font(.system(size: 15, weight: .semibold)).foregroundStyle(ProsperColor.ink)
+                    Spacer()
+                    Text(DurationText.countdown(left))
+                        .font(ProsperFont.hero(26)).monospacedDigit().foregroundStyle(ProsperColor.ink)
+                        .contentTransition(.numericText(countsDown: true))
                 }
             }
             ItemsLine(platformIDs: session.platformIDs, domains: session.domains, bundleIDs: session.bundleIDs, appNames: session.appNames)
@@ -309,6 +323,9 @@ struct ScheduleCard: View {
                     }
                 }
                 Text("\(schedule.window.timeRangeText()) · \(schedule.window.weekdaysText)").font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
+                // The locked hours across a day, with now marked (UX-30).
+                DayBand(startMinute: schedule.window.startMinute, endMinute: schedule.window.endMinute, now: Date(), height: 8)
+                    .padding(.vertical, 2)
                 ItemsLine(platformIDs: schedule.platformIDs, domains: schedule.domains, bundleIDs: schedule.bundleIDs, appNames: schedule.appNames)
             }
             Spacer()
@@ -330,7 +347,8 @@ struct ScheduleCard: View {
 /// duration is remembered. Holding it starts an ordinary session.
 struct RegularLockCard: View {
     @EnvironmentObject var model: AppModel
-    @Binding var justLocked: Bool
+    /// Called with the end time once the lock has started.
+    var onLocked: (Date) -> Void
     @State private var editing = false
 
     var body: some View {
@@ -368,7 +386,7 @@ struct RegularLockCard: View {
                         model.saveRegularLock(changed)
                     }))
                 HoldToConfirmButton(title: "Hold to start your regular lock for \(LockView.label(lock.minutes))", enabled: !lock.isEmpty) {
-                    if model.startRegularLock() { justLocked = true }
+                    if model.startRegularLock() { onLocked(Date().addingTimeInterval(TimeInterval(lock.minutes * 60))) }
                 }
             }
         }
@@ -474,6 +492,8 @@ struct NewScheduleSheet: View {
                 DatePicker("From", selection: $start, displayedComponents: .hourAndMinute)
                 DatePicker("To", selection: $end, displayedComponents: .hourAndMinute)
             }
+            // Redraws as the times change, so the result shows while you set it.
+            DayBand(startMinute: window.startMinute, endMinute: window.endMinute)
             HStack(spacing: 6) {
                 ForEach(1...7, id: \.self) { day in
                     let on = weekdays.contains(day)

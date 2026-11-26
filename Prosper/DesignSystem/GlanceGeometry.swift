@@ -161,6 +161,38 @@ nonisolated enum GlanceTimeline {
         return s
     }
 
+    /// The short beat when a lock starts (`LockSeal`), 0.9 s. The eye is wide
+    /// open and glances aside, the lid snaps shut at 0.4 s on the same thud
+    /// the ring closes on, and it opens again on a keyhole, gaze lowered.
+    static let sealDuration: TimeInterval = 0.9
+    /// When the lid lands, so the haptic can land with it.
+    static let sealShut: TimeInterval = 0.4
+
+    static func seal(at seconds: TimeInterval) -> GlanceState {
+        let t = seconds * 1000
+        if t >= sealDuration * 1000 { return .rest }
+        var s = GlanceState.rest
+        let rest = GlanceState.rest
+        s.lid = 1
+        s.key = 0
+        s.gazeY = 0
+        // A small glance aside: the moment before you decide.
+        let aside = outQuart(progress(t, 60, 200))
+        let back = outQuart(progress(t, 200, 330))
+        s.gazeX = t < 200 ? -14 * aside : lerp(-14, 0, back)
+        if t >= 300 {
+            if t < 400 {
+                s.lid = lerp(1, -0.96, inQuad(progress(t, 300, 400)))
+            } else {
+                s.lid = lerp(-0.96, rest.lid, spring(progress(t, 400, 700)))
+                s.gazeX = 0
+                s.gazeY = rest.gazeY
+            }
+        }
+        s.key = t < 430 ? 0 : spring(progress(t, 430, 800))
+        return s
+    }
+
     // MARK: Easing
 
     static func progress(_ t: Double, _ a: Double, _ b: Double) -> CGFloat {

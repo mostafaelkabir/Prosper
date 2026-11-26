@@ -290,6 +290,16 @@ targets:
       - path: Prosper/DesignSystem/AuroraComponents.swift
       - path: Prosper/DesignSystem/ProsperComponents.swift
       - path: Prosper/DesignSystem/ConnectedComponents.swift
+      # The Stolen Glance mark and its reveal (DS-10, DS-11), the lock seal and
+      # hold, the dial and day band (UX-30), and the Insights motion, so the
+      # Mac looks and moves like the iPhone (DS-12).
+      - path: Prosper/DesignSystem/GlanceGeometry.swift
+      - path: Prosper/DesignSystem/GlanceMark.swift
+      - path: Prosper/DesignSystem/LockComponents.swift
+      - path: Prosper/DesignSystem/HabitComponents.swift
+      - path: Prosper/DesignSystem/ChartMotion.swift
+      # The real brand marks on platform tiles (UX-28).
+      - path: Prosper/DesignSystem/BrandLogos.xcassets
       - path: ProsperMac/LaunchAgents/com.mostafa.prosper.mac.agent.plist
         buildPhase:
           copyFiles:

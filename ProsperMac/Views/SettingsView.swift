@@ -32,9 +32,34 @@ struct SettingsView: View {
                     Text(MacCopy.lockExitFull).font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).fixedSize(horizontal: false, vertical: true)
                 }
             }
+            AboutCard()
         }
         .navigationTitle("Settings")
         .onAppear { setup.refresh() }
+    }
+}
+
+/// The mark and name, still; a click plays the full reveal again (DS-11).
+/// It is a button to VoiceOver and does nothing under Reduce Motion.
+struct AboutCard: View {
+    var body: some View {
+        ProsperCard(padding: 24) {
+            VStack(spacing: 10) {
+                Text("About").labelCaps().frame(maxWidth: .infinity, alignment: .leading)
+                GlanceReveal(markSize: 84, replayable: true, autoplay: false)
+                    .help("Click to play it again")
+                Text(Self.version)
+                    .font(.system(size: 12)).foregroundStyle(ProsperColor.ink2)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    static var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "Version \(short) (\(build)) for Mac"
     }
 }
 
@@ -200,7 +225,7 @@ struct GuardSection: View {
                     Text("Additions are permanent too. While the guard is on, QUIC, browser secure DNS and iCloud Private Relay stay off so every connection keeps its name.")
                         .font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                 } else {
-                    HoldToConfirmButton(title: "Hold to turn on the guard, for good", systemImage: "shield.lefthalf.filled", duration: 3) {
+                    HoldToConfirmButton(title: "Hold to turn on the guard, for good", systemImage: "shield.lefthalf.filled", doneTitle: "Guard on", duration: 3) {
                         _ = model.enableGuard()
                     }
                     Text("There is no off switch after this. Decide with a clear head.")
@@ -217,7 +242,7 @@ struct GuardSection: View {
                 HStack {
                     Button("Cancel") { showAdd = false }
                     Spacer()
-                    HoldToConfirmButton(title: "Hold to add for good", systemImage: "plus", enabled: !selection.isEmpty) {
+                    HoldToConfirmButton(title: "Hold to add for good", systemImage: "plus", doneTitle: "Added", enabled: !selection.isEmpty) {
                         if model.addToGuard(domains: selection.domains, apps: Array(selection.apps)) {
                             selection = LockSelection()
                             showAdd = false

@@ -3,11 +3,18 @@ import SwiftUI
 
 struct TodayView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.snapshotMode) private var snapshotMode
     var openLock: () -> Void
     var openSettings: () -> Void
 
     var body: some View {
         ScreenScroll {
+            if !model.settings.onboarded {
+                // The launch reveal, once, the first time the app is opened.
+                GlanceReveal(markSize: 112, autoplay: !snapshotMode)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+            }
             if model.needsSetupCard {
                 SetupCard(openSettings: openSettings)
             }
@@ -65,8 +72,8 @@ struct TodayView: View {
                             .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2).padding(.vertical, 8)
                     }
                     let top = Array(model.today.rows.prefix(12))
-                    ForEach(top) { row in
-                        UsageRowView(row: row, maxSeconds: top.first?.seconds ?? 1) { model.setClass($0, for: row) }
+                    ForEach(Array(top.enumerated()), id: \.element.id) { index, row in
+                        UsageRowView(row: row, maxSeconds: top.first?.seconds ?? 1, order: index) { model.setClass($0, for: row) }
                     }
                     Text("Exact, measured on this Mac. Idle and locked time is never counted. Right-click a row to label it.")
                         .font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified).padding(.top, 6)
@@ -108,16 +115,24 @@ struct HourlyChart: View {
     let hourly: [Double]
     let distracting: [Double]
 
+    /// The bars rise from the baseline once, when the chart first shows
+    /// (GrowPal stats, `ChartMotion.grow`), against an axis that holds still.
+    @State private var grown = false
+    @Environment(\.snapshotMode) private var snapshotMode
+
     var body: some View {
+        let k: Double = grown || snapshotMode ? 1 : 0
         Chart {
             ForEach(0..<24, id: \.self) { hour in
-                BarMark(x: .value("Hour", hour), y: .value("Minutes", max(0, (hourly[safe: hour] ?? 0) - (distracting[safe: hour] ?? 0)) / 60), width: .fixed(14))
+                BarMark(x: .value("Hour", hour), y: .value("Minutes", k * max(0, (hourly[safe: hour] ?? 0) - (distracting[safe: hour] ?? 0)) / 60), width: .fixed(14))
                     .foregroundStyle(ProsperColor.unclassified.opacity(0.55))
-                BarMark(x: .value("Hour", hour), y: .value("Minutes", (distracting[safe: hour] ?? 0) / 60), width: .fixed(14))
+                BarMark(x: .value("Hour", hour), y: .value("Minutes", k * (distracting[safe: hour] ?? 0) / 60), width: .fixed(14))
                     .foregroundStyle(ProsperColor.distracting)
             }
         }
         .chartXScale(domain: -0.5...23.5)
+        .chartYScale(domain: 0...max(1, (hourly.max() ?? 0) / 60 * 1.05))
+        .onFirstAppear($grown, animation: ChartMotion.grow.delay(0.15))
         .chartXAxis {
             AxisMarks(values: [0, 6, 12, 18, 23]) { value in
                 AxisValueLabel {

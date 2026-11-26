@@ -30,7 +30,11 @@ struct ProsperMacApp: App {
         MenuBarExtra {
             MenuBarView().environmentObject(model)
         } label: {
-            Image(systemName: model.lockEndsAt != nil ? "lock.fill" : "eye")
+            if model.lockEndsAt != nil {
+                Image(systemName: "lock.fill")
+            } else {
+                Image(nsImage: MenuBarMark.image)
+            }
         }
     }
 }

@@ -17,6 +17,10 @@ enum HoldTestHarness {
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)
         app.finishLaunching()
+        // The full-window checks need the Lock tab; put back the one in use after.
+        let savedTab = UserDefaults.standard.string(forKey: "selectedTab")
+        UserDefaults.standard.set(MacTab.lock.rawValue, forKey: "selectedTab")
+        defer { UserDefaults.standard.set(savedTab, forKey: "selectedTab") }
 
         // 0. Control: a plain SwiftUI button, to prove the clicks land at all.
         var plainTaps = 0
@@ -51,6 +55,7 @@ enum HoldTestHarness {
 
         print(failures == 0 ? "ALL PASSED" : "\(failures) FAILED")
         fflush(stdout)
+        UserDefaults.standard.set(savedTab, forKey: "selectedTab")
         exit(failures == 0 ? 0 : 1)
     }
 

@@ -1,5 +1,35 @@
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
+#endif
+
+/// The taps in the hand that go with a lock. UIKit's generators on the
+/// iPhone; on the Mac the Force Touch trackpad, which has three kinds and no
+/// intensity, so the soft ticks of a hold become alignment taps there.
+enum LockHaptic {
+    case tick(Double), release, success, thud
+
+    func play() {
+        #if canImport(UIKit)
+        switch self {
+        case .tick(let intensity): UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: intensity)
+        case .release: UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
+        case .thud: UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
+        #else
+        let pattern: NSHapticFeedbackManager.FeedbackPattern
+        switch self {
+        case .tick: pattern = .alignment
+        case .release: pattern = .generic
+        case .success, .thud: pattern = .levelChange
+        }
+        NSHapticFeedbackManager.defaultPerformer.perform(pattern, performanceTime: .now)
+        #endif
+    }
+}
 
 /// Circular countdown for an active block. `progress` is the fraction of time
 /// remaining (1 → full ring, 0 → empty).
@@ -180,7 +210,7 @@ struct HoldToLock: View {
                 if beat < Self.beats.count, progress >= Self.beats[beat] {
                     beat += 1
                     if !reduceMotion {
-                        UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.35 + 0.65 * progress)
+                        LockHaptic.tick(0.35 + 0.65 * progress).play()
                     }
                 }
                 if progress >= 1 { complete() }
@@ -191,7 +221,7 @@ struct HoldToLock: View {
     private func complete() {
         timer?.invalidate(); timer = nil
         done = true
-        if !reduceMotion { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+        if !reduceMotion { LockHaptic.success.play() }
         onComplete()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             progress = 0
@@ -204,17 +234,19 @@ struct HoldToLock: View {
         guard holding, progress < 1 else { return }
         timer?.invalidate(); timer = nil
         holding = false
-        if !reduceMotion { UIImpactFeedbackGenerator(style: .rigid).impactOccurred() }
+        if !reduceMotion { LockHaptic.release.play() }
         progress = 0
     }
 }
 
 /// The moment a lock takes hold, shown over the sheet that started it.
 ///
-/// A violet glow draws in to the middle of the screen, the open lock shuts
-/// with a thud in the hand, a ring closes around it and a ripple leaves, and
-/// then it says until when. About a second and a half, once, and the sheet
-/// closes on the countdown. The drawing-in follows Peace Out's start
+/// A violet glow draws in to the middle of the screen. Inside a ring, the
+/// Stolen Glance eye glances aside, then its lid snaps shut with a thud in the
+/// hand as the ring closes and a ripple leaves, and it opens again on a
+/// keyhole, gaze lowered (`GlanceTimeline.seal`, DS-11). Then it says until
+/// when, and a word of encouragement. About a second and a half, once, and
+/// the sheet closes on the countdown. The drawing-in follows Peace Out's start
 /// (60fps.design/shots/peace-out-timer-screen-animation): the screen gathers
 /// to a point, which is what the lock does to the phone.
 ///
@@ -227,6 +259,8 @@ struct LockSeal: View {
     @State private var closed = false
     @State private var rippled = false
     @State private var worded = false
+    @State private var eyeStart: Date?
+    @State private var eyeDone = false
 
     private var untilText: String {
         Calendar.current.isDateInToday(until)
@@ -261,12 +295,9 @@ struct LockSeal: View {
                         .trim(from: 0, to: closed ? 1 : 0)
                         .stroke(ProsperColor.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                         .rotationEffect(.degrees(-90))
-                    Image(systemName: closed ? "lock.fill" : "lock.open.fill")
-                        // A glyph inside a fixed shape.
-                        .font(.system(size: 46, weight: .semibold))
-                        .foregroundStyle(ProsperColor.accent)
-                        .contentTransition(.symbolEffect(.replace))
-                        .scaleEffect(closed || reduceMotion ? 1 : 1.25)
+                    eye
+                        .frame(width: 92, height: 92)
+                        .scaleEffect(closed || reduceMotion ? 1 : 1.12)
                 }
                 .frame(width: 132, height: 132)
 
@@ -280,7 +311,7 @@ struct LockSeal: View {
                 }
                 .modifier(Rise(shown: worded, order: 0, reduceMotion: reduceMotion))
 
-                Text("Nothing can end it early.")
+                Text("Good call. Nothing can end it early.")
                     .font(ProsperFont.insight)
                     .foregroundStyle(ProsperColor.ink)
                     .multilineTextAlignment(.center)
@@ -289,8 +320,21 @@ struct LockSeal: View {
             .padding(.horizontal, 32)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Locked until \(untilText). Nothing can end it early.")
+        .accessibilityLabel("Locked until \(untilText). Good call. Nothing can end it early.")
         .onAppear(perform: play)
+    }
+
+    /// The eye's seal beat, then the resting mark so nothing keeps redrawing.
+    @ViewBuilder private var eye: some View {
+        if reduceMotion || eyeDone {
+            GlanceMark()
+        } else if let eyeStart {
+            TimelineView(.animation) { timeline in
+                GlanceMark(state: GlanceTimeline.seal(at: timeline.date.timeIntervalSince(eyeStart)))
+            }
+        } else {
+            GlanceMark(state: GlanceTimeline.seal(at: 0))
+        }
     }
 
     private func play() {
@@ -304,9 +348,12 @@ struct LockSeal: View {
             return
         }
         withAnimation(.easeIn(duration: 0.45)) { gathered = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        eyeStart = Date()
+        DispatchQueue.main.asyncAfter(deadline: .now() + GlanceTimeline.sealDuration) { eyeDone = true }
+        // The lid lands with the ring and the thud.
+        DispatchQueue.main.asyncAfter(deadline: .now() + GlanceTimeline.sealShut) {
             withAnimation(.spring(duration: 0.5, bounce: 0.45)) { closed = true }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            LockHaptic.thud.play()
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { worded = true }
     }

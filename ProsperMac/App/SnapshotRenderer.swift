@@ -21,6 +21,7 @@ enum SnapshotRenderer {
             ("lock", AnyView(LockView())),
             ("settings", AnyView(SettingsView(setup: model.setup))),
             ("shield", AnyView(ShieldPreview())),
+            ("brand", AnyView(BrandPreview())),
         ]
         for (name, view) in views {
             for scheme in [ColorScheme.light, .dark] {
@@ -67,6 +68,23 @@ enum SnapshotRenderer {
         rep.size = size
         host.cacheDisplay(in: host.bounds, to: rep)
         return rep.representation(using: .png, properties: [:])
+    }
+}
+
+/// The sidebar lockup, the menu bar mark (large and at size) and the resting
+/// reveal, for checking the identity pieces that no tab shows on its own.
+private struct BrandPreview: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            SidebarLockup().frame(width: 220).background(ProsperColor.surface)
+            HStack(spacing: 24) {
+                Image(nsImage: MenuBarMark.image).resizable().frame(width: 99, height: 72)
+                Image(nsImage: MenuBarMark.image)
+                GlanceReveal(markSize: 112, autoplay: false)
+            }
+        }
+        .padding(24)
+        .foregroundStyle(ProsperColor.ink)
     }
 }
 

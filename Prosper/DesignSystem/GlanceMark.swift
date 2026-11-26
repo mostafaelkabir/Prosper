@@ -73,13 +73,18 @@ struct GlanceMark: View {
 /// The launch reveal: the mark plays its five beats once, then the name
 /// unmasks beneath it. Never loops. Under Reduce Motion it is a short fade to
 /// the resting mark. VoiceOver hears the name once, as a heading.
+/// `replayable` lets a tap play it again (Settings, DS-11).
 struct GlanceReveal: View {
     var markSize: CGFloat = 132
+    var replayable = false
+    /// False shows the resting mark until the first tap (Settings).
+    var autoplay = true
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var start: Date?
     @State private var finished = false
     @State private var shown = false
+    @State private var run = 0
 
     var body: some View {
         Group {
@@ -87,7 +92,7 @@ struct GlanceReveal: View {
                 lockup(.rest)
                     .opacity(shown ? 1 : 0)
                     .onAppear { withAnimation(.easeOut(duration: 0.3)) { shown = true } }
-            } else if finished {
+            } else if finished || (!autoplay && run == 0) {
                 // Static once played, so nothing keeps redrawing (it never loops).
                 lockup(.rest)
             } else if let start {
@@ -98,15 +103,20 @@ struct GlanceReveal: View {
                 lockup(GlanceTimeline.state(at: 0))
             }
         }
-        .task {
-            guard start == nil, !reduceMotion else { return }
+        .contentShape(Rectangle())
+        .onTapGesture { if replayable && !reduceMotion && (finished || (!autoplay && run == 0)) { run += 1 } }
+        .task(id: run) {
+            guard !reduceMotion, autoplay || run > 0 else { return }
+            finished = false
             start = Date()
             try? await Task.sleep(for: .seconds(GlanceTimeline.duration))
-            finished = true
+            if !Task.isCancelled { finished = true }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Stolen Glance")
-        .accessibilityAddTraits(.isHeader)
+        .accessibilityAddTraits(replayable ? .isButton : .isHeader)
+        .accessibilityHint(replayable && !reduceMotion ? "Plays the logo animation again." : "")
+        .accessibilityAction { if replayable && !reduceMotion { run += 1 } }
     }
 
     private func lockup(_ s: GlanceState) -> some View {
