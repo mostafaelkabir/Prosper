@@ -302,6 +302,14 @@ struct UsageRow: View {
 
     private var labelTarget: LabelTarget? { labels == nil ? nil : LabelTarget(item: item) }
 
+    /// A website may be labelled by name or, from Apple's list, by token.
+    private func badgeClass(_ target: LabelTarget, _ labels: SharedClassification.Snapshot) -> TimeClass {
+        if case .site = target, let token = item.webToken {
+            return TimeClass(labels.timeClass(domain: item.name, webToken: token))
+        }
+        return target.currentClass(in: labels)
+    }
+
     private var showsStrip: Bool { peakDay > 0 && item.days.count > 1 }
 
     /// The row's bar grows in once, after the card it sits in has lifted.
@@ -311,7 +319,7 @@ struct UsageRow: View {
         HStack(alignment: .center, spacing: 6) {
             rowContent
             if let target = labelTarget, let labels {
-                LabelBadge(current: target.currentClass(in: labels))
+                LabelBadge(current: badgeClass(target, labels))
             }
         }
     }

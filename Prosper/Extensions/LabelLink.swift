@@ -11,6 +11,8 @@ import ManagedSettings
 enum LabelTarget: Hashable {
     case platform(String)
     case app(ApplicationToken, name: String)
+    /// A website as Apple's list hands it over: a token, no name.
+    case web(WebDomainToken)
     case site(String)
 
     /// The row's target: its platform when it has one (labelling YouTube covers
@@ -40,6 +42,8 @@ enum LabelTarget: Hashable {
             return TimeClass(snapshot.platformClass(platform) ?? platform.defaultClass)
         case .app(let token, let name):
             return TimeClass(snapshot.timeClass(appToken: token, categoryToken: nil, appName: name))
+        case .web(let token):
+            return TimeClass(snapshot.timeClass(domain: nil, webToken: token))
         case .site(let domain):
             return TimeClass(snapshot.timeClass(domain: domain))
         }

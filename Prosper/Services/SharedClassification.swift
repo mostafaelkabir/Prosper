@@ -111,8 +111,14 @@ enum SharedClassification {
         /// first (so `googlevideo.com`, `fbcdn.net` and every subdomain fold into
         /// their platform), then falls back to exact custom-site matching. Same
         /// distracting > rest > productive priority as apps (QA-1).
-        func timeClass(domain: String?) -> ClassKind? {
+        func timeClass(domain: String?, webToken: WebDomainToken? = nil) -> ClassKind? {
             if let c = platformClass(forText: domain) { return c }
+            // A website labelled from Apple's list in Label your day (UX-31).
+            if let webToken {
+                if distracting.webDomainTokens.contains(webToken) { return .distracting }
+                if rest.webDomainTokens.contains(webToken) { return .rest }
+                if productive.webDomainTokens.contains(webToken) { return .productive }
+            }
             guard let host = domain?.lowercased() else { return nil }
             if Self.matches(host, distractingDomains) { return .distracting }
             if Self.matches(host, restDomains) { return .rest }
