@@ -3,6 +3,15 @@ import SwiftUI
 
 struct InsightsView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.snapshotMode) private var snapshotMode
+    /// Flips once the screen is up: the cards lift in one after another, the
+    /// total counts up and the bars grow from the baseline (`ChartMotion`,
+    /// the same shots as the iPhone's Insights). Each visit plays it again.
+    @State private var appeared = false
+    @State private var barsGrown = false
+
+    private var shown: Bool { appeared || snapshotMode }
+    private var grow: Double { barsGrown || snapshotMode ? 1 : 0 }
 
     var body: some View {
         ScreenScroll {
@@ -10,7 +19,7 @@ struct InsightsView: View {
                 HStack(alignment: .center, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(measuredDays < 7 ? "Since measuring began" : "Last 7 days").labelCaps()
-                        HeroNumber(value: (model.week.distractingSeconds / Double(measuredDays)).usageFormatted, unit: "distracting a day")
+                        CountingHero(seconds: model.week.distractingSeconds / Double(measuredDays), unit: "distracting a day")
                         Text("\(model.week.totalSeconds.usageFormatted) on the Mac in total · \(model.week.unlocks) unlocks")
                             .font(.system(size: 13)).foregroundStyle(ProsperColor.ink2)
                     }
@@ -18,12 +27,14 @@ struct InsightsView: View {
                     TimeRing(balance: model.week.balance, size: 110, thickness: 9)
                 }
             }
+            .riseIn(shown, order: 0)
 
             if !attention.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("How your attention moved").labelCaps()
                     AttentionTiles(report: attention, scope: "this week")
                 }
+                .riseIn(shown, order: 1)
 
                 if attention.hourlyRate.contains(where: { $0 != nil }) {
                     ProsperCard {
@@ -34,10 +45,12 @@ struct InsightsView: View {
                                 .font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                         }
                     }
+                    .riseIn(shown, order: 2)
                 }
 
                 if FocusBreaksCard.hasContent(attention) {
                     FocusBreaksCard(report: attention)
+                        .riseIn(shown, order: 3)
                 }
             }
 
@@ -48,25 +61,29 @@ struct InsightsView: View {
                         ForEach(model.weekDays, id: \.date) { entry in
                             let total = entry.day?.totalSeconds ?? 0
                             let distracting = entry.day?.distractingSeconds ?? 0
-                            BarMark(x: .value("Day", entry.date, unit: .day), y: .value("Hours", max(0, total - distracting) / 3600))
+                            BarMark(x: .value("Day", entry.date, unit: .day), y: .value("Hours", grow * max(0, total - distracting) / 3600))
                                 .foregroundStyle(ProsperColor.unclassified.opacity(0.55))
-                            BarMark(x: .value("Day", entry.date, unit: .day), y: .value("Hours", distracting / 3600))
+                            BarMark(x: .value("Day", entry.date, unit: .day), y: .value("Hours", grow * distracting / 3600))
                                 .foregroundStyle(ProsperColor.distracting)
                         }
                     }
                     .chartXAxis { AxisMarks(values: .stride(by: .day)) { _ in AxisValueLabel(format: .dateTime.weekday(.abbreviated)) } }
+                    // The axis holds still while the bars grow into it.
+                    .chartYScale(domain: 0...max(1, (model.weekDays.map { ($0.day?.totalSeconds ?? 0) / 3600 }.max() ?? 1) * 1.05))
                     .frame(height: 150)
                     Text("Hours on the Mac each day; distracting time in coral.").font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                 }
             }
+            .riseIn(shown, order: 4)
 
             VStack(alignment: .leading, spacing: 10) {
                 Text("What stands out").labelCaps()
                 if insights.isEmpty {
                     Text("Insights appear after a day or two of measurement.").font(.system(size: 13)).foregroundStyle(ProsperColor.ink2)
                 }
-                ForEach(insights, id: \.self) { insight in
+                ForEach(Array(insights.enumerated()), id: \.element) { index, insight in
                     ProsperCard { InsightSentence(text: insight.headline, footnote: insight.evidence) }
+                        .riseIn(shown, order: 5 + index)
                 }
             }
 
@@ -78,16 +95,18 @@ struct InsightsView: View {
                     Text("Average minutes in each hour, across \(measuredDays) measured day\(measuredDays == 1 ? "" : "s").").font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                 }
             }
+            .riseIn(shown, order: 6)
 
             ProsperCard {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Top of the week").labelCaps()
                     let top = Array(model.week.rows.prefix(15))
-                    ForEach(top) { row in
-                        UsageRowView(row: row, maxSeconds: top.first?.seconds ?? 1) { model.setClass($0, for: row) }
+                    ForEach(Array(top.enumerated()), id: \.element.id) { index, row in
+                        UsageRowView(row: row, maxSeconds: top.first?.seconds ?? 1, order: index) { model.setClass($0, for: row) }
                     }
                 }
             }
+            .riseIn(shown, order: 7)
 
             if !blocked.isEmpty {
                 ProsperCard {
@@ -104,8 +123,11 @@ struct InsightsView: View {
                             .font(.system(size: 11)).foregroundStyle(ProsperColor.unclassified)
                     }
                 }
+                .riseIn(shown, order: 8)
             }
         }
+        .onFirstAppear($appeared)
+        .onFirstAppear($barsGrown, animation: ChartMotion.grow.delay(0.25))
         .navigationTitle("Insights")
     }
 

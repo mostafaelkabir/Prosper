@@ -54,6 +54,7 @@
 		3AF1F2A254EBD1DE5AED807B /* SharedClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B1BEF5D973DD03548CDAB0 /* SharedClassification.swift */; };
 		3BEFFA49270E13B9B59BA268 /* ProsperMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25924556E992D9853F926D09 /* ProsperMacApp.swift */; };
 		3C48B5F9E8FEE6836CF31293 /* LockExitCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D527D0E0C55EC884D552F557 /* LockExitCopy.swift */; };
+		3D7D267A5A6F558BE069912A /* ChartMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD9E830E91D621D5804AFA55 /* ChartMotion.swift */; };
 		3DDDF02502063707F3B8B5C6 /* InsightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 071EA35FC7FB8558AEFC887C /* InsightEngine.swift */; };
 		3E0E0058D9A254CBA3A1BD6C /* BlockDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E868A17200694E814150C7 /* BlockDomain.swift */; };
 		406257CF91A5F7AFFD0042CE /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B22F794056685B0173E0DA /* CloudSync.swift */; };
@@ -119,6 +120,7 @@
 		7FC5A7B053217B1624A9A02E /* HabitComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AA96CDEAFCB0D075B0A442 /* HabitComponents.swift */; };
 		8057A58A77FEB23B7E497E79 /* ProsperComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9314AE9A9C3D53B04778361F /* ProsperComponents.swift */; };
 		80BE6AEA393AA35702434B88 /* HourlyHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0562E1D5F56A496C65A575 /* HourlyHeatmapView.swift */; };
+		80E2CFC64FEAA44BFD95E33E /* HabitComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AA96CDEAFCB0D075B0A442 /* HabitComponents.swift */; };
 		84860347C477D56A98EA728E /* ProsperColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2169B119E76ABAC5A76FD /* ProsperColor.swift */; };
 		84911D8643111011B7AD7091 /* CreateBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C798094F2F921F57D4E9DA /* CreateBlockView.swift */; };
 		853B22820FDACA330350A95D /* AuroraComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE6DA47D979165CC918A89E /* AuroraComponents.swift */; };
@@ -155,6 +157,7 @@
 		A1A4FA5F692A0EF60E0C3C29 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A2F944B0B3CA07ED895231 /* InsightsView.swift */; };
 		A324D9560F9D546F013A149C /* InsightAndFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3497187E783594907E0D1987 /* InsightAndFormattingTests.swift */; };
 		A396AF1304912E15EAE42ACB /* ScheduledLockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425BCD169C0F914FAA06A6DA /* ScheduledLockService.swift */; };
+		A3AC94C58947C091F80016C4 /* GlanceMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F6E1C4157117DC9C33485B /* GlanceMark.swift */; };
 		A502CD33B796140AD47DB9AC /* UnblockSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A41F4E57173A9C17715B06 /* UnblockSchedule.swift */; };
 		A5BA1AFA93134336A0798055 /* BlockDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E868A17200694E814150C7 /* BlockDomain.swift */; };
 		A5EAFF3CA15B28677E0A7F8F /* WarningEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943E53DA14521BE1FDA1AACE /* WarningEvent.swift */; };
@@ -169,6 +172,7 @@
 		AF6DED0458ECDD6A0153A926 /* AdultContentGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A122C82DE37D4135B96EDE8 /* AdultContentGuard.swift */; };
 		B042A7E2F38972E5D120C790 /* UsageSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329678310127593F1550AB57 /* UsageSampler.swift */; };
 		B04B824C75671EDD7F2E65FD /* ConnectedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78508BB1474F52320F16A4AC /* ConnectedComponents.swift */; };
+		B0CFE578900FC5BAC7D0189D /* LockComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F25C5A89EC5E58636D2C353 /* LockComponents.swift */; };
 		B1C7D38F87E1FFD7F749C780 /* AdultDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5C6C2CDF5161016ECC4350 /* AdultDomains.swift */; };
 		B2E4AD5CF1565AD223D68F7D /* AdultDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5C6C2CDF5161016ECC4350 /* AdultDomains.swift */; };
 		B314DE5C77EA82DC023E1753 /* SyncStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2566377A70131886ED394A20 /* SyncStore.swift */; };
@@ -186,6 +190,7 @@
 		C62350679C024BFD52F1F4B0 /* NightlyCheckInSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0DA94C05E5A0142BC777E2 /* NightlyCheckInSettingsView.swift */; };
 		C7750BF7E71A142D3434534A /* InstallWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747EB3F1DA1FFF265D2B9310 /* InstallWindow.swift */; };
 		C841E7987E40EA05DEEE955D /* SnapshotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C6B8E7DFFD0C5FD72F8C7C /* SnapshotRenderer.swift */; };
+		C8F58173479351634B153A41 /* BrandLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 598D61B20E99F163D7BC83F2 /* BrandLogos.xcassets */; };
 		C8FDD09917FE7507FE2DABDB /* HourlyUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5141688CAF1B41179C2C0A /* HourlyUsage.swift */; };
 		C9B921E02F7670AED35E7057 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8207DF2CE8C728636D9D11BC /* PrivacyInfo.xcprivacy */; };
 		D02612A4A4FD2C8F9B20EBF2 /* com.mostafa.prosper.mac.agent.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 10024DFBE65A2D39D3179C2E /* com.mostafa.prosper.mac.agent.plist */; };
@@ -198,6 +203,7 @@
 		D680F5699C97E44818731489 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A5392C1BFA98EA99B7C63B /* StatsView.swift */; };
 		D6E283551BD33536E30B70CA /* AddToLockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EE3998A79E6D9D942968FA2 /* AddToLockView.swift */; };
 		D72C75CE46AA8C8DE8E2063A /* DayLedgerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F3A201724CAEB52AFAA4F43 /* DayLedgerTests.swift */; };
+		D7BC3CABD05073BD45FA97FF /* GlanceGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710826DCEE13F9518628662D /* GlanceGeometry.swift */; };
 		D8207B01E4E77D1B5BEBB71F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72AD9387F5DEB57CF802404 /* MainTabView.swift */; };
 		DE67D5BA0B03001A1CB3F7C1 /* DayLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5960C99504B61FC8D5D189CC /* DayLedger.swift */; };
 		DF776A90C2D193EAEEF37BBB /* HoldTestHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4759EA9BD38984E17CE8B26B /* HoldTestHarness.swift */; };
@@ -1348,6 +1354,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				876077B1BBC0121C305C2056 /* Assets.xcassets in Resources */,
+				C8F58173479351634B153A41 /* BrandLogos.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1562,12 +1569,17 @@
 				72AA96292B78C93B203D6EBE /* AppModel.swift in Sources */,
 				42415CD7FD620E661356AF40 /* AttentionViews.swift in Sources */,
 				C60DAC22F6BABC82563F25D9 /* AuroraComponents.swift in Sources */,
+				3D7D267A5A6F558BE069912A /* ChartMotion.swift in Sources */,
 				42C5F5D370C260000DA0D6AA /* Components.swift in Sources */,
 				B04B824C75671EDD7F2E65FD /* ConnectedComponents.swift in Sources */,
 				9E5BA5877921BA559EF70E2C /* CoreExports.swift in Sources */,
+				D7BC3CABD05073BD45FA97FF /* GlanceGeometry.swift in Sources */,
+				A3AC94C58947C091F80016C4 /* GlanceMark.swift in Sources */,
+				80E2CFC64FEAA44BFD95E33E /* HabitComponents.swift in Sources */,
 				DF776A90C2D193EAEEF37BBB /* HoldTestHarness.swift in Sources */,
 				A1A4FA5F692A0EF60E0C3C29 /* InsightsView.swift in Sources */,
 				AF32AAA9AACC681CB88856B0 /* InstalledApps.swift in Sources */,
+				B0CFE578900FC5BAC7D0189D /* LockComponents.swift in Sources */,
 				C5BE0C275657ABC4D8328146 /* LockView.swift in Sources */,
 				8057A58A77FEB23B7E497E79 /* ProsperComponents.swift in Sources */,
 				3BEFFA49270E13B9B59BA268 /* ProsperMacApp.swift in Sources */,

@@ -1,5 +1,35 @@
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#else
+import AppKit
+#endif
+
+/// The taps in the hand that go with a lock. UIKit's generators on the
+/// iPhone; on the Mac the Force Touch trackpad, which has three kinds and no
+/// intensity, so the soft ticks of a hold become alignment taps there.
+enum LockHaptic {
+    case tick(Double), release, success, thud
+
+    func play() {
+        #if canImport(UIKit)
+        switch self {
+        case .tick(let intensity): UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: intensity)
+        case .release: UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+        case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
+        case .thud: UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
+        #else
+        let pattern: NSHapticFeedbackManager.FeedbackPattern
+        switch self {
+        case .tick: pattern = .alignment
+        case .release: pattern = .generic
+        case .success, .thud: pattern = .levelChange
+        }
+        NSHapticFeedbackManager.defaultPerformer.perform(pattern, performanceTime: .now)
+        #endif
+    }
+}
 
 /// Circular countdown for an active block. `progress` is the fraction of time
 /// remaining (1 → full ring, 0 → empty).
@@ -180,7 +210,7 @@ struct HoldToLock: View {
                 if beat < Self.beats.count, progress >= Self.beats[beat] {
                     beat += 1
                     if !reduceMotion {
-                        UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.35 + 0.65 * progress)
+                        LockHaptic.tick(0.35 + 0.65 * progress).play()
                     }
                 }
                 if progress >= 1 { complete() }
@@ -191,7 +221,7 @@ struct HoldToLock: View {
     private func complete() {
         timer?.invalidate(); timer = nil
         done = true
-        if !reduceMotion { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+        if !reduceMotion { LockHaptic.success.play() }
         onComplete()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             progress = 0
@@ -204,7 +234,7 @@ struct HoldToLock: View {
         guard holding, progress < 1 else { return }
         timer?.invalidate(); timer = nil
         holding = false
-        if !reduceMotion { UIImpactFeedbackGenerator(style: .rigid).impactOccurred() }
+        if !reduceMotion { LockHaptic.release.play() }
         progress = 0
     }
 }
@@ -323,7 +353,7 @@ struct LockSeal: View {
         // The lid lands with the ring and the thud.
         DispatchQueue.main.asyncAfter(deadline: .now() + GlanceTimeline.sealShut) {
             withAnimation(.spring(duration: 0.5, bounce: 0.45)) { closed = true }
-            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            LockHaptic.thud.play()
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { worded = true }
     }
